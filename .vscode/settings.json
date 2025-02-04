@@ -1,0 +1,24 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": false,
+    "**/Thumbs.db": false,
+    "**/.yarn/*/**": true,
+    "**/node_modules": true,
+    "**/node_modules/*/**": true,
+    "node_modules/*/**": true
+  },
+  "explorerExclude.backup": {},
+  "CodeGPT.apiKey": "CodeGPT Plus",
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "eslint.nodePath": ".yarn/sdks",
+  "prettier.prettierPath": ".yarn/sdks/prettier/index.cjs",
+"typescript.enablePromptUseWorkspaceTsdk": true,
+"typescript.tsdk": "node_modules\\typescript\\lib"
+}

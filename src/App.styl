@@ -1,0 +1,22 @@
+@import "./styles/mixins.styl"
+@import "./styles/fonts.styl"
+
+html
+  font-size: .9rem
+
+  body
+    margin: 0
+    padding: 0
+    no-select()
+
+    :global(#root)
+      position: absolute
+      width: 100%
+      height: 100%
+      overflow: hidden
+    
+    .app
+      display: flex
+      flex-direction: column
+      height: 100vh
+      width:  100vw

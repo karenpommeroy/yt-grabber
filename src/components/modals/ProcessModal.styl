@@ -1,0 +1,34 @@
+@import "../../styles/mixins.styl"
+
+.process-modal
+  
+  .content
+    text-align: center
+
+    .invoice-icon,
+    .expense-icon
+      display: flex
+      flex-direction: column
+
+      svg
+        width: 3em
+        height: 3em
+
+      &:hover
+        vendor("filter", brightness(50%))
+
+    .progress-bar
+      height: 1rem
+
+    .alert
+      text-align: left
+      padding: 0px 6px
+
+      :global(.MuiAlert-message)
+        padding: 4px 0
+
+      .title
+        font-weight: bold
+        margin-bottom: 0
+      
+      

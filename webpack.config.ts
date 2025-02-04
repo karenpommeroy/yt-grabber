@@ -1,0 +1,181 @@
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import ESLintPlugin from "eslint-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import path from "path";
+import {Configuration, ProgressPlugin} from "webpack";
+
+const WebpackNodeExternals = require("webpack-node-externals");
+
+export const getRoot = (dirname: string = __dirname, ...args: any[]) => {
+    const rootDir = path.resolve(dirname, ".");
+
+    args = Array.prototype.slice.call(args, 0);
+
+    return path.join.apply(path, [rootDir].concat(args));
+};
+
+export const reportProgress = (percentage: number, message: string, ...args: any[]) => {
+    const stream = process.stderr;
+    const formatted = (percentage * 100).toFixed();
+
+    if (stream.isTTY && percentage < 1) {
+        stream.cursorTo(0);
+        stream.write(`${formatted}%: ${message}`);
+        stream.clearLine(1);
+    } else if (percentage === 1) {
+        stream.write("building done!");
+    }
+};
+
+export const mainConfig: Configuration = {
+    mode: "development",
+    entry: "./src/index.ts",
+    target: "electron-main",
+    module: {
+        rules: [
+            {
+                test: /\.ts$/,
+                include: /src/,
+                use: [{loader: "ts-loader"}],
+            },
+        ],
+    },
+    output: {
+        path: path.join(__dirname, "/dist"),
+        filename: "index.js",
+    },
+    resolve: {
+        extensions: [".ts", ".js"],
+    },
+    externals: [WebpackNodeExternals()],
+};
+
+export const renderConfig: Configuration = {
+    mode: "development",
+    entry: "./src/renderer.tsx",
+    target: "electron-renderer",
+    // devtool: "source-map",
+    devtool: "eval",
+    context: getRoot(__dirname, ""),
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: [
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            transpileOnly: true,
+                        },
+                    },
+                ],
+                exclude: [/\.(test|spec|)\.ts$/, /node_modules$/, /[\\/]node_modules[\\/]$/],
+            },
+            {
+                test: /\.js$/,
+                enforce: "pre",
+                loader: "source-map-loader",
+            },
+            {
+                test: /\.json$/,
+                loader: "json",
+                exclude: [getRoot(__dirname, "config"), /node_modules/],
+            },
+            {
+                test: /\.css$/i,
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            esModule: false,
+                        },
+                    },
+                    {
+                        loader: "css-loader",
+                        options: {
+                            modules: {
+                                localIdentName: "[name]__[local]___[hash:base64:5]",
+                                mode: "global",
+                                exportLocalsConvention: "camel-case-only",
+                            },
+                        },
+                    },
+                ],
+            },
+            {
+                test: /\.styl$/i,
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            esModule: false,
+                        },
+                    },
+                    {
+                        loader: "css-loader",
+                        options: {
+                            modules: {
+                                localIdentName: "[name]__[local]___[hash:base64:5]",
+                                exportLocalsConvention: "camel-case-only",
+                            },
+                            esModule: false,
+                        },
+                    },
+                    {
+                        loader: "stylus-loader",
+                        options: {
+                            sourceMap: true,
+                        },
+                    },
+                ],
+            },
+            {
+                test: /url\("([^\)]+?\.(woff|eot|woff2|ttf|svg)[^"]*)"/,
+                exclude: [],
+                type: "asset/resource",
+                dependency: {not: ["url"]},
+            },
+            {
+                test: /[^\)]+?\.(woff|eot|woff2|ttf|svg)[^"]*/,
+                exclude: [],
+                type: "asset/resource",
+                dependency: {not: ["url"]},
+            },
+            {
+                test: /[^\)]+?\.(svg|png|jpg|gif)[^"]*/,
+                exclude: [/fonts/],
+                type: "asset/resource",
+            },
+            {
+                test: /[^\)]+?\.(svg|png|jpg|gif)[^"]*/,
+                exclude: [/images/],
+                type: "asset/resource",
+            },
+        ],
+    },
+    output: {
+        path: path.join(__dirname, "/dist"),
+        filename: "renderer.js",
+    },
+    resolve: {
+        extensions: [".ts", ".tsx", ".js", ".json", ".styl", ".css"],
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            title: "YT Grabber",
+            template: "public/index.html",
+        }),
+        new ProgressPlugin(reportProgress),
+        new ESLintPlugin({
+            extensions: ["js", "jsx", "ts", "tsx"],
+        }),
+        new CopyWebpackPlugin({
+            patterns: [{from: "./src/resources", to: "resources", force: true}],
+        }),
+        new MiniCssExtractPlugin({filename: "bundle.css"}),
+    ],
+    externals: [WebpackNodeExternals()],
+};
+
+export default [mainConfig, renderConfig];

@@ -1,0 +1,44 @@
+@import "../../styles/mixins.styl"
+@import "../../styles/fonts.styl"
+
+.settings
+  display: flex
+  flex-direction: column
+  flex-grow: 1
+  justify-content: space-between
+
+  .paper
+    padding: 1rem
+
+  .form
+    padding: 1rem
+
+    .root-column
+      flex-grow: .5
+      flex-basis: 50%;
+
+      &.left
+        flex-grow: .5
+      
+      &.right
+        flex-grow: .5
+      
+      .wrapper
+        padding: 1rem
+
+      .address,
+      .bank
+        flex-grow: 1
+
+        > :first-child
+          padding-left: 0
+
+        > :last-child
+          padding-right: 0
+  
+  .footer
+    display: flex
+    justify-content: center
+    align-items: center
+    padding: 1rem
+

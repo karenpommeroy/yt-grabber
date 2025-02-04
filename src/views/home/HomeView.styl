@@ -1,0 +1,32 @@
+@import "../../styles/mixins.styl"
+@import "../../styles/fonts.styl"
+
+.home
+  display: flex
+  flex-direction: column
+  flex-grow: 1
+  justify-content: space-between
+  overflow: hidden
+
+  .content
+    padding: .5rem
+    overflow: hidden
+    display: flex
+
+    .root-column
+      overflow: auto
+
+      &.left
+        flex-basis: 50%
+
+      &.right
+        flex-basis: 50%
+
+      .total-hours
+        text-align: center
+
+  .footer
+    display: flex
+    justify-content: center
+    align-items: center
+    padding: 0.5rem 0.5rem 1rem 0.5rem
