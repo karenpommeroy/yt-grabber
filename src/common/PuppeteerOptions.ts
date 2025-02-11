@@ -1,9 +1,9 @@
-import { PuppeteerLaunchOptions } from "puppeteer";
+import {LaunchOptions} from "puppeteer";
 
 const width = 1280;
 const height = 800;
 
-const options: PuppeteerLaunchOptions = {
+const options: LaunchOptions = {
     headless: false,
     userDataDir: "./output/user-data-dir",
     defaultViewport: {

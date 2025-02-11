@@ -12,7 +12,7 @@
     {
       "files": ["*.json", ".prettierrc"],
       "options": {
-        "tabWidth": 2
+        "tabWidth": 4
       }
     }
   ]

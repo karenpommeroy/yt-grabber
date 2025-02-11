@@ -1,9 +1,11 @@
 import CopyWebpackPlugin from "copy-webpack-plugin";
 import ESLintPlugin from "eslint-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import I18nextScannerWebpackPlugin from "i18next-scanner-webpack";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import {Configuration, ProgressPlugin} from "webpack";
+import {Configuration as DevServerConfiguration} from "webpack-dev-server";
 
 const WebpackNodeExternals = require("webpack-node-externals");
 
@@ -51,12 +53,15 @@ export const mainConfig: Configuration = {
     externals: [WebpackNodeExternals()],
 };
 
-export const renderConfig: Configuration = {
+export const renderConfig: Configuration & DevServerConfiguration = {
     mode: "development",
     entry: "./src/renderer.tsx",
     target: "electron-renderer",
     // devtool: "source-map",
     devtool: "eval",
+    watchOptions: {
+        ignored: ["**/resources/locales/*/translation.json", "/dist"]
+    },
     context: getRoot(__dirname, ""),
     module: {
         rules: [
@@ -171,9 +176,38 @@ export const renderConfig: Configuration = {
             extensions: ["js", "jsx", "ts", "tsx"],
         }),
         new CopyWebpackPlugin({
-            patterns: [{from: "./src/resources", to: "resources", force: true}],
+            patterns: [
+                {
+                    from: "./src/resources/",
+                    to: "resources",
+                    noErrorOnMissing: true,
+                    force: false,
+                    globOptions: {
+                        ignore: ["**/locales/**/*.json"]
+                    }
+                }
+            ],
         }),
         new MiniCssExtractPlugin({filename: "bundle.css"}),
+        new I18nextScannerWebpackPlugin({
+            extensions: [".ts", ".tsx"],
+            dest: path.resolve("./"),
+            src: [path.resolve("./src")],
+            options: {
+                locales: ["en-GB", "de-DE", "pl-PL"],
+                sort: true,
+                verbose: false,
+                failOnWarnings: false,
+                pluralSeparator: "_",
+                output: path.resolve("./src/resources/locales/$LOCALE/$NAMESPACE.json"),
+                indentation: 4,
+                i18nextOptions: {
+                    debug: false,
+                    fallbackLng: false,
+                    returnEmptyString: false
+                }
+            }
+        }),
     ],
     externals: [WebpackNodeExternals()],
 };

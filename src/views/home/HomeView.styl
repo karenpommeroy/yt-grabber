@@ -1,32 +1,91 @@
 @import "../../styles/mixins.styl"
 @import "../../styles/fonts.styl"
 
-.home
-  display: flex
-  flex-direction: column
-  flex-grow: 1
-  justify-content: space-between
-  overflow: hidden
+.home {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+    overflow: hidden;
 
-  .content
-    padding: .5rem
-    overflow: hidden
-    display: flex
+    .header {
+        > div:global(.MuiGrid2-root) {
+            display: flex;
+        }
+    }
 
-    .root-column
-      overflow: auto
+    .content {
+        overflow: overlay;
+        flex-grow: 1;
+        align-content: flex-start;
+        justify-content: center;
 
-      &.left
-        flex-basis: 50%
+        .album-header {
+            display: flex;
 
-      &.right
-        flex-basis: 50%
+            .album-header-content {
+                display: flex;
+                flex-direction: row;
+                flex-grow: 1;
+            }
+            
+            .album-header-info {
+                flex: 1 0 auto;
+                padding: .2rem .5rem;
+            }
+            
+            .album-header-actions {
+                display: flex;
+                align-items: center;
+                flex-direction: row;
+            }
 
-      .total-hours
-        text-align: center
+            .row {
+                display: flex;
 
-  .footer
-    display: flex
-    justify-content: center
-    align-items: center
-    padding: 0.5rem 0.5rem 1rem 0.5rem
+                .label {
+                    padding-right: .3rem;
+
+                    & .bold {
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+
+        .track-list {
+            flex-grow: 1;
+
+            .track {
+                &:hover {
+                    background-color: var(--theme-palette-primary-light);
+
+                    .track-action {
+                        visibility: visible;
+                    }
+                }
+
+                .track-action {
+                    visibility: hidden;
+                }
+            }
+
+            .column {
+                display: flex;
+                align-self: center;
+            }
+
+            .completed-icon {
+                width: 2.3rem;
+                height: 2.3rem;
+            }
+        }
+    }
+
+    .footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem 0.5rem 1rem 0.5rem;
+    }
+}

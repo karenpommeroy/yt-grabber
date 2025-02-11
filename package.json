@@ -10,7 +10,7 @@
     "clean": "rimraf dist",
     "start": "concurrently \"cross-env NODE_ENV=development yarn run watch\" \"yarn run electron\"",
     "build": "cross-env NODE_ENV=production && yarn clean && webpack --config webpack.config.ts",
-    "electron": "wait-on dist/index.js && cross-env NODE_ENV=development electron .",
+    "electron": "wait-on dist/index.js && cross-env NODE_ENV=development ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
     "watch": "webpack --watch --config webpack.config.ts",
     "pack": "yarn run build && electron-builder --dir",
     "dist": "yarn run build && electron-builder"
@@ -30,7 +30,6 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@fontsource/roboto": "^5.1.1",
     "@mui/icons-material": "^6.4.2",
     "@mui/material": "^6.4.2",
     "classnames": "^2.5.1",
@@ -43,6 +42,7 @@
     "lodash": "^4.17.21",
     "mkdirp": "^3.0.1",
     "moment": "^2.30.1",
+    "moment-duration-format": "^2.3.2",
     "puppeteer": "^24.1.1",
     "puppeteer-core": "^24.1.1",
     "puppeteer-extra": "^3.3.6",
@@ -53,7 +53,8 @@
     "react-i18next": "^15.4.0",
     "react-number-format": "^5.4.3",
     "react-router-dom": "^7.1.5",
-    "usehooks-ts": "^3.1.0"
+    "usehooks-ts": "^3.1.0",
+    "yt-dlp-wrap": "^2.3.12"
   },
   "devDependencies": {
     "@types/eslint": "^9.6.1",
@@ -62,6 +63,7 @@
     "@types/i18next-node-fs-backend": "^2.1.5",
     "@types/jsonschema": "^1.1.1",
     "@types/lodash": "^4.17.15",
+    "@types/moment-duration-format": "^2.2.6",
     "@types/node": "^22.13.1",
     "@types/prettier": "^3.0.0",
     "@types/puppeteer-core": "^7.0.4",
@@ -83,6 +85,7 @@
     "eslint-plugin-react": "^7.37.4",
     "eslint-webpack-plugin": "^4.2.0",
     "html-webpack-plugin": "^5.6.3",
+    "i18next-scanner-webpack": "^0.9.1",
     "mini-css-extract-plugin": "^2.9.2",
     "prettier": "^3.4.2",
     "raw-loader": "^4.0.2",
@@ -100,10 +103,5 @@
     "webpack-dev-server": "^5.2.0",
     "webpack-node-externals": "^3.0.0"
   },
-  "packageManager": "yarn@4.4.1",
-  "dependenciesMeta": {
-    "electron@34.0.2": {
-      "unplugged": true
-    }
-  }
+  "packageManager": "yarn@4.4.1"
 }

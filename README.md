@@ -1,14 +1,11 @@
-##Install:
+## Install:
 `yarn install`
 
-##Build:
+## Build:
 `yarn build`
 
-##Start:
+## Start:
 `yarn start`
 
-##Usage:
-
-1. Go to settings and input agresso url and your credentials.
-
-
+## Usage:
+TODO

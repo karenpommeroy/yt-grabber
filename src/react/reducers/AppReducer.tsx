@@ -15,6 +15,18 @@ const reducer = (state: IAppState, action: IAppAction): IAppState => {
         return reduce(state, { mode: action.mode });
     }
 
+    if (action.type === AppActions.SetAlbum) {
+        return reduce(state, { album: action.album });
+    }
+
+    if (action.type === AppActions.SetTracks) {
+        return reduce(state, { tracks: action.tracks });
+    }
+    
+    if (action.type === AppActions.UpdateTrackStatus) {
+        return reduce(state, { trackStatus: action.trackStatus });
+    }
+
     throw new Error();
 };
 

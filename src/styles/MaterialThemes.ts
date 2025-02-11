@@ -8,7 +8,7 @@ import {IStringTMap} from "../common/Mappings";
 const themes: IStringTMap<Partial<Theme> | any> = {
     basic: {
         typography: {
-            fontFamily: "Roboto",
+            fontFamily: "Lato",
         },
         palette: {
             light: {
@@ -40,7 +40,7 @@ const themes: IStringTMap<Partial<Theme> | any> = {
     },
     "basic-dark": {
         typography: {
-            fontFamily: "Roboto",
+            fontFamily: "Lato",
         },
         palette: {
             light: {
@@ -63,7 +63,7 @@ const themes: IStringTMap<Partial<Theme> | any> = {
     },
     "sandy-beach": {
         typography: {
-            fontFamily: "Roboto",
+            fontFamily: "Lato",
         },
         palette: {
             light: {
@@ -128,7 +128,7 @@ const themes: IStringTMap<Partial<Theme> | any> = {
     },
     "mellow-pastel": {
         typography: {
-            fontFamily: "Roboto",
+            fontFamily: "Lato",
         },
         palette: {
             light: {
@@ -193,7 +193,7 @@ const themes: IStringTMap<Partial<Theme> | any> = {
     },
     "purple-rain": {
         typography: {
-            fontFamily: "Roboto",
+            fontFamily: "Lato",
         },
         palette: {
             light: {
@@ -260,7 +260,7 @@ const themes: IStringTMap<Partial<Theme> | any> = {
     },
     "cloudy-sky": {
         typography: {
-            fontFamily: "Roboto",
+            fontFamily: "Lato",
         },
         palette: {
             light: {

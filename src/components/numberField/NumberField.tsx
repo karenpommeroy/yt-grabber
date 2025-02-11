@@ -29,6 +29,7 @@ export const NumberField = (props: INumberFieldProps) => {
         inputLabelProps,
         allowEmpty,
         decimalScale = 2,
+        fullWidth,
         fixedDecimalScale = true,
         onChange,
         initialPressedDelay = 300,
@@ -104,7 +105,7 @@ export const NumberField = (props: INumberFieldProps) => {
             onValueChange={handleValueChange}
             customInput={TextField}
             className={Styles.numberField}
-            fullWidth
+            fullWidth={fullWidth}
             label={label}
             InputLabelProps={$_.defaultTo(inputLabelProps, {className: "upperfirst"})}
             variant="outlined"

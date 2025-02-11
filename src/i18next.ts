@@ -14,11 +14,11 @@ i18next.use(i18nextBackend).use(initReactI18next).init({
         loadPath: localePath + "/{{lng}}/{{ns}}.json",
         addPath: prependPath + "/src/resources/locales/{{lng}}/{{ns}}.missing.json",
     },
-    lng: "pl",
-    preload: ["en", "de", "pl"],
+    lng: "pl-PL",
+    preload: ["en-GB", "de-DE", "pl-PL"],
     debug: process.env.NODE_ENV === "development",
-    saveMissing: process.env.NODE_ENV === "development",
-    saveMissingTo: "current",
+    saveMissing: false,
+    saveMissingTo: "all",
     load: "all",
     returnEmptyString: false,
     fallbackLng: false,
@@ -27,7 +27,7 @@ i18next.use(i18nextBackend).use(initReactI18next).init({
     interpolation: {
         escapeValue: false,
     },
-    supportedLngs: ["en", "de", "pl"],
+    supportedLngs: ["en-GB", "de-DE", "pl-PL"],
 });
 
 export default i18next;

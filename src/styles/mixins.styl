@@ -1,44 +1,22 @@
-$(name)
-  var(name)
+no-select() {
+    user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+}
 
-no-select()
-  user-select: none
-  -o-user-select: none
-  -moz-user-select: none
-  -khtml-user-select: none
-  -webkit-user-select: none
+vendor(prop, args) {
+    -webkit-{prop} args;
+    -moz-{prop} args;
+    -o-{prop} args;
+    {prop} args;
+}
 
-vendor(prop, args)
-  -webkit-{prop} args
-  -moz-{prop} args
-  -o-{prop} args
-  {prop} args
+uppercase() {
+    text-transform: uppercase;
+}
 
-placeholder()
-	&::-webkit-input-placeholder
-		{block}
-	&:-moz-placeholder
-		{block}
-	&::-moz-placeholder
-		{block}
-	&:-ms-input-placeholder
-		{block}
-
-random(min, max)
-  return floor(math(0, 'random')*(max - min + 1) + min)
-
-:global(.capitalize)
-  text-transform: capitalize
-
-:global(.uppercase)
-  text-transform: uppercase
-
-:global(.lowercase)
-  text-transform: lowercase
-
-:global(.upperfirst)
-  &:span
-    display: inline-block
-
-  &:first-letter
-    text-transform: uppercase
+capitalize() {
+    text-transform: capitalize;
+}

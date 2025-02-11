@@ -1,4 +1,3 @@
-import contentDisposition from "content-disposition";
 import $_ from "lodash";
 import {setTimeout} from "node:timers/promises";
 import path from "path";
@@ -6,15 +5,8 @@ import {Browser, ElementHandle, Frame, Page} from "puppeteer";
 import puppeteer from "puppeteer-extra";
 import pluginStealth from "puppeteer-extra-plugin-stealth";
 
-import {getDataPath} from "./Paths";
-
 export const setTitle = async (title: string, page: Page) => {
     return page.evaluate((data) => (document.title = data), title);
-};
-
-export const createPreview = async (page: Page, id: string) => {
-    const previewPath = path.resolve(getDataPath() + `/jobs/${id}/preview.png`);
-    return page.screenshot({ path: previewPath });
 };
 
 export const isHeadless = async (browser: Browser) => {
@@ -115,7 +107,7 @@ export const getElementFromShadowRoot = async (xpath: string, page: Page) => {
 
         return;
     } catch (error) {
-        return;
+        return error;
     }
 };
 
@@ -133,7 +125,7 @@ export const setRequestInterceptors = async (page: Page, filters: any[]) => {
     });
 };
 
-export const useStealth = async (browser: Browser) => {
+export const useStealth = async () => {
     const shouldUseStealth = $_.get(global, "config.useStealth");
 
     if (!shouldUseStealth) {
@@ -224,33 +216,6 @@ export const waitForFileContentResponse = async (
         });
     });
 
-export const waitForFileResponse = async (
-    url: string,
-    reqMethod: string,
-    status: number,
-    expectedHeaders: any,
-    page: Page,
-): Promise<any> =>
-    new Promise((resolve: any, reject: any) => {
-        page.on("response", async (response: any) => {
-            if (!$_.includes(response.url(), url) || response.request().method() !== reqMethod) {
-                return response;
-            }
-            const statusOk = response.status() === status;
-
-            if (!statusOk) return reject();
-
-            $_.forEach(expectedHeaders, (value: string, key: string) => {
-                if (!$_.includes($_.lowerCase(response.headers()[key]), $_.lowerCase(value))) {
-                    return reject();
-                }
-            });
-            const parsed = contentDisposition.parse(response.headers()["content-disposition"]);
-
-            return resolve($_.get(parsed, "parameters.filename"));
-        });
-    });
-
 export const count = async (selector: string, frame: Frame) => {
     return (await frame.$$(selector)).length;
 };
@@ -283,19 +248,23 @@ export const queryShadowDom = async (page: Page, selector: string) => {
     }, selector);
 };
 
-export const retry = async (handler: any, params: any[], attempts = 5) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const result = await handler(...params);
-
-            resolve(result);
-        } catch (error) {
-            if (attempts === 0) {
-                reject(error);
-            } else {
-                const result = await retry(handler, params, attempts - 1);
-                resolve(result);
-            }
+export const retry = async (handler: any, params: any[], attempts = 5): Promise<any> => {
+    try {
+        return await handler(...params);
+    } catch (error) {
+        if (attempts <= 1) {
+            throw error;
         }
-    });
+        return retry(handler, params, attempts - 1);
+    }
+};
+
+export const formatFileSize = (sizeInBytes: number, decimals = 2) => {
+    if (sizeInBytes === 0) return "0 Bytes";
+    
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
+    const i = Math.floor(Math.log(sizeInBytes) / Math.log(k));
+  
+    return parseFloat((sizeInBytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 };

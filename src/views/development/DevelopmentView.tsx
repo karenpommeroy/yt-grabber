@@ -5,31 +5,27 @@ import {useDebounceValue} from "usehooks-ts";
 import {Box, Button, Divider, FormControlLabel, Stack, Switch} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
-import {Options} from "../../common/Store";
+import {ApplicationOptions} from "../../common/Store";
 import {useAppContext} from "../../react/contexts/AppContext";
 import Styles from "./DevelopmentView.styl";
 
 export const DevelopmentView: React.FC = () => {
     const {actions} = useAppContext();
     const {t} = useTranslation();
-    const [agressoOptions, setAgressoOptions] = useState<Options>(global.store.get("agresso"));
-    const [debouncedAgressoOptions] = useDebounceValue(agressoOptions, 500);
+    const [options, setOptions] = useState<ApplicationOptions>(global.store.get("application"));
+    const [debouncedOptions] = useDebounceValue(options, 500);
 
     const handleClose = async () => {
         actions.setLocation("/");
     };
 
-    const handleSkipDataChange = (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-        setAgressoOptions((prev) => ({ ...prev, skipData: checked }));
-    };
-
-    const handleShowInvoiceChange = (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-        setAgressoOptions((prev) => ({ ...prev, showInvoice: checked }));
+    const handleDebugModeChange = (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        setOptions((prev) => ({ ...prev, debugMode: checked }));
     };
 
     useEffect(() => {
-        global.store.set("agresso", debouncedAgressoOptions);
-    }, [debouncedAgressoOptions]);
+        global.store.set("application", debouncedOptions);
+    }, [debouncedOptions]);
 
     return (
         <Box className={Styles.development}>
@@ -42,13 +38,8 @@ export const DevelopmentView: React.FC = () => {
             >
                 <Stack direction="column" spacing={3} className={Styles.rootColumn}>
                     <FormControlLabel
-                        control={<Switch checked={agressoOptions.skipData} onChange={handleSkipDataChange} />}
-                        label={t("skipHoursReport")}
-                    />
-                    <Divider />
-                    <FormControlLabel
-                        control={<Switch checked={agressoOptions.showInvoice} onChange={handleShowInvoiceChange} />}
-                        label={t("showInvoiceSettings")}
+                        control={<Switch checked={options.debugMode} onChange={handleDebugModeChange} />}
+                        label={t("debugMode")}
                     />
                 </Stack>
             </Stack>

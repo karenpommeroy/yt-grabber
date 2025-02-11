@@ -1,12 +1,9 @@
-import {app, BrowserWindow, ipcMain, IpcMainEvent} from "electron";
+import {app, BrowserWindow} from "electron";
 import installExtension, {REACT_DEVELOPER_TOOLS} from "electron-devtools-installer";
 import Store from "electron-store";
 import path from "path";
-import {LaunchOptions} from "puppeteer";
 
-import {ProgressInfo} from "./common/Reporter";
 import i18n from "./i18next";
-import execute, {cancel} from "./workflows/Generic";
 
 let mainWindow: BrowserWindow | null;
 
@@ -64,14 +61,4 @@ app.whenReady().then(() => {
     installExtension(REACT_DEVELOPER_TOOLS)
         .then((name) => console.log(`Added Extension:  ${name}`))
         .catch((err) => console.log("An error occurred: ", err));
-});
-
-ipcMain.on("transfer-to-agresso", async (event: IpcMainEvent, options: LaunchOptions) => {
-    const onProgress = (data: ProgressInfo) => mainWindow.webContents.send("progress", data);
-
-    execute(options, i18n, onProgress);
-});
-
-ipcMain.on("transfer-to-agresso-cancel", async (event: IpcMainEvent, options: LaunchOptions) => {
-    cancel();
 });

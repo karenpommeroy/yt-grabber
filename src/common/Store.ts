@@ -1,23 +1,19 @@
 import {Schema} from "electron-store";
 
-export type Options = {
-    url?: string;
-    agressoLogin?: string;
-    agressoPass?: string;
-    userLogin?: string;
-    userPass?: string;
-    client?: string;
-    hourCost?: number;
-    skipData?: boolean;
-    showInvoice?: boolean;
-    color?: string;
+export type ApplicationOptions = {
+    outputDirectory?: string;
+    outputTemplate?: string;
+    metadataTemplate?: string;
+    concurrency?: number;
+    quality?: number;
+    debugMode?: boolean;
 };
 
 export interface IStore {
     options: {
         headless: boolean;
     };
-    agresso: Options;
+    application: ApplicationOptions;
 }
 
 export const StoreSchema: Schema<IStore> = {
@@ -31,50 +27,33 @@ export const StoreSchema: Schema<IStore> = {
         },
         default: {},
     },
-    agresso: {
+    application: {
         type: "object",
         properties: {
-            url: {
+            outputDirectory: {
                 type: "string",
-                default: "https://agresso.trimetis.eu/vpn/index.html",
-                pattern: "^(https?|ftp):\\/\\/([^\\s/$.?#].[^\\s]*)$",
+                default: "/output",
             },
-            client: {
+            outputTemplate: {
                 type: "string",
-                default: "T5",
+                default: "`./${appOptions.outputDirectory}/${album.artist}/[${album.releaseYear}] ${album.title}/${track.playlist_autonumber} - ${track.title}.mp3`",
             },
-            agressoLogin: {
+            metadataTemplate: {
                 type: "string",
-                default: "Trimetis",
+                default: "`-metadata title='${track.title}' -metadata artist='${album.artist}' -metadata album='${album.title}' -metadata track='${track.playlist_autonumber}' -metadata release_year='${album.releaseYear}'`",
             },
-            agressoPass: {
-                type: "string",
-                default: "PW4TriAde!",
+            concurrency: {
+                type: "integer",
+                default: 1
             },
-            userLogin: {
-                type: "string",
-                default: "",
+            quality: {
+                type: "integer",
+                default: 5
             },
-            userPass: {
-                type: "string",
-                default: "",
-            },
-            hourCost: {
-                type: "number",
-                default: 0,
-            },
-            skipData: {
+            debugMode: {
                 type: "boolean",
-                default: false,
-            },
-            showInvoice: {
-                type: "boolean",
-                default: false,
-            },
-            color: {
-                type: "string",
-                default: "#0693e3",
-            },
+                default: false
+            }
         },
         default: {},
     },
