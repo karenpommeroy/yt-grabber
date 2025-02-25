@@ -1,32 +1,41 @@
 import {Dispatch} from "react";
 
 import {ColorMode} from "../../common/Theme";
-import {AlbumInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
+import {MediaFormat} from "../../enums/MediaFormat";
 import {IAction} from "./Action";
 
 export enum AppActions {
     SetLocation = "SET_LOCATION",
     SetTheme = "SET_THEME",
     SetMode = "SET_MODE",
-    SetAlbum = "SET_ALBUM",
-    SetTracks = "SET_TRACKS",
-    UpdateTrackStatus = "UPDATE_TRACK_STATUS",
+    SetUrls = "SET_URLS",
+    SetSelectedAction = "SET_SELECTED_ACTION",
+    SetFormat = "SET_FORMAT",
+    SetLoading = "SET_LOADING",
+    SetQueue = "SET_QUEUE",
+    SetControllers = "SET_CONTROLLERS",
 }
 
 export interface IAppAction extends IAction<AppActions> {
     location?: string;
     theme?: string;
     mode?: ColorMode;
-    album?: AlbumInfo;
-    tracks?: TrackInfo[];
-    trackStatus?: TrackStatusInfo[];
+    urls?: string[];
+    selectedAction?: string;
+    format?: MediaFormat;
+    loading?: boolean;
+    queue?: string[];
+    controllers?: AbortController[];
 }
 
 export const actions = (dispatch: Dispatch<IAppAction>) => ({
     setLocation: (location: string) => dispatch({ type: AppActions.SetLocation, location }),
     setTheme: (theme: string) => dispatch({ type: AppActions.SetTheme, theme }),
     setMode: (mode: ColorMode) => dispatch({ type: AppActions.SetMode, mode }),
-    setAlbum: (album: AlbumInfo) => dispatch({ type: AppActions.SetAlbum, album }),
-    setTracks: (tracks: TrackInfo[]) => dispatch({ type: AppActions.SetTracks, tracks }),
-    updateTrackStatus: (trackStatus: TrackStatusInfo[]) => dispatch({ type: AppActions.UpdateTrackStatus, trackStatus }),
+    setUrls: (urls: string[]) => dispatch({ type: AppActions.SetUrls, urls }),
+    setSelectedAction: (selectedAction: string) => dispatch({ type: AppActions.SetSelectedAction, selectedAction }),
+    setFormat: (format: MediaFormat) => dispatch({ type: AppActions.SetFormat, format }),
+    setLoading: (loading: boolean) => dispatch({ type: AppActions.SetLoading, loading }),
+    setQueue: (queue: string[]) => dispatch({ type: AppActions.SetQueue, queue }),
+    setControllers: (controllers: AbortController[]) => dispatch({ type: AppActions.SetControllers, controllers }),
 });

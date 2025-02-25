@@ -3,6 +3,7 @@ import {MediaFormat} from "../enums/MediaFormat";
 export type TrackInfo = {
     album: string;
     artist: string;
+    channel: string;
     creators: string[];
     duration: number;
     id: string;
@@ -38,7 +39,7 @@ export type Thumbnail = {
 export type TrackStatusInfo = {
     trackId: string;
     percent: number;
-    totalSize: string;
+    totalSize: number;
     completed?: boolean;
     status?: string;
     error?: boolean;
@@ -52,6 +53,7 @@ export type FormatInfo = {
     video_ext: string;
     format_id: string;
     format_note: string;
+    filesize: number;
     fps: number;
     quality: number;
     has_drm: boolean;
@@ -69,4 +71,9 @@ export type Format = {
     id: string;
     width: number;
     height: number;
-}
+};
+
+export type TrackCut = {
+    from: string;
+    to: string;
+};

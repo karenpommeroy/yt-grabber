@@ -8,4 +8,4 @@
 `yarn start`
 
 ## Usage:
-TODO
+Download and run latest binary release.

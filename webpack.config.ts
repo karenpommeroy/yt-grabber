@@ -59,8 +59,19 @@ export const renderConfig: Configuration & DevServerConfiguration = {
     target: "electron-renderer",
     // devtool: "source-map",
     devtool: "eval",
+    devServer: {
+        watchFiles: {
+            paths: ["/src"],
+            options: {
+                ignored: [
+                    "**/resources/locales/**/translation.json",
+                    "**/resources/locales/**/translation_old.json"
+                ]
+            }
+        }
+    },
     watchOptions: {
-        ignored: ["**/resources/locales/*/translation.json", "/dist"]
+        ignored: ["**/resources/locales/**/translation.json", "**/resources/locales/**/translation_old.json", "/dist",]
     },
     context: getRoot(__dirname, ""),
     module: {
@@ -183,7 +194,7 @@ export const renderConfig: Configuration & DevServerConfiguration = {
                     noErrorOnMissing: true,
                     force: false,
                     globOptions: {
-                        ignore: ["**/locales/**/*.json"]
+                        // ignore: ["**/locales/**/*.json"]
                     }
                 }
             ],

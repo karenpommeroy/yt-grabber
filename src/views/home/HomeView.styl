@@ -14,71 +14,40 @@
         }
     }
 
+    .formats {
+        justify-content: center;
+    }
+
+    .header {
+        position: relative;
+
+        .format-info {
+            display: flex;
+            justify-content: center;
+        }
+    }
+
+    .cancel {
+        position: absolute;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        top: 0;
+        z-index: 999;
+        height: 100%;
+        backdrop-filter: brightness(0.6);
+    }
+
     .content {
         overflow: overlay;
         flex-grow: 1;
         align-content: flex-start;
         justify-content: center;
 
-        .album-header {
-            display: flex;
-
-            .album-header-content {
-                display: flex;
-                flex-direction: row;
-                flex-grow: 1;
-            }
-            
-            .album-header-info {
-                flex: 1 0 auto;
-                padding: .2rem .5rem;
-            }
-            
-            .album-header-actions {
-                display: flex;
-                align-items: center;
-                flex-direction: row;
-            }
-
-            .row {
-                display: flex;
-
-                .label {
-                    padding-right: .3rem;
-
-                    & .bold {
-                        font-weight: bold;
-                    }
-                }
-            }
-        }
-
-        .track-list {
-            flex-grow: 1;
-
-            .track {
-                &:hover {
-                    background-color: var(--theme-palette-primary-light);
-
-                    .track-action {
-                        visibility: visible;
-                    }
-                }
-
-                .track-action {
-                    visibility: hidden;
-                }
-            }
-
-            .column {
-                display: flex;
-                align-self: center;
-            }
-
-            .completed-icon {
-                width: 2.3rem;
-                height: 2.3rem;
-            }
+        .error {
+            width: 100%;
+            justify-content: center;
         }
     }
 

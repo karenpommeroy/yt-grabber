@@ -14,7 +14,7 @@ const isDev = () => !app.isPackaged;
 
 const createWindow = async () => {
     mainWindow = new BrowserWindow({
-        width: 1280,
+        width: 800,
         height: 900,
         frame: true,
         roundedCorners: true,
@@ -24,8 +24,8 @@ const createWindow = async () => {
             contextIsolation: false,
         },
     });
-    mainWindow.removeMenu();
-    mainWindow.setMenu(null);
+    // mainWindow.removeMenu();
+    // mainWindow.setMenu(null);
     mainWindow.loadFile(path.join(__dirname, "index.html"));
 
     if (isDev()) {

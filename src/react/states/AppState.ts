@@ -1,14 +1,17 @@
 import {ColorMode} from "../../common/Theme";
-import {AlbumInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
+import {MediaFormat} from "../../enums/MediaFormat";
 import {StateCreator} from "./State";
 
 export interface IAppState {
     location?: string;
     theme?: string;
     mode?: ColorMode;
-    album?: AlbumInfo;
-    tracks?: TrackInfo[];
-    trackStatus?: TrackStatusInfo[];
+    urls: string[];
+    selectedAction?: string;
+    format?: MediaFormat;
+    loading?: boolean;
+    queue?: string[];
+    controllers?: AbortController[];
 }
 
 export const createDefaultState = () => {
@@ -16,6 +19,11 @@ export const createDefaultState = () => {
         location: "/",
         theme: "purple-rain",
         mode: ColorMode.Light,
-        trackStatus: [],
+        urls: [],
+        selectedAction: undefined,
+        format: MediaFormat.Audio,
+        loading: false,
+        queue: [],
+        controllers: [],
     });
 };

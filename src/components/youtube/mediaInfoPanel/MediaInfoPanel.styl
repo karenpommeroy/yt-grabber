@@ -1,0 +1,79 @@
+@import "../../../styles/mixins.styl"
+
+.media-info-panel {
+    .header {
+        display: flex;
+
+        .content {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .info {
+            flex: 1 0 auto;
+            padding: .2rem .5rem;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            opacity: 0;
+            vendor("transition", all .25s ease-in-out)
+
+            .edit {
+                min-width: 12px;
+                padding: 12px;
+            }
+        }
+        
+        .loading {
+            z-index: 1;
+            align-items: center;
+            column-gap: 2rem;
+        }
+        
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+        }
+
+        .progress {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.25;
+
+            .progress-bar {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        .row {
+            display: flex;
+
+            .label {
+                padding-right: .3rem;
+
+                & .bold {
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+
+    &:hover {
+        .actions {
+            opacity: 1;
+        }
+    }
+}

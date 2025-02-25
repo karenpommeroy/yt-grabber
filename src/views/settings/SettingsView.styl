@@ -1,44 +1,27 @@
 @import "../../styles/mixins.styl"
 @import "../../styles/fonts.styl"
 
-.settings
-  display: flex
-  flex-direction: column
-  flex-grow: 1
-  justify-content: space-between
+.settings {
+    flex-grow: 1;
+    
+    .container {
+        height: 100%;
+        flex-direction: column;
+    
+        .content {
+            flex-grow: 1;
+            align-content: flex-start;
 
-  .paper
-    padding: 1rem
+            .group {
+                padding: 1rem;
+                align-content: flex-start;
+            }
+        }
 
-  .form
-    padding: 1rem
-
-    .root-column
-      flex-grow: .5
-      flex-basis: 50%;
-
-      &.left
-        flex-grow: .5
-      
-      &.right
-        flex-grow: .5
-      
-      .wrapper
-        padding: 1rem
-
-      .address,
-      .bank
-        flex-grow: 1
-
-        > :first-child
-          padding-left: 0
-
-        > :last-child
-          padding-right: 0
-  
-  .footer
-    display: flex
-    justify-content: center
-    align-items: center
-    padding: 1rem
+        .footer {
+            flex-grow: 0;
+            justify-content: center;
+        }
+    }
+}
 

@@ -1,7 +1,7 @@
 import React, {createContext, FC, ReactNode, useReducer} from "react";
 
 import {ColorMode} from "../../common/Theme";
-import {AlbumInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
+import {MediaFormat} from "../../enums/MediaFormat";
 import {actions} from "../actions/AppActions";
 import reducer from "../reducers/AppReducer";
 import {createDefaultState, IAppState} from "../states/AppState";
@@ -12,9 +12,12 @@ interface IAppContext {
         setLocation: (location: string) => void;
         setTheme: (theme: string) => void;
         setMode: (mode: ColorMode) => void;
-        setAlbum: (album: AlbumInfo) => void;
-        setTracks: (tracks: TrackInfo[]) => void;
-        updateTrackStatus: (track: TrackStatusInfo[]) => void;
+        setUrls: (urls: string[]) => void;
+        setSelectedAction: (selectedAction: string) => void;
+        setFormat: (format: MediaFormat) => void;
+        setLoading: (loading: boolean) => void;
+        setQueue: (queue: string[]) => void;
+        setControllers: (controllers: AbortController[]) => void;
     };
 }
 

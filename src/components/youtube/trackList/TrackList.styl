@@ -1,0 +1,31 @@
+.track-list {
+    flex-grow: 1;
+
+    .track {
+        padding-top: 0;
+        padding-bottom: 0;
+
+        &:hover {
+            background-color: var(--theme-palette-divider);
+
+            .track-action {
+                visibility: visible;
+            }
+        }
+
+        .track-action {
+            visibility: hidden;
+            min-width: 0;
+        }
+    }
+
+    .column {
+        display: flex;
+        align-self: center;
+    }
+
+    .completed-icon {
+        width: 2.3rem;
+        height: 2.3rem;
+    }
+}

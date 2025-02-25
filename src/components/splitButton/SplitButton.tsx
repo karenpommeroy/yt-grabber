@@ -1,5 +1,9 @@
+import _find from "lodash/find";
+import _first from "lodash/first";
+import _get from "lodash/get";
 import _isFunction from "lodash/isFunction";
-import React from "react";
+import _map from "lodash/map";
+import React, {useEffect} from "react";
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Button from "@mui/material/Button";
@@ -12,37 +16,35 @@ import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
 
 export type SplitButtonProps = ButtonGroupProps & {
-    labels: string[];
     loading?: boolean;
-    handlers?: Array<() => void>;
-    onClick?: (index: number) => void;
+    actions?: SplitButtonAction[];
+    selectedAction?: string;
+    onSelectedActionChange?: (action: string) => void;
+}
+
+export type SplitButtonAction = {
+    id: string;
+    label: string;
+    handler: (...args: any[]) => void;
 }
 
 export const SplitButton = (props: SplitButtonProps) => {
-    const {labels, loading, handlers, onClick, ...rest} = props;
+    const {loading, selectedAction, actions, onSelectedActionChange, ...rest} = props;
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef<HTMLDivElement>(null);
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
-
-    const handleClick = () => {
-        executeHandler(selectedIndex);
-    };
-
-    const executeHandler = (index: number) => {
-        if (handlers && _isFunction(handlers[index])) {
-            handlers[index]();
-        } else if (_isFunction(onClick)) {
-            onClick(index);
+    
+    const handleMenuItemClick = (action: SplitButtonAction) => {
+        if (_isFunction(onSelectedActionChange)) {
+            onSelectedActionChange(action.id);
         }
+        setOpen(false);
+        action.handler();
     };
 
-    const handleMenuItemClick = (
-        event: React.MouseEvent<HTMLLIElement, MouseEvent>,
-        index: number,
-    ) => {
-        setSelectedIndex(index);
-        setOpen(false);
-        executeHandler(index);
+    const handleSelectedActionClick = () => {
+        const action = _find(actions, ["id", selectedAction]);
+
+        action.handler();
     };
 
     const handleToggle = () => {
@@ -57,14 +59,27 @@ export const SplitButton = (props: SplitButtonProps) => {
         setOpen(false);
     };
 
+    useEffect(() => {
+        if (selectedAction) return;
+        if (!actions) return;
+
+        onSelectedActionChange(_get(_first(actions), "id"));
+    }, [actions]);
+
+    const getSelectedActionLabel = () => {
+        const action = _find(actions, ["id", selectedAction]);
+
+        return action?.label;
+    };
+
     return (
-        <React.Fragment>
+        <>
             <ButtonGroup
                 variant="contained"
                 ref={anchorRef}
                 {...rest}
             >
-                <Button loading={loading} onClick={handleClick}>{labels[selectedIndex]}</Button>
+                <Button loading={loading} onClick={handleSelectedActionClick}>{getSelectedActionLabel()}</Button>
                 <Button disabled={loading} size="small" onClick={handleToggle} sx={{width: "auto"}}>
                     <ArrowDropDownIcon />
                 </Button>
@@ -88,13 +103,13 @@ export const SplitButton = (props: SplitButtonProps) => {
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>
                                 <MenuList autoFocusItem>
-                                    {labels.map((label, index) => (
+                                    {_map(actions, (action) => (
                                         <MenuItem
-                                            key={label}
-                                            selected={index === selectedIndex}
-                                            onClick={(event) => handleMenuItemClick(event, index)}
+                                            key={action.id}
+                                            selected={action.id === selectedAction}
+                                            onClick={() => handleMenuItemClick(action)}
                                         >
-                                            {label}
+                                            {action.label}
                                         </MenuItem>
                                     ))}
                                 </MenuList>
@@ -103,7 +118,7 @@ export const SplitButton = (props: SplitButtonProps) => {
                     </Grow>
                 )}
             </Popper>
-        </React.Fragment>
+        </>
     );
 };
 

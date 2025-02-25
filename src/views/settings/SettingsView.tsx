@@ -1,12 +1,24 @@
-import classnames from "classnames";
+import _filter from "lodash/filter";
+import _first from "lodash/first";
+import _get from "lodash/get";
+import _includes from "lodash/includes";
+import _isEmpty from "lodash/isEmpty";
+import _isNil from "lodash/isNil";
+import _join from "lodash/join";
+import _map from "lodash/map";
+import _omitBy from "lodash/omitBy";
+import _values from "lodash/values";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
-import {Box, Button, Paper, Stack, TextField} from "@mui/material";
+import {
+    Box, Button, FormControlLabel, Paper, SelectChangeEvent, Switch, TextField
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
-import {ApplicationOptions} from "../../common/Store";
+import StoreSchema, {ApplicationOptions} from "../../common/Store";
+import FileField from "../../components/fileField/FileField";
 import NumberField from "../../components/numberField/NumberField";
 import ThemePicker from "../../components/themePicker/ThemePicker";
 import {useAppContext} from "../../react/contexts/AppContext";
@@ -15,23 +27,84 @@ import Styles from "./SettingsView.styl";
 export const SettingsView: React.FC = () => {
     const {actions} = useAppContext();
     const {t} = useTranslation();
+    const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
     const [applicationOptions, setApplicationOptions] = useState<ApplicationOptions>(global.store.get("application"));
-    const [debouncedApplicationOptions] = useDebounceValue(applicationOptions, 500);
+    const [debouncedApplicationOptions] = useDebounceValue(applicationOptions, 500, {leading: true});
+
+    // const formats = _map(_values(ModeFormat), (f) => <MenuItem key={f} value={f}>{_capitalize(f)}</MenuItem>)}
+
+    const validateTemplateString = (input: HTMLInputElement) => {
+        const allowedKeys = ["artist", "albumTitle", "trackTitle", "trackNo", "releaseYear"];
+        const regex = /{{(.*?)}}/g;
+        const matches = _map([...input.value.matchAll(regex)], (m) => m[1]);
+
+        const invalidKeys = _filter(matches, (m) => !_includes(allowedKeys, m));
+        if (!_isEmpty(invalidKeys)) {
+            setValidationErrors((prev) => ({...prev, [input.id]: t("invalidTemplateKeys", { invalidKeys: _join(invalidKeys, ", ")})}));
+        } else {
+            setValidationErrors((prev) => _omitBy(prev, (_, key) => key === input.id));
+        }
+    };
 
     const handleClose = async () => {
         actions.setLocation("/");
     };
 
-    const onOutputDirectoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setApplicationOptions((prev) => ({...prev, outputDirectory: e.target.value}));
+    const onOutputDirectoryChange = (value: string[]) => {
+        setApplicationOptions((prev) => ({...prev, outputDirectory: _first(value)}));
     };
 
-    const onOutputTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setApplicationOptions((prev) => ({...prev, outputTemplate: e.target.value}));
+    const onOutputDirectoryBlur = (value: string[]) => {
+        const outputDirectory = _isNil(_first(value)) || _isEmpty(_first(value)) ? _get(StoreSchema.application, "properties.outputDirectory.default") : _first(value);
+        setApplicationOptions((prev) => ({...prev, outputDirectory}));
     };
 
-    const onMetadataTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setApplicationOptions((prev) => ({...prev, metadataTemplate: e.target.value}));
+    const onAlbumOutputTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        validateTemplateString(e.target);
+        setApplicationOptions((prev) => ({...prev, albumOutputTemplate: e.target.value}));
+    };
+    
+    const onAlbumOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const albumOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.albumOutputTemplate.default") : value;
+        setApplicationOptions((prev) => ({...prev, albumOutputTemplate}));
+    };
+
+    const onPlaylistOutputTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        validateTemplateString(e.target);
+        setApplicationOptions((prev) => ({...prev, playlistOutputTemplate: e.target.value}));
+    };
+    
+    const onPlaylistOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const playlistOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.playlistOutputTemplate.default") : value;
+        setApplicationOptions((prev) => ({...prev, playlistOutputTemplate}));
+    };
+
+    const onVideoOutputTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        validateTemplateString(e.target);
+        setApplicationOptions((prev) => ({...prev, videoOutputTemplate: e.target.value}));
+    };
+
+    const onVideoOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const videoOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.videoOutputTemplate.default") : value;
+        setApplicationOptions((prev) => ({...prev, videoOutputTemplate}));
+    };
+
+    const onTrackOutputTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        validateTemplateString(e.target);
+        setApplicationOptions((prev) => ({...prev, trackOutputTemplate: e.target.value}));
+    };
+    
+    const onTrackOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        const trackOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.trackOutputTemplate.default") : value;
+        setApplicationOptions((prev) => ({...prev, trackOutputTemplate}));
+    };
+    
+    const onOverwriteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, overwrite: e.target.checked}));
     };
 
     const onConcurrencyChange = (value: number) => {
@@ -39,7 +112,11 @@ export const SettingsView: React.FC = () => {
     };
 
     const onQualityChange = (value: number) => {
-        setApplicationOptions((prev) => ({...prev, quality: value}));
+        
+    };
+    
+    const onFormatChange = (event: SelectChangeEvent<"best" | "bestaudio" | "custom">) => {       
+        setApplicationOptions((prev) => ({...prev, format: event.target.value as "best" | "bestaudio" | "custom"}));
     };
 
     useEffect(() => {
@@ -48,42 +125,10 @@ export const SettingsView: React.FC = () => {
 
     return (
         <Box className={Styles.settings}>
-            <Stack
-                component="form"
-                className={Styles.form}
-                direction="row"
-                spacing={2}
-            >
-                <Stack spacing={3} className={classnames(Styles.rootColumn, Styles.left)}>
-                    <Stack component={Paper} variant="outlined" direction="column" spacing={2} className={Styles.wrapper}>
-                        <TextField
-                            fullWidth
-                            label={t("outputDirectory")}
-                            id="outputDirectory"
-                            variant="outlined"
-                            onChange={onOutputDirectoryChange}
-                            value={applicationOptions.outputDirectory}
-                            type="string"
-                        />
-                        <TextField
-                            fullWidth
-                            label={t("outputTemplate")}
-                            id="outputTempalte"
-                            variant="outlined"
-                            onChange={onOutputTemplateChange}
-                            value={applicationOptions.outputTemplate}
-                            type="string"
-                        />
-                        <TextField
-                            fullWidth
-                            label={t("metadataTemplate")}
-                            id="metadataTemplate"
-                            variant="outlined"
-                            onChange={onMetadataTemplateChange}
-                            value={applicationOptions.metadataTemplate}
-                            type="string"
-                        />
-                        <Stack direction="row" spacing={2}>
+            <Grid className={Styles.container} container padding={2} spacing={3}>
+                <Grid className={Styles.content} container>
+                    <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">
+                        <Grid size={6} spacing={2}>
                             <NumberField
                                 fullWidth
                                 label={t("concurrency")}
@@ -96,9 +141,11 @@ export const SettingsView: React.FC = () => {
                                 min={1}
                                 max={12}
                             />
+                        </Grid>
+                        <Grid size={6}>
                             <NumberField
                                 fullWidth
-                                label={t("quality")}
+                                label={t("audioQuality")}
                                 id="quality"
                                 variant="outlined"
                                 onChange={onQualityChange}
@@ -108,17 +155,105 @@ export const SettingsView: React.FC = () => {
                                 min={0}
                                 max={10}
                             />
-                        </Stack>
-                        <ThemePicker />
-                    </Stack>
-                </Stack>
-            </Stack>
-            <Grid className={Styles.footer}>
-                <Stack className={Styles.actions} direction="row" spacing={2}>
-                    <Button variant="contained" color="primary" onClick={handleClose}>
-                        {t("close")}
-                    </Button>
-                </Stack>
+                        </Grid>
+                        {/* <Grid size={12}>
+                            <FormControl fullWidth>
+                                <InputLabel id="mode-format-label">{t("modeFormat")}</InputLabel>
+                                <Select<string>
+                                    labelId="mode-format-label"
+                                    value={applicationOptions.format}
+                                    label={t("modeFormat")}
+                                    onChange={onFormatChange}
+                                >
+                                    {_map(_values(ModeFormat), (f) => <MenuItem key={f} value={f}><div>{t(f + "ModeFormat")}</div></MenuItem>)}
+                                </Select>
+                            </FormControl>
+                        </Grid> */}
+                        <Grid size={12}>
+                            <ThemePicker />
+                        </Grid>
+                        <Grid size={12}>
+                            <FormControlLabel control={<Switch checked={applicationOptions.overwrite} onChange={onOverwriteChange} />} label={t("overwrite")} />
+                        </Grid>
+                    </Grid>
+                    <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">
+                        <Grid size={12}>
+                            <FileField
+                                fullWidth
+                                label={t("outputDirectory")}
+                                id="outputDirectory"
+                                variant="outlined"
+                                onChange={onOutputDirectoryChange}
+                                onBlur={onOutputDirectoryBlur}
+                                value={applicationOptions.outputDirectory}
+                                mode="directory"
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <TextField
+                                fullWidth
+                                label={t("albumOutputTemplate")}
+                                id="albumOutputTemplate"
+                                variant="outlined"
+                                onBlur={onAlbumOutputTemplateBlur}
+                                onChange={onAlbumOutputTemplateChange}
+                                value={applicationOptions.albumOutputTemplate}
+                                helperText={validationErrors["albumOutputTemplate"]}
+                                error={!!validationErrors["albumOutputTemplate"]}
+                                type="string"
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <TextField
+                                fullWidth
+                                label={t("playlistOutputTemplate")}
+                                id="playlistOutputTemplate"
+                                variant="outlined"
+                                onBlur={onPlaylistOutputTemplateBlur}
+                                onChange={onPlaylistOutputTemplateChange}
+                                value={applicationOptions.playlistOutputTemplate}
+                                helperText={validationErrors["playlistOutputTemplate"]}
+                                error={!!validationErrors["playlistOutputTemplate"]}
+                                type="string"
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <TextField
+                                fullWidth
+                                label={t("videoOutputTemplate")}
+                                id="videoOutputTemplate"
+                                variant="outlined"
+                                onBlur={onVideoOutputTemplateBlur}
+                                onChange={onVideoOutputTemplateChange}
+                                value={applicationOptions.videoOutputTemplate}
+                                helperText={validationErrors["videoOutputTemplate"]}
+                                error={!!validationErrors["videoOutputTemplate"]}
+                                type="string"
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <TextField
+                                fullWidth
+                                label={t("trackOutputTemplate")}
+                                id="trackOutputTemplate"
+                                variant="outlined"
+                                onBlur={onTrackOutputTemplateBlur}
+                                onChange={onTrackOutputTemplateChange}
+                                value={applicationOptions.trackOutputTemplate}
+                                helperText={validationErrors["trackOutputTemplate"]}
+                                error={!!validationErrors["trackOutputTemplate"]}
+                                type="string"
+                            />
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <Grid className={Styles.footer} container>
+                    <Grid size="auto">
+                        <Button variant="contained" color="primary" onClick={handleClose}>
+                            {t("close")}
+                        </Button>
+                    </Grid>
+                </Grid>
             </Grid>
         </Box>
     );
