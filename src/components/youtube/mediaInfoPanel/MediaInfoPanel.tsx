@@ -1,13 +1,18 @@
 import classnames from "classnames";
 import _assign from "lodash/assign";
 import _isFunction from "lodash/isFunction";
+import _pick from "lodash/pick";
+import _some from "lodash/some";
 import moment from "moment";
 import React, {useCallback, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
-import {Box, Button, Card, CardContent, CardMedia, LinearProgress, Typography} from "@mui/material";
+import LaunchIcon from "@mui/icons-material/Launch";
+import {
+    Box, Button, Card, CardContent, CardMedia, LinearProgress, Tooltip, Typography
+} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
 import {AlbumInfo} from "../../../common/Youtube";
@@ -21,11 +26,12 @@ export type MediaInfoPanelProps = {
     loading?: boolean;
     progress?: number;
     onCancel?: () => void;
+    onOpenOutput?: () => void;
 }
 
 export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPanelProps) => {
-    const {className, onCancel, loading, progress = 0} = props;
-    const {album, setAlbum} = useDataState();
+    const {className, onCancel, onOpenOutput, loading, progress = 0} = props;
+    const {album, trackStatus, setAlbum} = useDataState();
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const {t} = useTranslation();
     
@@ -37,6 +43,12 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     const cancel = () => {
         if (_isFunction(onCancel)) {
             onCancel();
+        }
+    };
+
+    const openOutputFolder = () => {
+        if (_isFunction(onOpenOutput)) {
+            onOpenOutput();
         }
     };
 
@@ -74,10 +86,19 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                             </div>
                         </CardContent>
                         {!loading &&
-                            <Box className={Styles.actions} padding={2} gap={1}>
-                                <Button className={Styles.edit} title={t("edit")} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={editInfo}>
-                                    <EditIcon />
-                                </Button>
+                            <Box className={Styles.actions} padding={2} gap={2}>
+                                {_some(trackStatus, (s) => s.completed) &&
+                                    <Tooltip title={t("openOutputDirectory")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                        <Button className={Styles.openOutput} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={openOutputFolder}>
+                                            <LaunchIcon />
+                                        </Button>
+                                    </Tooltip>
+                                }
+                                <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                    <Button className={Styles.edit} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={editInfo}>
+                                        <EditIcon />
+                                    </Button>
+                                </Tooltip>    
                             </Box>
                         }
                         {loading &&
@@ -102,7 +123,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
             </Grid>
             <DetailsModal
                 id="details-modal"
-                details={album}
+                details={_pick(album, ["artist", "title", "releaseYear"])}
                 open={detailsModalOpen}
                 onClose={onDetailsModalClose}
             />

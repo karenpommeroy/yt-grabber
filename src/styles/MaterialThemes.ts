@@ -3,9 +3,7 @@ import $_ from "lodash";
 import {Theme} from "@mui/material";
 import {grey} from "@mui/material/colors";
 
-import {IStringTMap} from "../common/Mappings";
-
-const themes: IStringTMap<Partial<Theme> | any> = {
+const themes: Record<string, Partial<Theme | any>> = {
     basic: {
         typography: {
             fontFamily: "Lato",

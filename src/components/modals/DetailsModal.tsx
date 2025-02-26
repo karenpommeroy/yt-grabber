@@ -1,5 +1,5 @@
 import _map from "lodash/map";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Stack, TextField} from "@mui/material";
@@ -25,7 +25,7 @@ export type DetailsModalProps = {
 export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalProps) => {
     const {onClose, details, open, ...other} = props;
     const {t} = useTranslation();
-    const [value, setValue] = useState<Details>();
+    const [value, setValue] = useState<Details>(details);
 
     const onValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const key = event.target.dataset.key;
@@ -39,9 +39,9 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
         }
     };
 
-    useEffect(() => {
-        setValue(details);
-    }, [details]);
+    // useEffect(() => {
+    //     setValue(details);
+    // }, [details]);
 
     return (
         <Dialog
@@ -49,7 +49,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
             disablePortal
             onClose={handleClose}
             fullWidth
-            maxWidth="md"
+            maxWidth="sm"
             className={Styles.detailsModal}
             {...other}
         >

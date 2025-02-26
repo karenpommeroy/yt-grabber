@@ -31,7 +31,7 @@ export const reportProgress = (percentage: number, message: string, ...args: any
 };
 
 export const mainConfig: Configuration = {
-    mode: process.env.NODE_ENV as any,  //"development",
+    mode: process.env.NODE_ENV as any,
     entry: "./src/index.ts",
     target: "electron-main",
     module: {
@@ -54,10 +54,9 @@ export const mainConfig: Configuration = {
 };
 
 export const renderConfig: Configuration & DevServerConfiguration = {
-    mode: process.env.NODE_ENV as any, // "development",
+    mode: process.env.NODE_ENV as any,
     entry: "./src/renderer.tsx",
     target: "electron-renderer",
-    // devtool: "source-map",
     devtool: "eval",
     devServer: {
         watchFiles: {

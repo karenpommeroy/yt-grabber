@@ -1,15 +1,13 @@
 import classnames from "classnames";
-// import fs from "fs-extra";
-import _first from "lodash/first";
-import _get from "lodash/get";
+import {ipcRenderer, IpcRendererEvent} from "electron";
 import _isFunction from "lodash/isFunction";
 import _join from "lodash/join";
-import _union from "lodash/union";
-import React, {useRef} from "react";
+import React, {useEffect, useRef} from "react";
 
 import FolderIcon from "@mui/icons-material/Folder";
 import {IconButton, InputAdornment, TextField, TextFieldProps} from "@mui/material";
 
+import {OpenSelectPathDialogCompletedParams} from "../../common/Messaging";
 import Styles from "./FileField.styl";
 
 export type FileFieldProps = Omit<TextFieldProps, "onChange" | "onBlur"> & {
@@ -23,8 +21,28 @@ export type FileFieldProps = Omit<TextFieldProps, "onChange" | "onBlur"> & {
 
 export const FileField: React.FC<FileFieldProps> = (props) => {
     const {mode = "file", fileTypes, value, multiple, className, onChange, onBlur, ...rest} = props;
-    const rootPath = "./";
+    // const rootPath = "./";
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        ipcRenderer.on("open-select-path-dialog-completed", onOpenSelectPathDialogCompleted);
+
+        return () => {
+            ipcRenderer.off("open-select-path-dialog-completed", onOpenSelectPathDialogCompleted);
+        };
+    }, []);
+
+    const onOpenSelectPathDialogCompleted = (event: IpcRendererEvent, data: string) => {
+        const parsed: OpenSelectPathDialogCompletedParams = JSON.parse(data);
+        
+        if (parsed.paths && _isFunction(onChange)) {
+            onChange([parsed.paths]);
+        }
+    };
+
+    const onOpenSelectPathDialog = () => {
+        ipcRenderer.send("open-select-path-dialog", {directory: mode === "directory", multiple, defaultPath: value});
+    };
 
     const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (_isFunction(onChange)) {
@@ -39,38 +57,40 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     };
 
     const handleButtonClick = () => {
-        fileInputRef.current?.click();
+        onOpenSelectPathDialog();
+        
+        // fileInputRef.current?.click();
     };
 
-    const resolveDirectory = (files: FileList) => {
-        if (multiple) {
-            const paths = [];
+    // const resolveDirectory = (files: FileList) => {
+    //     if (multiple) {
+    //         const paths = [];
 
-            for (const file of files) {
-                paths.push(rootPath + file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf("/")));
-            }
+    //         for (const file of files) {
+    //             paths.push(rootPath + file.webkitRelativePath.substring(0, file.webkitRelativePath.lastIndexOf("/")));
+    //         }
 
-            return _union(paths);
-        } else {
-            const firstFilePath = _get(_first(files), "webkitRelativePath");
+    //         return _union(paths);
+    //     } else {
+    //         const firstFilePath = _get(_first(files), "webkitRelativePath");
             
-            return [rootPath + _first(firstFilePath.split("/"))];
-        }
-    };
+    //         return [rootPath + _first(firstFilePath.split("/"))];
+    //     }
+    // };
 
-    const resolveFile = (files: FileList): string[] => {
-        if (multiple) {
-            const paths = [];
+    // const resolveFile = (files: FileList): string[] => {
+    //     if (multiple) {
+    //         const paths = [];
 
-            for (const file of files) {
-                paths.push(rootPath + file.webkitRelativePath);
-            }
+    //         for (const file of files) {
+    //             paths.push(rootPath + file.webkitRelativePath);
+    //         }
 
-            return paths;
-        } else {
-            return [rootPath + _get(_first(files), "webkitRelativePath")];
-        }
-    };
+    //         return paths;
+    //     } else {
+    //         return [rootPath + _get(_first(files), "webkitRelativePath")];
+    //     }
+    // };
 
     // async function readDirectory(dirHandle: any, path: any) {
     //     for await (const entry of dirHandle.values()) {
@@ -89,16 +109,16 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
         // const dirHandle = await (window as any).showDirectoryPicker();
         // await readDirectory(dirHandle, "");
 
-        const result = mode === "directory" ? resolveDirectory(event.target.files) : resolveFile(event.target.files);
-        // const outPath = fs.realpathSync(result[0]);
+        // const result = mode === "directory" ? resolveDirectory(event.target.files) : resolveFile(event.target.files);
+        // // const outPath = fs.realpathSync(result[0]);
 
-        // setFieldValue(result);
+        // // setFieldValue(result);
+        // // if (_isFunction(onChange)) {
+        // //     onChange(fs.existsSync(outPath) ? [outPath] : result);
+        // // }
         // if (_isFunction(onChange)) {
-        //     onChange(fs.existsSync(outPath) ? [outPath] : result);
+        //     onChange(result);
         // }
-        if (_isFunction(onChange)) {
-            onChange(result);
-        }
         event.target.value = "";
 
         // const reader = new FileReader();

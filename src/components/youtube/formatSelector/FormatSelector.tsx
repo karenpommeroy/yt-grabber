@@ -15,9 +15,9 @@ import {useTranslation} from "react-i18next";
 import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
+import {AudioType, MediaFormat, VideoType} from "../../../common/Media";
 import {ApplicationOptions} from "../../../common/Store";
 import {FormatInfo} from "../../../common/Youtube";
-import {AudioType, MediaFormat, VideoType} from "../../../enums/Media";
 import {useDataState} from "../../../react/contexts/DataContext";
 import NumberField from "../../numberField/NumberField";
 import Styles from "./FormatSelector.styl";

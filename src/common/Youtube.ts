@@ -1,4 +1,4 @@
-import {MediaFormat} from "../enums/Media";
+import {MediaFormat} from "./Media";
 
 export type TrackInfo = {
     album: string;
@@ -44,6 +44,7 @@ export type TrackStatusInfo = {
     completed?: boolean;
     status?: string;
     error?: boolean;
+    path?: string;
 }
 
 export type FormatInfo = {

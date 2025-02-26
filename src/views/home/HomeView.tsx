@@ -1,3 +1,4 @@
+import {ipcRenderer, IpcRendererEvent} from "electron";
 import fs from "fs-extra";
 import _every from "lodash/every";
 import _filter from "lodash/filter";
@@ -30,17 +31,17 @@ import YTDlpWrap, {Progress as YtDlpProgress} from "yt-dlp-wrap";
 import {Alert, Box, CircularProgress} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
+import {MediaFormat} from "../../common/Media";
+import {OpenSystemPathParams} from "../../common/Messaging";
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
 import {AlbumInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
 import FormatSelector, {Format} from "../../components/youtube/formatSelector/FormatSelector";
 import InputPanel from "../../components/youtube/inputPanel/InputPanel";
 import MediaInfoPanel from "../../components/youtube/mediaInfoPanel/MediaInfoPanel";
 import TrackList from "../../components/youtube/trackList/TrackList";
-import {MediaFormat} from "../../enums/Media";
 import {useAppContext} from "../../react/contexts/AppContext";
 import {useDataState} from "../../react/contexts/DataContext";
-// import CompleteTracksMock from "../../tests/CompleteTracksMock";
-import MissingDetailsTracksMock from "../../tests/MissingDetailsTracksMock";
+import TracksMock from "../../tests/CompleteTracksMock";
 import Styles from "./HomeView.styl";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -63,6 +64,14 @@ export const HomeView: React.FC = () => {
     const onFormatSelected = (value: Format) => {
         setAppOptions((prev) => ({...prev, format: value}));
     };
+
+    useEffect(() => {
+        ipcRenderer.on("open-system-path-completed", onOpenSystemDirectoryCompleted);
+
+        return () => {
+            ipcRenderer.off("open-system-path-completed", onOpenSystemDirectoryCompleted);
+        };
+    }, []);
 
     useEffect(() => {
         global.store.set("application", debouncedAppOptions);
@@ -95,9 +104,27 @@ export const HomeView: React.FC = () => {
         }
     };
 
+    const onOpenSystemDirectoryCompleted = (event: IpcRendererEvent, data: string) => {
+        const parsed: OpenSystemPathParams = JSON.parse(data);
+        
+        return parsed;
+    };
+
     const handleUrlChange = (url: string) => {       
         setAppOptions((prev) => ({...prev, url}));
     }; 
+
+    const onOpenFile = (trackId: string) => {
+        const found = _find(trackStatusRef.current, ["trackId", trackId]);
+
+        ipcRenderer.send("open-system-path", {filepath: found.path});
+    };
+
+    const onOpenDirectory = () => {
+        const found = _find(trackStatusRef.current, "completed");
+
+        ipcRenderer.send("open-system-path", {dirpath: path.dirname(found.path)});
+    };
 
     const onCancel = () => {
         _map(abortControllersRef, (v) => v.abort());
@@ -111,7 +138,7 @@ export const HomeView: React.FC = () => {
     const getResolveDataPromise = (url: string): Promise<any> => {
         if (appOptions.debugMode) {
             return new Promise<any>((resolve) => {
-                setTimeout(() => resolve(MissingDetailsTracksMock), 1000);
+                setTimeout(() => resolve(TracksMock), 1000);
             });
         } else {
             return ytDlpWrap.getVideoInfo(url);
@@ -120,14 +147,14 @@ export const HomeView: React.FC = () => {
 
     const resolveData = (url: string) => {
         const promise = getResolveDataPromise(url);
+        
         promise.finally(() => _pull(state.queue, "resolve-data"));
-
         queueRef.current.push("resolve-data");
         
         return promise;
     };
     
-    const loadInfo = useCallback(async (url: string) => {
+    const loadInfo = useCallback(async (url: string) => {        
         try {
             clearMedia();
             actions.setLoading(true);
@@ -437,6 +464,7 @@ export const HomeView: React.FC = () => {
             trackId: track.id,
             percent: 0,
             totalSize: track.filesize_approx,
+            path: path.resolve(getOutputFilePath(track, album)),
         };
 
         setTrackStatus((prev) => [...prev, newTrackProgressInfo]);
@@ -493,8 +521,8 @@ export const HomeView: React.FC = () => {
                 {!state.loading && tracks && album &&
                     <>
                         {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}
-                        <MediaInfoPanel loading={!_isEmpty(queueRef.current)} progress={getTotalProgress()} onCancel={onCancel} />
-                        <TrackList queue={queueRef.current} onDownloadTrack={downloadTrack} onCancelTrack={cancelTrack}/>
+                        <MediaInfoPanel loading={!_isEmpty(queueRef.current)} progress={getTotalProgress()} onCancel={onCancel} onOpenOutput={onOpenDirectory} />
+                        <TrackList queue={queueRef.current} onDownloadTrack={downloadTrack} onCancelTrack={cancelTrack} onOpenFile={onOpenFile}/>
                     </>
                 }
             </Grid>

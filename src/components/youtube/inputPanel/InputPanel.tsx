@@ -11,7 +11,7 @@ import FolderIcon from "@mui/icons-material/Folder";
 import InfoIcon from "@mui/icons-material/Info";
 import ReplayIcon from "@mui/icons-material/Replay";
 import {
-    Autocomplete, AutocompleteRenderInputParams, Button, Chip, IconButton, Stack, TextField
+    Autocomplete, AutocompleteRenderInputParams, Button, Chip, IconButton, Stack, TextField, Tooltip
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
@@ -165,21 +165,29 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             <Grid>
                 <Stack direction="row" spacing={1}>
                     {album &&
-                        <Button disabled={loading || _isEmpty(value) || !!validationError} title={t("clear")} variant="contained" disableElevation color="secondary" onClick={onClear}>
-                            <ClearIcon />
-                        </Button>
+                        <Tooltip title={t("clear")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
+                            <Button disabled={loading || _isEmpty(value) || !!validationError} variant="contained" disableElevation color="secondary" onClick={onClear}>
+                                <ClearIcon />
+                            </Button>
+                        </Tooltip>
                     }
-                    <Button disabled={loading || _isEmpty(value) || !!validationError} title={t("loadInfo")} variant="contained" disableElevation color="secondary" onClick={() => onLoadInfo(value)}>
-                        <InfoIcon/>
-                    </Button>
+                    <Tooltip title={t("loadInfo")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
+                        <Button disabled={loading || _isEmpty(value) || !!validationError} variant="contained" disableElevation color="secondary" onClick={() => onLoadInfo(value)}>
+                            <InfoIcon/>
+                        </Button>
+                    </Tooltip>
                     {showDownloadFailed &&
-                        <Button disabled={loading || _isEmpty(value) || !!validationError} title={t("downloadFailed")} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
-                            <ReplayIcon />
-                        </Button>
+                        <Tooltip title={t("downloadFailed")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
+                            <Button disabled={loading || _isEmpty(value) || !!validationError} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
+                                <ReplayIcon />
+                            </Button>
+                        </Tooltip>
                     }
-                    <Button disabled={loading || _isEmpty(value) || !!validationError} title={t("download")} variant="contained" disableElevation color="secondary" onClick={() => onDownload(value)}>
-                        <DownloadIcon/>
-                    </Button>
+                    <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
+                        <Button disabled={loading || _isEmpty(value) || !!validationError} variant="contained" disableElevation color="secondary" onClick={() => onDownload(value)}>
+                            <DownloadIcon/>
+                        </Button>
+                    </Tooltip>
                 </Stack>
             </Grid>
         </Grid>

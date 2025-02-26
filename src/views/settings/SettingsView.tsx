@@ -7,6 +7,7 @@ import _isNil from "lodash/isNil";
 import _join from "lodash/join";
 import _map from "lodash/map";
 import _omitBy from "lodash/omitBy";
+import path from "path";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
@@ -27,8 +28,6 @@ export const SettingsView: React.FC = () => {
     const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
     const [applicationOptions, setApplicationOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const [debouncedApplicationOptions] = useDebounceValue(applicationOptions, 500, {leading: true});
-
-    // const formats = _map(_values(ModeFormat), (f) => <MenuItem key={f} value={f}>{_capitalize(f)}</MenuItem>)}
 
     const validateTemplateString = (input: HTMLInputElement) => {
         const allowedKeys = ["artist", "albumTitle", "trackTitle", "trackNo", "releaseYear"];
@@ -52,7 +51,7 @@ export const SettingsView: React.FC = () => {
     };
 
     const onOutputDirectoryBlur = (value: string[]) => {
-        const outputDirectory = _isNil(_first(value)) || _isEmpty(_first(value)) ? _get(StoreSchema.application, "properties.outputDirectory.default") : _first(value);
+        const outputDirectory = _isNil(_first(value)) || _isEmpty(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.outputDirectory.default")) : _first(value);
         setApplicationOptions((prev) => ({...prev, outputDirectory}));
     };
 
@@ -149,19 +148,6 @@ export const SettingsView: React.FC = () => {
                                 max={10}
                             />
                         </Grid>
-                        {/* <Grid size={12}>
-                            <FormControl fullWidth>
-                                <InputLabel id="mode-format-label">{t("modeFormat")}</InputLabel>
-                                <Select<string>
-                                    labelId="mode-format-label"
-                                    value={applicationOptions.format}
-                                    label={t("modeFormat")}
-                                    onChange={onFormatChange}
-                                >
-                                    {_map(_values(ModeFormat), (f) => <MenuItem key={f} value={f}><div>{t(f + "ModeFormat")}</div></MenuItem>)}
-                                </Select>
-                            </FormControl>
-                        </Grid> */}
                         <Grid size={12}>
                             <ThemePicker />
                         </Grid>

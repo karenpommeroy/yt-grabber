@@ -44,7 +44,7 @@ export const StoreSchema: Schema<IStore> = {
             },
             outputDirectory: {
                 type: "string",
-                default: "/output",
+                default: "./output",
             },
             albumOutputTemplate: {
                 type: "string",

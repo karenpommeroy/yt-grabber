@@ -1,7 +1,6 @@
 import React, {createContext, FC, ReactNode, useReducer} from "react";
 
 import {ColorMode} from "../../common/Theme";
-import {MediaFormat} from "../../enums/Media";
 import {actions} from "../actions/AppActions";
 import reducer from "../reducers/AppReducer";
 import {createDefaultState, IAppState} from "../states/AppState";
@@ -12,12 +11,8 @@ interface IAppContext {
         setLocation: (location: string) => void;
         setTheme: (theme: string) => void;
         setMode: (mode: ColorMode) => void;
-        setUrls: (urls: string[]) => void;
-        setSelectedAction: (selectedAction: string) => void;
-        setFormat: (format: MediaFormat) => void;
         setLoading: (loading: boolean) => void;
         setQueue: (queue: string[]) => void;
-        setControllers: (controllers: AbortController[]) => void;
     };
 }
 
