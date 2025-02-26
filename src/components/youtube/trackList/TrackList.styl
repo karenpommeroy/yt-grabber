@@ -4,6 +4,8 @@
     .track {
         padding-top: 0;
         padding-bottom: 0;
+        padding-left: 5px;
+        padding-right: 5px;
 
         &:hover {
             background-color: var(--theme-palette-divider);
@@ -13,19 +15,50 @@
             }
         }
 
+        // :global(.MuiListItemSecondaryAction-root) {
+        //     padding-right: 8px;
+        // }
+
         .track-action {
             visibility: hidden;
             min-width: 0;
+        }
+
+        .number-column {
+            width: 1rem;
+            align-content: center;
+            justify-items: center;
+
+            .number {
+                font-size: 1rem;
+            }
+        }
+
+        .image-column {
+            width: 4rem;
+            align-content: center;
+            justify-items: center;
+
+            .image > img {
+                width: 110%;
+                height: 110%;
+            }
         }
     }
 
     .column {
         display: flex;
         align-self: center;
+        align-items: center;
     }
 
     .completed-icon {
         width: 2.3rem;
         height: 2.3rem;
+    }
+
+    .cut-icon {
+        font-size: 18px;
+        margin-right: 0.25rem;
     }
 }

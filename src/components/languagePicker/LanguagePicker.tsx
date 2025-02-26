@@ -62,6 +62,7 @@ export const LanguagePicker = (props: ILanguagePickerProps) => {
             setLoading(true);
             i18n.changeLanguage(lang, () => setLoading(false));
             moment.locale(lang);
+            global.store.set("application.language", lang);
         }
 
         onClose();

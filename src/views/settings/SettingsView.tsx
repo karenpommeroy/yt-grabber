@@ -7,14 +7,11 @@ import _isNil from "lodash/isNil";
 import _join from "lodash/join";
 import _map from "lodash/map";
 import _omitBy from "lodash/omitBy";
-import _values from "lodash/values";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
-import {
-    Box, Button, FormControlLabel, Paper, SelectChangeEvent, Switch, TextField
-} from "@mui/material";
+import {Box, Button, FormControlLabel, Paper, Switch, TextField} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
@@ -104,7 +101,7 @@ export const SettingsView: React.FC = () => {
     };
     
     const onOverwriteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setApplicationOptions((prev) => ({...prev, overwrite: e.target.checked}));
+        setApplicationOptions((prev) => ({...prev, alwaysOverwrite: e.target.checked}));
     };
 
     const onConcurrencyChange = (value: number) => {
@@ -112,11 +109,7 @@ export const SettingsView: React.FC = () => {
     };
 
     const onQualityChange = (value: number) => {
-        
-    };
-    
-    const onFormatChange = (event: SelectChangeEvent<"best" | "bestaudio" | "custom">) => {       
-        setApplicationOptions((prev) => ({...prev, format: event.target.value as "best" | "bestaudio" | "custom"}));
+        setApplicationOptions((prev) => ({...prev, quality: value}));
     };
 
     useEffect(() => {
@@ -173,7 +166,7 @@ export const SettingsView: React.FC = () => {
                             <ThemePicker />
                         </Grid>
                         <Grid size={12}>
-                            <FormControlLabel control={<Switch checked={applicationOptions.overwrite} onChange={onOverwriteChange} />} label={t("overwrite")} />
+                            <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />
                         </Grid>
                     </Grid>
                     <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">

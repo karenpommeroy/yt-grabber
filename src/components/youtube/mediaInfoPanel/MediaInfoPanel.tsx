@@ -40,7 +40,6 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
         }
     };
 
-
     const editInfo = useCallback(() => {
         setDetailsModalOpen(true);
     }, [detailsModalOpen, setDetailsModalOpen]);
@@ -51,7 +50,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                 <Card variant="outlined" className={Styles.header}>
                     <CardMedia
                         component="img"
-                        sx={{width: 108, height: 108}}
+                        sx={{width: 100, height: "auto", marginRight: 1}}
                         image={album.thumbnail}
                         alt={album.title}
                     />
@@ -59,7 +58,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                         <CardContent className={Styles.info}>
                             <div className={classnames(Styles.row, Styles, Styles.title)}>
                                 <Typography variant="subtitle2" className={Styles.label}>{t("title")}:</Typography>
-                                <Typography variant="subtitle2" className={classnames(Styles.label, Styles.bold)}>{album.title}</Typography>
+                                <Typography variant="subtitle2" sx={{color: "text.secondary"}} className={classnames(Styles.label, Styles.bold)}>{album.title}</Typography>
                             </div>
                             <div className={classnames(Styles.row, Styles, Styles.artist)}>
                                 <Typography variant="body1" className={Styles.label}>{t("artist")}:</Typography>

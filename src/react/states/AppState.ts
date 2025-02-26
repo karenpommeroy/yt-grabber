@@ -1,5 +1,5 @@
 import {ColorMode} from "../../common/Theme";
-import {MediaFormat} from "../../enums/MediaFormat";
+import {MediaFormat} from "../../enums/Media";
 import {StateCreator} from "./State";
 
 export interface IAppState {

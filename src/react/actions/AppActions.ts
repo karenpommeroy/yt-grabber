@@ -1,7 +1,7 @@
 import {Dispatch} from "react";
 
 import {ColorMode} from "../../common/Theme";
-import {MediaFormat} from "../../enums/MediaFormat";
+import {MediaFormat} from "../../enums/Media";
 import {IAction} from "./Action";
 
 export enum AppActions {

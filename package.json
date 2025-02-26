@@ -9,11 +9,12 @@
   "scripts": {
     "clean": "rimraf dist",
     "start": "concurrently \"cross-env NODE_ENV=development yarn run watch\" \"yarn run electron\"",
-    "build": "cross-env NODE_ENV=production && yarn clean && webpack --config webpack.config.ts",
-    "electron": "wait-on dist/index.js && cross-env NODE_ENV=development ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
+    "build": "cross-env NODE_ENV=development && yarn clean && webpack --config webpack.config.ts",
+    "build:prod": "cross-env NODE_ENV=production && yarn clean && webpack --config webpack.config.ts",
+    "electron": "wait-on dist/index.js && cross-env NODE_ENV=production ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
     "watch": "webpack --watch --config webpack.config.ts",
-    "pack": "yarn run build && electron-builder --dir",
-    "dist": "yarn run build && electron-builder"
+    "pack": "yarn build:prod && electron-builder --dir",
+    "dist": "yarn build:prod && electron-builder"
   },
   "build": {
     "appId": "yt.grabber",
@@ -23,7 +24,14 @@
     ],
     "directories": {
       "output": "release"
-    }
+    },
+    "extraResources": [
+        {
+            "from": "dist/resources/bin",
+            "to": "bin",
+            "filter": ["*.exe"]
+        }
+    ]
   },
   "author": "Marcin Karpiński <mkarpins@gmail.com>",
   "license": "MIT",

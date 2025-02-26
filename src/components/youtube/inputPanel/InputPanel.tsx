@@ -35,7 +35,6 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const {value, values, mode = "single", loading, onChange, onDownload, onDownloadFailed, onLoadInfo, onClear} = props;
     const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const {album, trackStatus} = useDataState();
-    // const {album, trackStatus} = useData("test");
     const [validationError, setValidationError] = useState<string>();
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);

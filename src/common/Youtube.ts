@@ -1,4 +1,4 @@
-import {MediaFormat} from "../enums/MediaFormat";
+import {MediaFormat} from "../enums/Media";
 
 export type TrackInfo = {
     album: string;
@@ -9,6 +9,7 @@ export type TrackInfo = {
     id: string;
     original_url: string;
     playlist: string;
+    playlist_title: string;
     playlist_autonumber: number;
     playlist_count: number;
     release_year: number;
@@ -74,6 +75,6 @@ export type Format = {
 };
 
 export type TrackCut = {
-    from: string;
-    to: string;
+    from: number;
+    to: number;
 };

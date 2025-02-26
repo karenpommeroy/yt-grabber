@@ -14,7 +14,7 @@ const isDev = () => !app.isPackaged;
 
 const createWindow = async () => {
     mainWindow = new BrowserWindow({
-        width: 800,
+        width: 1000,
         height: 900,
         frame: true,
         roundedCorners: true,
@@ -24,12 +24,13 @@ const createWindow = async () => {
             contextIsolation: false,
         },
     });
-    // mainWindow.removeMenu();
-    // mainWindow.setMenu(null);
     mainWindow.loadFile(path.join(__dirname, "index.html"));
 
     if (isDev()) {
         mainWindow.webContents.openDevTools({mode: "detach"});
+    } else {
+        mainWindow.removeMenu();
+        mainWindow.setMenu(null);
     }
 
     mainWindow.on("closed", () => {

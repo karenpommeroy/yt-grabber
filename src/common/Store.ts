@@ -1,5 +1,7 @@
 import {Schema} from "electron-store";
 
+import {Format} from "../components/youtube/formatSelector/FormatSelector";
+
 export type ApplicationOptions = {
     outputDirectory?: string;
     albumOutputTemplate?: string;
@@ -8,10 +10,11 @@ export type ApplicationOptions = {
     trackOutputTemplate?: string;
     concurrency?: number;
     quality?: number;
-    format?: "best" | "bestaudio" | "custom";
+    format?: Format;
     debugMode?: boolean;
     url?: string;
-    overwrite?: boolean;
+    language?: string;
+    alwaysOverwrite?: boolean;
 };
 
 export interface IStore {
@@ -65,17 +68,35 @@ export const StoreSchema: Schema<IStore> = {
             },
             quality: {
                 type: "integer",
-                default: 5
+                default: 0
             },
             format: {
-                type: "string",
-                default: "best",
+                type: "object",
+                properties: {
+                    type: {
+                        type: "string",
+                        enum: ["video", "audio"],
+                        default: "audio",
+                    },
+                    extension: {
+                        type: "string",
+                        enum: ["mp3", "m4a", "flac", "wav", "opus", "mp4", "mkv"],
+                        default: "mp3",
+                    },
+                    audioQuality: {
+                        type: "integer",
+                        default: 0,
+                    }
+                },
             },
             debugMode: {
                 type: "boolean",
                 default: false
             },
-            overwrite: {
+            language: {
+                type: "string"
+            },
+            alwaysOverwrite: {
                 type: "boolean",
                 default: false
             }

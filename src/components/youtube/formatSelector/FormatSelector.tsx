@@ -1,16 +1,13 @@
 import _capitalize from "lodash/capitalize";
 import _filter from "lodash/filter";
-import _find from "lodash/find";
 import _first from "lodash/first";
 import _get from "lodash/get";
 import _includes from "lodash/includes";
-import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
 import _isNumber from "lodash/isNumber";
 import _last from "lodash/last";
 import _map from "lodash/map";
 import _uniq from "lodash/uniq";
-import _uniqBy from "lodash/uniqBy";
 import _values from "lodash/values";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -20,132 +17,119 @@ import Grid from "@mui/material/Grid2";
 
 import {ApplicationOptions} from "../../../common/Store";
 import {FormatInfo} from "../../../common/Youtube";
-import {MediaFormat} from "../../../enums/MediaFormat";
+import {AudioType, MediaFormat, VideoType} from "../../../enums/Media";
 import {useDataState} from "../../../react/contexts/DataContext";
 import NumberField from "../../numberField/NumberField";
 import Styles from "./FormatSelector.styl";
 
 export type Format = {
     type?: MediaFormat;
-    extension?: string;
-    video?: FormatInfo;
+    extension?: AudioType | VideoType;
     videoQuality?: string;
     audioQuality?: number;
 }
 
 export type FormatSelectorProps = {
+    value?: Format;
     onSelected?: (format: Format) => void;
 }
 
 export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
-    const {onSelected} = props;
+    const {value, onSelected} = props;
     const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const {tracks} = useDataState();
-    const [allFormats, setAllFormats] = useState<FormatInfo[]>();
-    const [currentFormats, setCurrentFormats] = useState<FormatInfo[]>();
     
-    const [audioExtensions, setAudioExtensions] = useState<string[]>();
-    const [videoExtensions, setVideoExtensions] = useState<string[]>();
-    const [resolutions, setResolutions] = useState<FormatInfo[]>();
+    const audioExtensions = Object.values(AudioType);
+    const videoExtensions = Object.values(VideoType);
+    const [formats, setFormats] = useState<Array<AudioType | VideoType>>(value.type === MediaFormat.Audio ? audioExtensions : videoExtensions);
+    const [resolutions, setResolutions] = useState<string[]>();
     
-    const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(MediaFormat.Audio);
-    const [selectedAudioExtension, setSelectedAudioExtension] = useState<string>();
-    const [selectedVideoExtension, setSelectedVideoExtension] = useState<string>();
-    const [selectedResolution, setSelectedResolution] = useState<FormatInfo>();
-    const [selectedQuality, setSelectedQuality] = useState(appOptions.quality);
-    const [value, setValue] = useState<Format>();
+    const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(value.type ?? MediaFormat.Audio);
+    const [selectedAudioExtension, setSelectedAudioExtension] = useState<AudioType>(value.type === MediaFormat.Audio ? value.extension as AudioType :_first(audioExtensions));
+    const [selectedVideoExtension, setSelectedVideoExtension] = useState<VideoType>(value.type === MediaFormat.Video ? value.extension as VideoType :_first(videoExtensions));
+    const [selectedFormat, setSelectedFormat] = useState<AudioType | VideoType>(value.extension ?? _first(formats));
+    const [selectedResolution, setSelectedResolution] = useState<string>(value.videoQuality);
+    const [selectedQuality, setSelectedQuality] = useState(value.audioQuality ?? appOptions.quality);
+    const [currentValue, setCurrentValue] = useState<Format>(value);
     const {t} = useTranslation();
 
     const isFormatValid = (val: Format) => {
-        return val && val.type && val.extension && ((val.type === MediaFormat.Video && val.video) || (val.type === MediaFormat.Audio && _isNumber(val.audioQuality)));  
-    }
+        return val && val.type && val.extension && (
+            (val.type === MediaFormat.Video && val.videoQuality && _includes(videoExtensions, val.extension)) ||
+            (val.type === MediaFormat.Audio && _isNumber(val.audioQuality) && _includes(audioExtensions, val.extension))
+        );
+    };
+    
+    const resolveResolutionText = (val: FormatInfo) => {
+        const [, height] = _map(val.resolution.match(/\d+/g), Number);
+
+        return `${val.resolution} (${height}p)`;
+    };
 
     useEffect(() => {
-        if (!_isFunction(onSelected) || !isFormatValid(value)) return;
+        if (!_isFunction(onSelected) || !isFormatValid(currentValue)) return;
 
-         onSelected(value);
-    }, [value]);
+        onSelected(currentValue);
+    }, [currentValue]);
 
     useEffect(() => {
-        setValue({
+        setCurrentValue({
             type: selectedMediaType,
-            extension: selectedMediaType === MediaFormat.Audio ? selectedAudioExtension : selectedVideoExtension,
-            video: selectedResolution,
+            extension: selectedFormat,
+            videoQuality: selectedResolution,
             audioQuality: selectedQuality,
         });
-    }, [selectedMediaType, selectedAudioExtension, selectedVideoExtension, selectedResolution, selectedQuality]);
+    }, [selectedMediaType, selectedFormat, selectedVideoExtension, selectedResolution, selectedQuality]);
 
     useEffect(() => {
-        setAllFormats(_get(tracks, "0.formats"));
+        const formats = _get(tracks, "0.formats");
+        const nextResolutions = _uniq(_map(_filter(formats, (f) => f.vcodec !== "none" && !!f.resolution), resolveResolutionText));
+        
+        setResolutions(nextResolutions);
+        setSelectedResolution(value.videoQuality ?? _last(nextResolutions));
     }, [tracks]);
 
     useEffect(() => {
-        let nextFormats: FormatInfo[];
-        
-        if (selectedMediaType === MediaFormat.Video) {
-            nextFormats = _filter(allFormats, (f) => f.vcodec !== "none" && !!f.resolution);
-        } else if (selectedMediaType === MediaFormat.Audio) {
-            nextFormats = _map(_filter(allFormats, (f) => f.acodec !== "none"));
-        }
-        
-        setCurrentFormats(nextFormats);
-    }, [selectedMediaType, allFormats]);
+        const extensionsByMediaType = {
+            [MediaFormat.Audio]: audioExtensions,
+            [MediaFormat.Video]: videoExtensions,
+        };
+        const selectedExtensionByMediaType = {
+            [MediaFormat.Audio]: selectedAudioExtension,
+            [MediaFormat.Video]: selectedVideoExtension,
+        };
 
-    useEffect(() => {
-        if (selectedMediaType === MediaFormat.Video) {
-            // setVideoExtensions(_uniq(_map(currentFormats, "ext")));
-            setVideoExtensions(["mp4", "mkv"]);
-        } else {
-            setAudioExtensions(["mp3", "wav", "flac"]);
-        }
-    }, [selectedMediaType, currentFormats]);
+        setFormats(extensionsByMediaType[selectedMediaType]);
+        setSelectedFormat(selectedExtensionByMediaType[selectedMediaType]);
+    }, [selectedMediaType]);
 
-    useEffect(() => {
-        if (selectedVideoExtension || _isEmpty(videoExtensions)) return;
+    // useEffect(() => {
+    //     const selectedExtensionByMediaType = {
+    //         [MediaFormat.Audio]: selectedAudioExtension,
+    //         [MediaFormat.Video]: selectedVideoExtension,
+    //     };
 
-        setSelectedVideoExtension(_first(videoExtensions));
-    }, [videoExtensions]);
-
-    useEffect(() => {
-        if (selectedAudioExtension || _isEmpty(audioExtensions)) return;
-        
-        setSelectedAudioExtension(_first(audioExtensions));
-    }, [audioExtensions]);
-
-
-    useEffect(() => {
-        if (selectedMediaType === MediaFormat.Audio) return;
-
-        setResolutions(_uniqBy(_filter(currentFormats, ["ext", selectedVideoExtension]), (f) => f.resolution));
-    }, [selectedVideoExtension, currentFormats]);
-
-    useEffect(() => {
-        if (_isEmpty(resolutions)) return;
-
-        if (selectedResolution) {
-            const found = _find(resolutions, ["resolution", selectedResolution.resolution]);
-            setSelectedResolution(found ?? _last(resolutions));
-        } else {
-            setSelectedResolution(_last(resolutions));
-        }
-    }, [resolutions]);
+    //     setSelectedFormat(selectedExtensionByMediaType[selectedMediaType]);
+    // }, [formats]);
 
     const handleMediaTypeChange = (event: SelectChangeEvent<MediaFormat>) => {       
         setSelectedMediaType(event.target.value as MediaFormat);
     };
 
-    const handleAudioExtensionChange = (event: SelectChangeEvent<string>) => {       
-        setSelectedAudioExtension(event.target.value);
-    };
+    const handleFormatChange = (event: SelectChangeEvent<AudioType | VideoType>) => {       
+        if (selectedMediaType === MediaFormat.Audio) {
+            setSelectedAudioExtension(event.target.value as AudioType);
+        }
 
-    const handleVideoExtensionChange = (event: SelectChangeEvent<string>) => {       
-        setSelectedVideoExtension(event.target.value);
+        if (selectedMediaType === MediaFormat.Video) {
+            setSelectedVideoExtension(event.target.value as VideoType);
+        }
+
+        setSelectedFormat(event.target.value as AudioType | VideoType);
     };
 
     const handleResolutionChange = (event: SelectChangeEvent<string>) => {       
-        const nextResolution = _find(resolutions, ["format_id", event.target.value]);
-        
-        setSelectedResolution(nextResolution);
+        setSelectedResolution(event.target.value);
     };
     
     const onQualityChange = (value: number) => {       
@@ -167,43 +151,30 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                     </Select>
                 </FormControl>
             </Grid>
-            {selectedMediaType === MediaFormat.Video && <Grid size={4}>
+            <Grid size={4}>
                 <FormControl fullWidth>
-                    <InputLabel id="extension-label">{t("extension")}</InputLabel>
+                    <InputLabel id="format-label">{t("format")}</InputLabel>
                     <Select<string>
-                        labelId="extension-label"
-                        value={selectedVideoExtension ?? ""}
-                        label={t("extension")}
-                        onChange={handleVideoExtensionChange}
+                        labelId="format-label"
+                        value={selectedFormat}
+                        label={t("format")}
+                        onChange={handleFormatChange}
                     >
-                        {_map(videoExtensions, (e) => <MenuItem key={e} value={e}>{e}</MenuItem>)}
+                        {_map(formats, (item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                     </Select>
                 </FormControl>
-            </Grid>}
-            {selectedMediaType === MediaFormat.Audio && <Grid size={4}>
-                <FormControl fullWidth>
-                    <InputLabel id="extension-label">{t("extension")}</InputLabel>
-                    <Select<string>
-                        labelId="extension-label"
-                        value={selectedAudioExtension ?? ""}
-                        label={t("extension")}
-                        onChange={handleAudioExtensionChange}
-                    >
-                        {_map(audioExtensions, (e) => <MenuItem key={e} value={e}>{e}</MenuItem>)}
-                    </Select>
-                </FormControl>
-            </Grid>}
+            </Grid>
             {selectedMediaType === MediaFormat.Video &&
                 <Grid size={4}>
                     <FormControl fullWidth>
-                        <InputLabel id="format-label">{t("format")}</InputLabel>
+                        <InputLabel id="resolution-label">{t("resolution")}</InputLabel>
                         <Select<string>
-                            labelId="format-label"
-                            value={selectedResolution?.format_id ?? ""}
-                            label={t("format")}
+                            labelId="resolution-label"
+                            value={selectedResolution}
+                            label={t("resolution")}
                             onChange={handleResolutionChange}
                         >
-                            {_map(resolutions, (f) => <MenuItem key={f.format_id} value={f.format_id}>{f.resolution}</MenuItem>)}
+                            {_map(resolutions, (item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                         </Select>
                     </FormControl>
                 </Grid>

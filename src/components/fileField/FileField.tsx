@@ -1,4 +1,5 @@
 import classnames from "classnames";
+// import fs from "fs-extra";
 import _first from "lodash/first";
 import _get from "lodash/get";
 import _isFunction from "lodash/isFunction";
@@ -24,18 +25,14 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     const {mode = "file", fileTypes, value, multiple, className, onChange, onBlur, ...rest} = props;
     const rootPath = "./";
     const fileInputRef = useRef<HTMLInputElement>(null);
-    // const [fieldValue, setFieldValue] = useState<string[]>([value]);
 
     const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        // setFieldValue([event.target.value]);
         if (_isFunction(onChange)) {
             onChange([event.target.value]);
         }
     };
     
     const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-        // setFieldValue([event.target.value]);
-
         if (_isFunction(onBlur)) {
             onBlur([event.target.value]);
         }
@@ -75,10 +72,30 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
         }
     };
 
-    const onSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // async function readDirectory(dirHandle: any, path: any) {
+    //     for await (const entry of dirHandle.values()) {
+    //         const fullPath = path ? `${path}/${entry.name}` : entry.name;
+            
+    //         if (entry.kind === "file") {
+    //             console.log("File:", fullPath);
+    //         } else if (entry.kind === "directory") {
+    //             console.log("Directory:", fullPath); // Logs even empty directories
+    //             await readDirectory(entry, fullPath); // Recursively read subdirectories
+    //         }
+    //     }
+    // }
+
+    const onSelectFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        // const dirHandle = await (window as any).showDirectoryPicker();
+        // await readDirectory(dirHandle, "");
+
         const result = mode === "directory" ? resolveDirectory(event.target.files) : resolveFile(event.target.files);
+        // const outPath = fs.realpathSync(result[0]);
 
         // setFieldValue(result);
+        // if (_isFunction(onChange)) {
+        //     onChange(fs.existsSync(outPath) ? [outPath] : result);
+        // }
         if (_isFunction(onChange)) {
             onChange(result);
         }

@@ -14,7 +14,7 @@ i18next.use(i18nextBackend).use(initReactI18next).init({
         loadPath: localePath + "/{{lng}}/{{ns}}.json",
         addPath: prependPath + "/src/resources/locales/{{lng}}/{{ns}}.missing.json",
     },
-    lng: "pl-PL",
+    lng: "en-GB",
     preload: ["en-GB", "de-DE", "pl-PL"],
     debug: false, // process.env.NODE_ENV === "development",
     saveMissing: false,

@@ -11,7 +11,9 @@ import {DataProvider} from "./react/contexts/DataContext";
 
 export const Bootstrap: React.FC = () => {
     momentDurationFormat(moment as any);
-    moment.updateLocale("en", { week: { dow: 1 } });
+    moment.updateLocale("en", {week: {dow: 1}});
+    i18n.changeLanguage(global.store.get("application").language);
+
     return (
         <AppContextProvider>
             <DataProvider>

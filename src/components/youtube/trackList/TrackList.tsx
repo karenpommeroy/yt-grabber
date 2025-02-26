@@ -6,9 +6,12 @@ import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
 import _map from "lodash/map";
 import _omit from "lodash/omit";
+import _toInteger from "lodash/toInteger";
+import _toString from "lodash/toString";
 import moment from "moment";
 import React, {useCallback, useState} from "react";
 import {useTranslation} from "react-i18next";
+import {NumberFormatBase} from "react-number-format";
 
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
@@ -16,8 +19,7 @@ import ContentCutIcon from "@mui/icons-material/ContentCut";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DownloadIcon from "@mui/icons-material/Download";
 import {
-    Avatar, Button, List, ListItem, ListItemAvatar, ListItemText, Popover, Stack, TextField,
-    Typography
+    Avatar, Button, List, ListItem, ListItemText, Popover, Slider, Stack, TextField, Typography
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
@@ -40,6 +42,16 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     const [cutOpen, setCutOpen] = useState<string>();
     const {t} = useTranslation();
 
+    const formatTime = (value: string) => {
+        const formatted = moment.duration(value, "seconds").format("HH:mm:ss", {trim: "left"});
+        
+        if (/^\d{2}$/.test(formatted)) {
+            return `00:${formatted}`;
+        }
+
+        return formatted;
+    };
+
     const onDownloadTrackClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         const trackId = event.currentTarget.getAttribute("data-id");
         setTrackStatus((prev) => _filter(prev, (item) => item.trackId !== trackId));
@@ -51,17 +63,18 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
 
     const onOpenTrackCut = (event: React.MouseEvent<HTMLButtonElement>) => {
         const trackId = event.currentTarget.getAttribute("data-id");
+        const track = _find(tracks, ["id", trackId]);
 
         setCutAnchorEl(event.currentTarget);
         setCutOpen(trackId);
-        setTrackCuts((prev) => ({...prev, [trackId]: prev[trackId] ?? { from: "0:00:00", to: "0:00:00"} }));
+        setTrackCuts((prev) => ({...prev, [trackId]: prev[trackId] ?? [0, track.duration]}));
     };
     
     const onDeleteTrackCut = (event: React.MouseEvent<HTMLButtonElement>) => {
         const trackId = event.currentTarget.getAttribute("data-id");
 
         setTrackCuts((prev) => _omit(prev, [trackId]));
-        onCloseTrackCut()
+        onCloseTrackCut();
     };
 
     const onCloseTrackCut = () => {
@@ -78,11 +91,23 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     };
 
     const onCutStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTrackCuts((prev) => ({...prev, [cutOpen]: {from: e.target.value, to: prev[cutOpen].to}}));
+        setTrackCuts((prev) => ({...prev, [cutOpen]: [_toInteger(e.target.value), prev[cutOpen][1]]}));
     };
 
     const onCutEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTrackCuts((prev) => ({...prev, [cutOpen]: {to: e.target.value, from: prev[cutOpen].from}}));
+        setTrackCuts((prev) => ({...prev, [cutOpen]: [prev[cutOpen][0],_toInteger(e.target.value)]}));
+    };
+
+    const onCutTimeChange = (event: Event, value: number | number[], activeThumb: number) => {
+        if (!Array.isArray(value)) {
+            return;
+        }
+    
+        if (activeThumb === 0) {
+            setTrackCuts((prev) => ({...prev, [cutOpen]: [value[0], prev[cutOpen][1]]}));
+        } else {
+            setTrackCuts((prev) => ({...prev, [cutOpen]: [prev[cutOpen][0], value[1]]}));
+        }
     };
 
     const getTrackStatusInfo = useCallback((track: TrackInfo): TrackStatusInfo => {
@@ -107,6 +132,8 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                         dense
                         key={item.id}
                         className={Styles.track}
+                        // disableGutters
+                        // sx={{backgroundColor: info?.completed ? "success.main" : info?.error ? "error.main" : "inherit"}}
                         secondaryAction={
                             <Stack direction="row" spacing={2}>
                                 {_includes(queue, item.id) &&
@@ -133,29 +160,41 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                 horizontal: "right",
                                             }}
                                         >
-                                            <Grid container padding={2} spacing={2} className={Styles.trackCutPopup}>
+                                            <Grid container padding={2} spacing={1} className={Styles.trackCutPopup}>
                                                 <Grid size={5}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label={t("from")}
-                                                        variant="outlined"
-                                                        value={_get(trackCuts, `${item.id}.from`, "0:00:00")}
+                                                    <NumberFormatBase
+                                                        value={_get(trackCuts, `${item.id}.0`, 0) + ""}
                                                         onChange={onCutStartTimeChange}
+                                                        format={formatTime}
+                                                        customInput={TextField}
+                                                        variant="outlined"
+                                                        label={t("from")}
                                                     />
                                                 </Grid>
                                                 <Grid size={5}>
-                                                    <TextField
-                                                        fullWidth
-                                                        label={t("to")}
-                                                        variant="outlined"
-                                                        value={_get(trackCuts, `${item.id}.to`, "0:00:00")}
+                                                    <NumberFormatBase
+                                                        value={_get(trackCuts, `${item.id}.1`, item.duration) + ""}
                                                         onChange={onCutEndTimeChange}
+                                                        format={formatTime}
+                                                        customInput={TextField}
+                                                        variant="outlined"
+                                                        label={t("to")}
                                                     />
                                                 </Grid>
                                                 <Grid size={2} display="flex">
                                                     <Button data-id={item.id} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
                                                         <DeleteForeverIcon />
                                                     </Button>
+                                                </Grid>
+                                                <Grid size={12} display="flex" paddingX={2}>
+                                                    <Slider
+                                                        value={trackCuts[item.id] ?? [0, item.duration]}
+                                                        onChange={onCutTimeChange}
+                                                        valueLabelDisplay="off"
+                                                        min={0}
+                                                        max={item.duration}
+                                                        step={1}
+                                                    />
                                                 </Grid>
                                             </Grid>
                                         </Popover>
@@ -169,19 +208,32 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                             </Stack>
                         }
                     >
-                        <ListItemAvatar color="success">
-                            <Avatar sx={{backgroundColor: info?.completed ? "success.main" : info?.error ? "error.main" : "primary.main"}}>{item.playlist_autonumber}</Avatar>
-                        </ListItemAvatar>
                         <Grid container direction="row" flexGrow={1}>
+                            {item.playlist_autonumber &&
+                                <Grid size={1} className={Styles.numberColumn}>
+                                    <Typography className={Styles.number} variant="body1" color="primary.main">{item.playlist_autonumber}</Typography>
+                                </Grid>
+                            }
+                            <Grid size={1} className={Styles.imageColumn}>
+                                <Avatar className={Styles.image} src={item.thumbnail}>{item.playlist_autonumber}</Avatar>
+                            </Grid>
                             <Grid size={4}>
                                 <ListItemText primary={item.title} secondary={moment.duration(item.duration, "seconds").format("m:ss")} />
                             </Grid>
-                            <Grid size={1} className={Styles.column}>
-                                {!_isEmpty(trackCuts[item.id]) && 
-                                    <ContentCutIcon color="action"/>
+                            <Grid size={2} className={Styles.column}>
+                                {!_isEmpty(trackCuts[item.id]) &&
+                                    <>
+                                        <ContentCutIcon className={Styles.cutIcon} color="action"/>
+                                        <Typography variant="caption">
+                                            {formatTime(_toString(trackCuts[item.id][0]))} - {formatTime(_toString(trackCuts[item.id][1]))}
+                                        </Typography>
+                                    </>
                                 }
                             </Grid>
                             {info && <>
+                                <Grid size={1} className={Styles.column}>
+                                    <Typography variant="body1">{formatFileSize(info.totalSize ?? item.filesize_approx)}</Typography>
+                                </Grid>
                                 <Grid size={1} className={Styles.column}>
                                     {info.completed ?
                                         <CheckIcon className={Styles.completedIcon} color="success" />
@@ -190,10 +242,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                             : <Progress color="primary" value={info.percent} />
                                     }
                                 </Grid>
-                                <Grid size={1} className={Styles.column}>
-                                    <Typography variant="body1">{formatFileSize(info.totalSize ?? item.filesize_approx)}</Typography>
-                                </Grid>
-                                <Grid size={5} className={Styles.column}>
+                                <Grid size={2} className={Styles.column}>
                                     <Typography variant="body1">{info.status}</Typography>
                                 </Grid>
                             </>

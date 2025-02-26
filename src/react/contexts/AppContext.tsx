@@ -1,7 +1,7 @@
 import React, {createContext, FC, ReactNode, useReducer} from "react";
 
 import {ColorMode} from "../../common/Theme";
-import {MediaFormat} from "../../enums/MediaFormat";
+import {MediaFormat} from "../../enums/Media";
 import {actions} from "../actions/AppActions";
 import reducer from "../reducers/AppReducer";
 import {createDefaultState, IAppState} from "../states/AppState";

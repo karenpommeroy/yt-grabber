@@ -1,16 +1,16 @@
 import React, {createContext, useContext, useState} from "react";
 
-import {AlbumInfo, TrackCut, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
+import {AlbumInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
 
 export type DataState = {
     album?: AlbumInfo; 
     tracks: TrackInfo[]; 
     trackStatus: TrackStatusInfo[]; 
-    trackCuts: {[key: string]: TrackCut};
+    trackCuts: {[key: string]: number[]};
     setAlbum: React.Dispatch<React.SetStateAction<AlbumInfo>>;
     setTracks: React.Dispatch<React.SetStateAction<TrackInfo[]>>;
     setTrackStatus: React.Dispatch<React.SetStateAction<TrackStatusInfo[]>>;
-    setTrackCuts: React.Dispatch<React.SetStateAction<{[key: string]: TrackCut}>>;
+    setTrackCuts: React.Dispatch<React.SetStateAction<{[key: string]: number[]}>>;
     clear: () => void;
 }
 
@@ -20,7 +20,7 @@ export function DataProvider(props: any) {
     const [album, setAlbum] = useState<AlbumInfo | undefined>();
     const [tracks, setTracks] = useState<TrackInfo[]>([]);
     const [trackStatus, setTrackStatus] = useState<TrackStatusInfo[]>([]);
-    const [trackCuts, setTrackCuts] = useState<{[key: string]: TrackCut}>({});
+    const [trackCuts, setTrackCuts] = useState<{[key: string]: number[]}>({});
     
     const clear = () => {
         setAlbum(undefined);

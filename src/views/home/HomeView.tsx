@@ -9,7 +9,6 @@ import _isArray from "lodash/isArray";
 import _isEmpty from "lodash/isEmpty";
 import _isNaN from "lodash/isNaN";
 import _isNil from "lodash/isNil";
-import _last from "lodash/last";
 import _map from "lodash/map";
 import _min from "lodash/min";
 import _pull from "lodash/pull";
@@ -21,9 +20,6 @@ import _sumBy from "lodash/sumBy";
 import _template from "lodash/template";
 import _times from "lodash/times";
 import _toString from "lodash/toString";
-import _uniq from "lodash/uniq";
-import _uniqBy from "lodash/uniqBy";
-import _values from "lodash/values";
 import moment from "moment";
 import path from "path";
 import React, {useCallback, useEffect, useRef, useState} from "react";
@@ -36,12 +32,11 @@ import Grid from "@mui/material/Grid2";
 
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
 import {AlbumInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
-import NumberField from "../../components/numberField/NumberField";
 import FormatSelector, {Format} from "../../components/youtube/formatSelector/FormatSelector";
 import InputPanel from "../../components/youtube/inputPanel/InputPanel";
 import MediaInfoPanel from "../../components/youtube/mediaInfoPanel/MediaInfoPanel";
 import TrackList from "../../components/youtube/trackList/TrackList";
-import {MediaFormat} from "../../enums/MediaFormat";
+import {MediaFormat} from "../../enums/Media";
 import {useAppContext} from "../../react/contexts/AppContext";
 import {useDataState} from "../../react/contexts/DataContext";
 // import CompleteTracksMock from "../../tests/CompleteTracksMock";
@@ -57,33 +52,27 @@ const abortControllersRef: {[key: string]: AbortController} = {};
 export const HomeView: React.FC = () => {
     const [appOptions, setAppOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const {t} = useTranslation();
-    const {album, tracks, trackStatus, trackCuts, setAlbum, setTracks, setTrackStatus, setTrackCuts, clear} = useDataState();
+    const {album, tracks, trackStatus, trackCuts, setAlbum, setTracks, setTrackStatus, clear} = useDataState();
     const {state, actions} = useAppContext();
     const [error, setError] = useState(false);
-    const [format, setFormat] = useState<Format>();
     const [downloadStart, setDownloadStart] = useState(false);
     const trackStatusRef = useRef<TrackStatusInfo[]>(trackStatus);
     const queueRef = useRef<string[]>(state.queue);
-    const formatRef = useRef<Format>(null);
     const [debouncedAppOptions] = useDebounceValue(appOptions, 500, {leading: true});
-
+    
     const onFormatSelected = (value: Format) => {
-        setFormat((prev) => Object.assign((prev || {}), value));
+        setAppOptions((prev) => ({...prev, format: value}));
     };
-
-    useEffect(() => {
-        formatRef.current = format;
-    }, [format]);
 
     useEffect(() => {
         global.store.set("application", debouncedAppOptions);
     }, [debouncedAppOptions]);
 
     useEffect(() => {
-        if (!downloadStart || !formatRef.current) return;
+        if (!downloadStart || !appOptions.format) return;
   
         downloadAlbum();
-    }, [formatRef.current, format, downloadStart]);
+    }, [appOptions.format, downloadStart]);
 
     useEffect(() => {
         trackStatusRef.current = trackStatus;
@@ -160,6 +149,10 @@ export const HomeView: React.FC = () => {
         return ((x - inRange[0]) * (outRange[1] - outRange[0])) / (inRange[1] - inRange[0]) + outRange[0];
     };
 
+    const isAlbumTrack = (track: TrackInfo) => {
+        return !!track.playlist;
+    };
+
     const setProgressPercentage = useCallback((trackId: string, value?: number) => {
         setTrackStatus((prev) => _map(prev, (item) => {
             if (item.trackId === trackId) {
@@ -221,6 +214,14 @@ export const HomeView: React.FC = () => {
         const aborted = controller?.signal.aborted;
         const nextTrackToDownload = _find(queueRef.current, (item) => !_find(trackStatusRef.current, (status) => status.trackId === item));
 
+        const track = _find(tracks, ["id", result.trackId]);
+        const outputPath = getOutputFilePath(track, album);
+        const totalSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
+        
+        if (result.error && _includes(result.error, "[generic] '' is not a valid URL")) {
+            result.error = undefined;
+        }
+
         setTrackStatus((prev) => _map(prev, (item) => {
             if (item.trackId === result.trackId) {
                 return {
@@ -229,6 +230,7 @@ export const HomeView: React.FC = () => {
                     error: !!result.error,
                     completed: !result.error,
                     percent: 100,
+                    totalSize,
                 };
             } else {
                 return item;
@@ -241,6 +243,7 @@ export const HomeView: React.FC = () => {
             queueRef.current = [];
             actions.setQueue([]);
             setDownloadStart(false);
+
             return;
         }
         if (aborted || !nextTrackToDownload) {
@@ -248,12 +251,13 @@ export const HomeView: React.FC = () => {
         } else {
             downloadTrack(nextTrackToDownload);
         }
-    }, [tracks, trackStatus, trackStatusRef.current, queueRef.current]);
+    }, [tracks, trackStatus, trackStatusRef.current, queueRef.current, appOptions]);
 
     const downloadAlbum = () => {
         setTrackStatus([]);
-        setDownloadStart(false)
+        setDownloadStart(false);
         queueRef.current = _map(tracks, "id");
+
         _times(_min([appOptions.concurrency, _size(tracks)]), (num) => {
             const id = tracks[num].id;
             
@@ -268,10 +272,8 @@ export const HomeView: React.FC = () => {
         const failedTracks = _filter(trackStatusRef.current, "error");
 
         queueRef.current = _map(failedTracks, "trackId");
-        for (const failed of failedTracks) {
-            setTrackStatus((prev) => _filter(prev, (p) => p.trackId !== failed.trackId));
-            trackStatusRef.current = _filter(trackStatusRef.current, (p) => p.trackId !== failed.trackId);
-        }
+        setTrackStatus((prev) => _filter(prev, (p) => !p.error));
+        trackStatusRef.current = _filter(trackStatusRef.current, (p) => !p.error);
 
         for (const failed of failedTracks) {
             downloadTrack(failed.trackId);
@@ -283,6 +285,7 @@ export const HomeView: React.FC = () => {
         onCancel();
         actions.setQueue([]);
         setDownloadStart(false);
+        setAppOptions((prev) => ({...prev, format: {}}));
     };
     
     const handleClear = () => {
@@ -291,27 +294,29 @@ export const HomeView: React.FC = () => {
     };
 
     const getYtDplArguments = (track: TrackInfo, album: AlbumInfo) => {
-        if (formatRef.current.type === MediaFormat.Audio) {
+        if (appOptions.format.type === MediaFormat.Audio) {
             return [
                 "--extract-audio",
-                "--audio-format", formatRef.current.extension,
-                formatRef.current.extension !== "wav" ? "--embed-thumbnail" : "", // wav does not support thumbnail embedding
-                "--audio-quality", _toString(formatRef.current.audioQuality),
+                "--audio-format", appOptions.format.extension,
+                appOptions.format.extension !== "wav" ? "--embed-thumbnail" : "", // wav does not support thumbnail embedding
+                "--audio-quality", _toString(appOptions.format.audioQuality),
                 ...getCutArgs(track),
                 "--postprocessor-args", getPostProcessorArgs(track, album),
-                appOptions.overwrite ? "--force-overwrites" : "",
+                appOptions.alwaysOverwrite ? "--force-alwaysOverwrites" : "",
                 "--output", getOutput(track, album)
             ];
         }
 
-        if (formatRef.current.type === MediaFormat.Video) {
-            const selected = formatRef.current.video;
-
+        if (appOptions.format.type === MediaFormat.Video) {
+            const selected = appOptions.format.videoQuality;
+            const [, height] = _map(selected.match(/\d+/g), Number);
+            const ext = appOptions.format.extension === "mkv" ? "webm" : appOptions.format.extension;
+            
             return [
-                "-f", `bv*[height<=${selected.height}][ext=${formatRef.current.extension}]+ba[ext=m4a]/b[height<=${selected.height}][ext=${formatRef.current.extension}] / bv*+ba/b`,
+                "-f", `bv*[height<=${height}][ext=${ext}]+ba[ext=m4a]/b[height<=${height}][ext=${ext}] / bv*+ba/b`,
                 ...getCutArgs(track),
                 "--embed-thumbnail",
-                appOptions.overwrite ? "--force-overwrites" : "",
+                appOptions.alwaysOverwrite ? "--force-alwaysOverwrites" : "",
                 "--postprocessor-args", getPostProcessorArgs(track, album),
                 "--output", getOutput(track, album)
             ];
@@ -323,18 +328,18 @@ export const HomeView: React.FC = () => {
         if (_isEmpty(cuts)) {
             return "";
         } else {
-            const start = moment.duration(cuts.from);
-            const end = moment.duration(cuts.to);
+            const start = moment.duration(cuts[0], "seconds");
+            const end = moment.duration(cuts[1], "seconds");
             const length = end.subtract(start);
 
             const t = length.format("H:m:s");
            
             return `-ss 0:0:0 -to ${t} `;
         }
-    }
+    };
     
     const getPostProcessorArgs = (track: TrackInfo, album: AlbumInfo) => {
-        if (track.playlist) {
+        if (isAlbumTrack(track)) {
             const title = track.title.replace(/"/g, "\\\"");
             const artist = album.artist.replace(/"/g, "\\\"");
             const albumTitle = album.title.replace(/"/g, "\\\"");
@@ -346,14 +351,23 @@ export const HomeView: React.FC = () => {
 
     const getCutArgs = (track: TrackInfo): string[] => {
         const cuts = trackCuts[track.id];
+        
         if (_isEmpty(cuts)) {
             return [];
         } else {
-            return ["--download-sections", `*${cuts.from}-${cuts.to}`, "-S", "proto:https"]
+            return ["--download-sections", `*${moment.duration(cuts[0], "seconds").format("HH:mm:ss")}-${moment.duration(cuts[1], "seconds").format("HH:mm:ss")}`, "-S", "proto:https"];
         }
     };
 
     const getOutput = (track: TrackInfo, album: AlbumInfo) => {
+        return getOutputFile(track, album) + ".%(ext)s";
+    };
+
+    const getOutputFilePath = (track: TrackInfo, album: AlbumInfo) => {
+        return getOutputFile(track, album) + "." + appOptions.format.extension;
+    };
+
+    const getOutputFile = (track: TrackInfo, album: AlbumInfo) => {
         const interpolate = /{{([\s\S]+?)}}/g;
         const data = {
             albumTitle: album.title,
@@ -363,54 +377,54 @@ export const HomeView: React.FC = () => {
             releaseYear: album.releaseYear
         };
 
-        if (formatRef.current.type === MediaFormat.Audio) {
-            if (!track.playlist) {
+        if (appOptions.format.type === MediaFormat.Audio) {
+            if (!isAlbumTrack(track)) {
                 try {
                     const compiled = _template(appOptions.trackOutputTemplate, {interpolate});
                     
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 } catch {
                     const defaultTrackOutputTemplate = _get(StoreSchema.application, "properties.trackOutputTemplate.default");
                     const compiled = _template(defaultTrackOutputTemplate, {interpolate});
 
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 }
             } else {
                 try {
                     const compiled = _template(appOptions.albumOutputTemplate, {interpolate});
                     
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 } catch {
                     const defaultAlbumOutputTemplate = _get(StoreSchema.application, "properties.albumOutputTemplate.default");
                     const compiled = _template(defaultAlbumOutputTemplate, {interpolate});
 
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 }
             }
         }
 
-        if (formatRef.current.type === MediaFormat.Video) {
-            if (!track.playlist) {
+        if (appOptions.format.type === MediaFormat.Video) {
+            if (!isAlbumTrack(track)) {
                 try {
                     const compiled = _template(appOptions.videoOutputTemplate, {interpolate});
 
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 } catch {
                     const defaultVideoOutputTemplate = _get(StoreSchema.application, "properties.videoOutputTemplate.default");
                     const compiled = _template(defaultVideoOutputTemplate, {interpolate});
                 
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 }
             } else {
                 try {
                     const compiled = _template(appOptions.playlistOutputTemplate, {interpolate});
 
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 } catch {
                     const defaultPlaylistOutputTemplate = _get(StoreSchema.application, "properties.playlistOutputTemplate.default");
                     const compiled = _template(defaultPlaylistOutputTemplate, {interpolate});
                 
-                    return `./${appOptions.outputDirectory}/${compiled(data)}`;
+                    return `${appOptions.outputDirectory}/${compiled(data)}`;
                 }
             }
         }
@@ -434,30 +448,11 @@ export const HomeView: React.FC = () => {
         abortControllersRef[trackId] = controller;
 
         const proc = ytDlpWrap.exec([track.original_url, ...getYtDplArguments(track, album)], {shell: false, windowsHide: false, detached: false}, controller.signal)
-            .on("progress", (progress) => updateProgress(track.id, progress, formatRef.current.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
+            .on("progress", (progress) => updateProgress(track.id, progress, appOptions.format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
             .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
             .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message}))
             .on("close", () => {
                 onProcessEnd({trackId: track.id});
-                
-                const outputPath = getOutput(track, album) + "." + formatRef.current.extension;
-                
-                if (!fs.existsSync(outputPath)) {
-                    return;
-                };
-
-                const stats = fs.statSync(outputPath);
-                
-                
-                setTrackStatus((prev) => _map(prev, (item) => {
-                    if (item.trackId === track.id) {
-                        return {...item, totalSize: stats.size };
-                    } else {
-                        return item;
-                    }
-                }));
-                
-                console.log(stats.size);
             });
     
         console.log(proc.ytDlpProcess.pid);
@@ -468,7 +463,7 @@ export const HomeView: React.FC = () => {
 
         return {
             artist: _get(item, "creators.0", _get(item, "artist", item.channel)),
-            title: _get(item, "album", item.title),
+            title: isAlbumTrack(item) ? _get(item, "album", _get(item, "playlist_title", _get(item, "playlist"))) : item.title,
             releaseYear: _get(item, "release_year") ?? (new Date(item.timestamp * 1000)).getFullYear(),
             tracksNumber: _get(item, "playlist_count", 1),
             duration: _sumBy(items, "duration"),
@@ -491,8 +486,7 @@ export const HomeView: React.FC = () => {
         <Box className={Styles.home}>
             <div className={Styles.header}>
                 <InputPanel value={appOptions.url} onChange={handleUrlChange} loading={state.loading || !_isEmpty(queueRef.current)} onDownload={download} onDownloadFailed={downloadFailed} onLoadInfo={loadInfo} onClear={handleClear} />
-                {/* {appOptions.format !== "custom" && <Typography className={Styles.formatInfo} component="div" variant="caption" gutterBottom>{appOptions.format === "best" ? t("usingBestAvailableFormat") : t(t("usingBestAudioFormat"))}</Typography>} */}
-                {!_isEmpty(tracks) && <FormatSelector onSelected={onFormatSelected} />}
+                {!_isEmpty(tracks) && <FormatSelector value={appOptions.format} onSelected={onFormatSelected} />}
             </div>
             <Grid className={Styles.content} container spacing={2} padding={2}>
                 {state.loading && <CircularProgress color="primary" thickness={5} size={80} />}
