@@ -19,6 +19,7 @@ import ContentCutIcon from "@mui/icons-material/ContentCut";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DownloadIcon from "@mui/icons-material/Download";
 import LaunchIcon from "@mui/icons-material/Launch";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 import {
     Avatar, Button, Fade, List, ListItem, ListItemText, Popover, Slider, Stack, TextField, Tooltip,
     Typography
@@ -35,11 +36,12 @@ export type TrackListProps = {
     onDownloadTrack?: (id: string) => void;
     onCancelTrack?: (id: string) => void;
     onOpenFile?: (id: string) => void;
+    onOpenUrl?: (url: string) => void;
     queue: string[];
 };
 
 export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
-    const {onDownloadTrack, onCancelTrack, onOpenFile, queue} = props;
+    const {onDownloadTrack, onCancelTrack, onOpenFile, onOpenUrl, queue} = props;
     const {tracks, trackStatus, trackCuts, setTrackStatus, setTrackCuts} = useDataState();
     const [cutAnchorEl, setCutAnchorEl] = React.useState<HTMLButtonElement | null>(null);
     const [cutOpen, setCutOpen] = useState<string>();
@@ -81,6 +83,15 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
 
         if (_isFunction(onDownloadTrack)) {
             onDownloadTrack(trackId);
+        }
+    };
+    
+    const onOpenInBrowser = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const trackId = event.currentTarget.getAttribute("data-id");
+        const track = _find(tracks, ["id", trackId]);
+
+        if (_isFunction(onOpenUrl)) {
+            onOpenUrl(track.original_url);
         }
     };
 
@@ -167,13 +178,6 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                         className={Styles.track}
                         secondaryAction={
                             <Stack direction="row" spacing={1.5} className={Styles.actions}>
-                                {_includes(queue, item.id) &&
-                                    <Tooltip title={t("cancel")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
-                                            <CloseIcon />
-                                        </Button>
-                                    </Tooltip>
-                                }
                                 {info?.completed &&
                                     <Tooltip title={t("findFileInSystem")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                         <Button className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onFindFileInSystem}>
@@ -249,11 +253,22 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                         </Popover>
                                     </div>
                                 }
-                                
+                                <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                    <Button className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenInBrowser}>
+                                        <YouTubeIcon />
+                                    </Button>
+                                </Tooltip>
                                 {!_includes(queue, item.id) &&
                                     <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                         <Button className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
                                             <DownloadIcon />
+                                        </Button>
+                                    </Tooltip>
+                                }
+                                {_includes(queue, item.id) &&
+                                    <Tooltip title={t("cancel")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                        <Button size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
+                                            <CloseIcon />
                                         </Button>
                                     </Tooltip>
                                 }

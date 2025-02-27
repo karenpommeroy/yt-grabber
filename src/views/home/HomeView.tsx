@@ -31,6 +31,7 @@ import YTDlpWrap, {Progress as YtDlpProgress} from "yt-dlp-wrap";
 import {Alert, Box, CircularProgress} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 
+import {escapePathString, mapRange} from "../../common/Helpers";
 import {MediaFormat} from "../../common/Media";
 import {OpenSystemPathParams} from "../../common/Messaging";
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
@@ -67,9 +68,11 @@ export const HomeView: React.FC = () => {
 
     useEffect(() => {
         ipcRenderer.on("open-system-path-completed", onOpenSystemDirectoryCompleted);
+        ipcRenderer.on("open-url-in-browser-completed", onOpenUrlInBrowserCompleted);
 
         return () => {
             ipcRenderer.off("open-system-path-completed", onOpenSystemDirectoryCompleted);
+            ipcRenderer.off("open-url-in-browser-completed", onOpenUrlInBrowserCompleted);
         };
     }, []);
 
@@ -109,6 +112,12 @@ export const HomeView: React.FC = () => {
         
         return parsed;
     };
+    
+    const onOpenUrlInBrowserCompleted = (event: IpcRendererEvent, data: string) => {
+        const parsed: OpenSystemPathParams = JSON.parse(data);
+        
+        return parsed;
+    };
 
     const handleUrlChange = (url: string) => {       
         setAppOptions((prev) => ({...prev, url}));
@@ -124,6 +133,10 @@ export const HomeView: React.FC = () => {
         const found = _find(trackStatusRef.current, "completed");
 
         ipcRenderer.send("open-system-path", {dirpath: path.dirname(found.path)});
+    };
+
+    const openInBrowser = (url: string) => {
+        ipcRenderer.send("open-url-in-browser", {url});
     };
 
     const onCancel = () => {
@@ -171,10 +184,6 @@ export const HomeView: React.FC = () => {
             actions.setLoading(false);
         }
     }, [setTracks, setAlbum]);
-
-    const mapRange = (x: number, inRange: [number, number], outRange: number[]) => {
-        return ((x - inRange[0]) * (outRange[1] - outRange[0])) / (inRange[1] - inRange[0]) + outRange[0];
-    };
 
     const isAlbumTrack = (track: TrackInfo) => {
         return !!track.playlist;
@@ -394,12 +403,14 @@ export const HomeView: React.FC = () => {
         return getOutputFile(track, album) + "." + appOptions.format.extension;
     };
 
+    
+
     const getOutputFile = (track: TrackInfo, album: AlbumInfo) => {
         const interpolate = /{{([\s\S]+?)}}/g;
         const data = {
-            albumTitle: album.title,
-            artist: album.artist,
-            trackTitle: track.title,
+            albumTitle: escapePathString(album.title),
+            artist: escapePathString(album.artist),
+            trackTitle: escapePathString(track.title),
             trackNo: track.playlist_autonumber,
             releaseYear: album.releaseYear
         };
@@ -479,9 +490,7 @@ export const HomeView: React.FC = () => {
             .on("progress", (progress) => updateProgress(track.id, progress, appOptions.format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
             .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
             .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message}))
-            .on("close", () => {
-                onProcessEnd({trackId: track.id});
-            });
+            .on("close", () => onProcessEnd({trackId: track.id}));
     
         console.log(proc.ytDlpProcess.pid);
     };
@@ -522,7 +531,7 @@ export const HomeView: React.FC = () => {
                     <>
                         {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}
                         <MediaInfoPanel loading={!_isEmpty(queueRef.current)} progress={getTotalProgress()} onCancel={onCancel} onOpenOutput={onOpenDirectory} />
-                        <TrackList queue={queueRef.current} onDownloadTrack={downloadTrack} onCancelTrack={cancelTrack} onOpenFile={onOpenFile}/>
+                        <TrackList queue={queueRef.current} onDownloadTrack={downloadTrack} onOpenUrl={openInBrowser} onCancelTrack={cancelTrack} onOpenFile={onOpenFile}/>
                     </>
                 }
             </Grid>

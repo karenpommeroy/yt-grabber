@@ -5,7 +5,9 @@ import installExtension, {REACT_DEVELOPER_TOOLS} from "electron-devtools-install
 import Store from "electron-store";
 import path from "path";
 
-import {OpenSelectPathDialogParams, OpenSystemPathParams} from "./common/Messaging";
+import {
+    OpenSelectPathDialogParams, OpenSystemPathParams, OpenUrlInBrowserParams
+} from "./common/Messaging";
 import i18n from "./i18next";
 
 let mainWindow: BrowserWindow | null;
@@ -104,5 +106,16 @@ ipcMain.on(
         } catch (error) {
             console.error(error);
         }
+    },
+);
+
+ipcMain.on(
+    "open-url-in-browser",
+    async (event: IpcMainEvent, params: OpenUrlInBrowserParams) => {
+        if (params.url) {
+            shell.openExternal(params.url);
+        }
+        
+        mainWindow.webContents.send("open-url-in-browser-completed", JSON.stringify(params));
     },
 );

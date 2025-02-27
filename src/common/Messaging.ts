@@ -12,3 +12,7 @@ export type OpenSelectPathDialogParams = {
 export type OpenSelectPathDialogCompletedParams = {
     paths?: string;
 };
+
+export type OpenUrlInBrowserParams = {
+    url?: string;
+};
