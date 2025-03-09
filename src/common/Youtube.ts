@@ -28,6 +28,7 @@ export type AlbumInfo = {
     tracksNumber: number;
     duration: number;
     thumbnail: string;
+    url: string;
 };
 
 export type Thumbnail = {

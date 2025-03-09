@@ -91,7 +91,7 @@ export const HomeView: React.FC = () => {
     }, [trackStatus]);
 
     const download = async (url: string) => {
-        if (!album) {
+        if (!album || album.url !== appOptions.url) {
             const result = await loadInfo(url);
 
             if (_some(result, v => _isNil(v))) {
@@ -161,7 +161,10 @@ export const HomeView: React.FC = () => {
     const resolveData = (url: string) => {
         const promise = getResolveDataPromise(url);
         
-        promise.finally(() => _pull(state.queue, "resolve-data"));
+        promise.finally(() => {
+            _pull(queueRef.current, "resolve-data");
+            _pull(state.queue, "resolve-data");
+        });
         queueRef.current.push("resolve-data");
         
         return promise;
@@ -183,7 +186,7 @@ export const HomeView: React.FC = () => {
         } catch {
             actions.setLoading(false);
         }
-    }, [setTracks, setAlbum]);
+    }, [setTracks, setAlbum, appOptions]);
 
     const isAlbumTrack = (track: TrackInfo) => {
         return !!track.playlist;
@@ -238,7 +241,12 @@ export const HomeView: React.FC = () => {
     }, [trackStatus, setTrackStatus]);
 
     const isQueueCompleted = () => {
-        return _every(queueRef.current, (item) => {
+        const queueLength = queueRef.current.length;
+        const completed = _filter(trackStatusRef.current, (s) => s.completed || s.error);
+
+        
+
+        return queueLength === completed.length || _every(queueRef.current, (item) => {
             const status = _find(trackStatusRef.current, ["trackId", item]);
             
             return (!status && !abortControllersRef[item]) || (status && (status.completed || status.error || !abortControllersRef[status.trackId]));
@@ -249,7 +257,6 @@ export const HomeView: React.FC = () => {
         const controller = abortControllersRef[result.trackId];
         const aborted = controller?.signal.aborted;
         const nextTrackToDownload = _find(queueRef.current, (item) => !_find(trackStatusRef.current, (status) => status.trackId === item));
-
         const track = _find(tracks, ["id", result.trackId]);
         const outputPath = getOutputFilePath(track, album);
         const totalSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
@@ -263,7 +270,7 @@ export const HomeView: React.FC = () => {
                 return {
                     ...item,
                     status: aborted ? t("cancelled") : result.error ?? t("done"),
-                    error: !!result.error,
+                    error: !!result.error || aborted,
                     completed: !result.error,
                     percent: 100,
                     totalSize,
@@ -272,25 +279,36 @@ export const HomeView: React.FC = () => {
                 return item;
             }
         }));
+        
+        const trackStatus = _find(trackStatusRef.current, ["trackId", result.trackId]);
+        trackStatus.completed = !result.error;
+        trackStatus.percent = 100;
+        trackStatus.totalSize = totalSize;
+        trackStatus.status = aborted ? t("cancelled") : result.error ?? t("done");
+        trackStatus.error = !!result.error || aborted;
 
         delete abortControllersRef[result.trackId];
-
+        
         if (isQueueCompleted()) {
             queueRef.current = [];
             actions.setQueue([]);
             setDownloadStart(false);
+            // delete abortControllersRef[result.trackId];
 
             return;
         }
+
+
         if (aborted || !nextTrackToDownload) {
             setDownloadStart(false);
         } else {
             downloadTrack(nextTrackToDownload);
         }
-    }, [tracks, trackStatus, trackStatusRef.current, queueRef.current, appOptions]);
+    }, [album, tracks, trackStatus, trackStatusRef.current, queueRef.current, appOptions]);
 
     const downloadAlbum = () => {
         setTrackStatus([]);
+        trackStatusRef.current = [];
         setDownloadStart(false);
         queueRef.current = _map(tracks, "id");
 
@@ -338,7 +356,7 @@ export const HomeView: React.FC = () => {
                 "--audio-quality", _toString(appOptions.format.audioQuality),
                 ...getCutArgs(track),
                 "--postprocessor-args", getPostProcessorArgs(track, album),
-                appOptions.alwaysOverwrite ? "--force-alwaysOverwrites" : "",
+                appOptions.alwaysOverwrite ? "--force-overwrite" : "",
                 "--output", getOutput(track, album)
             ];
         }
@@ -352,7 +370,7 @@ export const HomeView: React.FC = () => {
                 "-f", `bv*[height<=${height}][ext=${ext}]+ba[ext=m4a]/b[height<=${height}][ext=${ext}] / bv*+ba/b`,
                 ...getCutArgs(track),
                 "--embed-thumbnail",
-                appOptions.alwaysOverwrite ? "--force-alwaysOverwrites" : "",
+                appOptions.alwaysOverwrite ? "--force-overwrite" : "",
                 "--postprocessor-args", getPostProcessorArgs(track, album),
                 "--output", getOutput(track, album)
             ];
@@ -471,28 +489,47 @@ export const HomeView: React.FC = () => {
     const downloadTrack = (trackId: string) => {
         const track = _find(tracks, ["id", trackId]);
         const controller = new AbortController();
-        const newTrackProgressInfo = {
+        const trackPath = path.resolve(getOutputFilePath(track, album));
+        const newTrackProgressInfo: TrackStatusInfo = {
             trackId: track.id,
             percent: 0,
             totalSize: track.filesize_approx,
-            path: path.resolve(getOutputFilePath(track, album)),
+            path: trackPath,
         };
 
         setTrackStatus((prev) => [...prev, newTrackProgressInfo]);
-
+        trackStatusRef.current = [...trackStatusRef.current, newTrackProgressInfo];
+        
         if (!_includes(queueRef.current, trackId)) {
             queueRef.current.push(trackId);
         }
-        
-        abortControllersRef[trackId] = controller;
 
-        const proc = ytDlpWrap.exec([track.original_url, ...getYtDplArguments(track, album)], {shell: false, windowsHide: false, detached: false}, controller.signal)
-            .on("progress", (progress) => updateProgress(track.id, progress, appOptions.format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
-            .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
-            .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message}))
-            .on("close", () => onProcessEnd({trackId: track.id}));
+        abortControllersRef[trackId] = controller;
+        const verifyDownloadStatusPromise: Promise<void> = new Promise<boolean>((resolve, reject) => {
+            if (!appOptions.alwaysOverwrite && fs.existsSync(trackPath)) {
+                resolve(true);
+            }
+
+            resolve(false);
+        }).then((result) => {
+            if (result) {
+                onProcessEnd({trackId});
+            } else {
+                const proc = ytDlpWrap.exec([track.original_url, ...getYtDplArguments(track, album)], {shell: false, windowsHide: false, detached: false}, controller.signal)
+                    .on("progress", (progress) => updateProgress(track.id, progress, appOptions.format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
+                    .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
+                    .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message}))
+                    .on("close", () => onProcessEnd({trackId: track.id}));
     
-        console.log(proc.ytDlpProcess.pid);
+                console.log(proc.ytDlpProcess.pid);
+            }
+        });
+
+        // const res = await verifyDownloadStatusPromise;
+
+        // if (res) {
+        //     return;
+        // }        
     };
 
     const getAlbumInfo = (items: TrackInfo[]): AlbumInfo => {
@@ -505,6 +542,7 @@ export const HomeView: React.FC = () => {
             tracksNumber: _get(item, "playlist_count", 1),
             duration: _sumBy(items, "duration"),
             thumbnail: _get(item, "thumbnail", _get(_find(item.thumbnails, ["id", "2"]), "url")),
+            url: appOptions.url,
         };
     };
 
