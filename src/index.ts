@@ -2,6 +2,7 @@ import {
     app, BrowserWindow, dialog, ipcMain, IpcMainEvent, OpenDialogOptions, shell
 } from "electron";
 import installExtension, {REACT_DEVELOPER_TOOLS} from "electron-devtools-installer";
+import electronReload from "electron-reload";
 import Store from "electron-store";
 import path from "path";
 
@@ -10,6 +11,11 @@ import {
 } from "./common/Messaging";
 import i18n from "./i18next";
 
+electronReload(__dirname, {
+    electron: path.join(__dirname, "..", 'node_modules', "electron", 'dist', "electron.exe"),
+    interval: 2000,
+});
+  
 let mainWindow: BrowserWindow | null;
 
 process.traceProcessWarnings = true;
@@ -88,7 +94,6 @@ ipcMain.on(
         }, 500);
     },
 );
-
 
 ipcMain.on(
     "open-select-path-dialog",

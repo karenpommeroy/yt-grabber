@@ -11,7 +11,7 @@
     "start": "concurrently \"cross-env NODE_ENV=development yarn run watch\" \"yarn run electron\"",
     "build": "yarn clean && \"cross-env NODE_ENV=development webpack\" --config webpack.config.ts",
     "build:prod": "yarn clean && \"cross-env NODE_ENV=production webpack\" --config webpack.config.ts",
-    "electron": "wait-on dist/index.js && cross-env NODE_ENV=development ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
+    "electron": "wait-on dist/index.js && ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
     "watch": "webpack --watch --config webpack.config.ts",
     "pack": "yarn build:prod && electron-builder --dir",
     "dist": "yarn build:prod && electron-builder"
@@ -44,6 +44,7 @@
     "@mui/material": "^6.4.2",
     "classnames": "^2.5.1",
     "electron-devtools-installer": "^4.0.0",
+    "electron-reload": "^2.0.0-alpha.1",
     "electron-store": "^8.2.0",
     "fs-extra": "^11.3.0",
     "i18next": "^24.2.2",

@@ -2809,7 +2809,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chokidar@npm:^3.5.1, chokidar@npm:^3.6.0":
+"chokidar@npm:^3.5.1, chokidar@npm:^3.5.2, chokidar@npm:^3.6.0":
   version: 3.6.0
   resolution: "chokidar@npm:3.6.0"
   dependencies:
@@ -3871,6 +3871,15 @@ __metadata:
     lazy-val: "npm:^1.0.5"
     mime: "npm:^2.5.2"
   checksum: 10/75a3e6bcb796423456e01fb79d7c39257ae9a9ea9820ddbc64321ac888867da33198693af87366137d6c13b66a4273e89d15c268184bbddc24db6585d16067c1
+  languageName: node
+  linkType: hard
+
+"electron-reload@npm:^2.0.0-alpha.1":
+  version: 2.0.0-alpha.1
+  resolution: "electron-reload@npm:2.0.0-alpha.1"
+  dependencies:
+    chokidar: "npm:^3.5.2"
+  checksum: 10/6382a2ae9d128415a408d3eb02676210d1524ef289d35226475b5cc750c62dce05364b1948b231a9ae90c9fddee3089f9c4d2466f7a67e022900c957fedd7cf2
   languageName: node
   linkType: hard
 
@@ -10830,6 +10839,7 @@ __metadata:
     electron: "npm:^34.0.2"
     electron-builder: "npm:^25.1.8"
     electron-devtools-installer: "npm:^4.0.0"
+    electron-reload: "npm:^2.0.0-alpha.1"
     electron-store: "npm:^8.2.0"
     eslint: "npm:^9.19.0"
     eslint-config-prettier: "npm:^10.0.1"
