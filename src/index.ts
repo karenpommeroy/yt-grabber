@@ -15,7 +15,15 @@ electronReload(__dirname, {
     electron: path.join(__dirname, "..", 'node_modules', "electron", 'dist', "electron.exe"),
     interval: 2000,
 });
-  
+
+/* Alternative reload using different electron binary */
+
+// require("electron-reload")(__dirname, {
+//     electron: path.join(__dirname, "..", "node_modules", ".bin", "electron.cmd"),
+//     hardReset: true,
+//     livenessThreshold: 2000,
+// });
+
 let mainWindow: BrowserWindow | null;
 
 process.traceProcessWarnings = true;
