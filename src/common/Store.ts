@@ -13,6 +13,7 @@ export type ApplicationOptions = {
     format?: Format;
     debugMode?: boolean;
     url?: string;
+    urls?: string[];
     language?: string;
     alwaysOverwrite?: boolean;
 };
@@ -41,6 +42,13 @@ export const StoreSchema: Schema<IStore> = {
             url: {
                 type: "string",
                 default: "",
+            },
+            urls: {
+                type: "array",
+                items: {
+                    type: "string"
+                },
+                default: [],
             },
             outputDirectory: {
                 type: "string",

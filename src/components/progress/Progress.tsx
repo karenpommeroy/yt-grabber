@@ -1,15 +1,23 @@
+import classnames from "classnames";
 import React from "react";
 
 import {Box, CircularProgress, CircularProgressProps, Typography} from "@mui/material";
 
 import Styles from "./Progress.styl";
 
-export const Progress: React.FC<CircularProgressProps> = (props) => {
+export type ProgressProps = CircularProgressProps & {
+    labelScale?: number;
+    renderLabel?: (value: number) => React.ReactNode;
+};
+
+export const Progress: React.FC<ProgressProps> = (props) => {
+    const {size, labelScale = 1, renderLabel, className, ...rest} = props;
+
     return (
-        <Box className={Styles.progress}>
-            <CircularProgress variant="determinate" {...props} />
+        <Box className={classnames(Styles.progress, className)}>
+            <CircularProgress variant="determinate" size={size} {...rest} />
             <Box className={Styles.labelWrapper}>
-                <Typography variant="caption">{`${Math.round(props.value)}%`}</Typography>
+                <Typography variant="caption" sx={{scale: labelScale}}>{renderLabel ? renderLabel(props.value) : `${Math.round(props.value)}%`}</Typography>
             </Box>
         </Box>
     );

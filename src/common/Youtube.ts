@@ -1,5 +1,11 @@
 import {MediaFormat} from "./Media";
 
+export type YoutubeInfoResult = {
+    url: string,
+    value?: TrackInfo[];
+    error?: string,
+};
+
 export type TrackInfo = {
     album: string;
     artist: string;
@@ -10,6 +16,7 @@ export type TrackInfo = {
     original_url: string;
     playlist: string;
     playlist_title: string;
+    playlist_id: string;
     playlist_autonumber: number;
     playlist_count: number;
     release_year: number;
@@ -22,13 +29,20 @@ export type TrackInfo = {
 };
 
 export type AlbumInfo = {
-    artist: string;
-    title: string;
-    releaseYear: number;
+    id: string;
+    artist?: string;
+    title?: string;
+    releaseYear?: number;
     tracksNumber: number;
     duration: number;
-    thumbnail: string;
+    thumbnail?: string;
+    url?: string;
+};
+
+export type PlaylistInfo = {
     url: string;
+    album: AlbumInfo;
+    tracks: TrackInfo[];
 };
 
 export type Thumbnail = {

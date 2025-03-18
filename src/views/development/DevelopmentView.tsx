@@ -13,7 +13,7 @@ export const DevelopmentView: React.FC = () => {
     const {actions} = useAppContext();
     const {t} = useTranslation();
     const [options, setOptions] = useState<ApplicationOptions>(global.store.get("application"));
-    const [debouncedOptions] = useDebounceValue(options, 500);
+    const [debouncedOptions] = useDebounceValue(options, 500, {leading: true});
 
     const handleClose = async () => {
         actions.setLocation("/");

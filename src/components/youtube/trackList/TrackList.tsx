@@ -9,7 +9,7 @@ import _omit from "lodash/omit";
 import _omitBy from "lodash/omitBy";
 import _toString from "lodash/toString";
 import moment from "moment";
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {NumberFormatBase} from "react-number-format";
 
@@ -33,6 +33,7 @@ import Progress from "../../progress/Progress";
 import Styles from "./TrackList.styl";
 
 export type TrackListProps = {
+    items?: TrackInfo[];
     onDownloadTrack?: (id: string) => void;
     onCancelTrack?: (id: string) => void;
     onOpenFile?: (id: string) => void;
@@ -41,11 +42,16 @@ export type TrackListProps = {
 };
 
 export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
-    const {onDownloadTrack, onCancelTrack, onOpenFile, onOpenUrl, queue} = props;
+    const {items, onDownloadTrack, onCancelTrack, onOpenFile, onOpenUrl, queue} = props;
     const {tracks, trackStatus, trackCuts, setTrackStatus, setTrackCuts} = useDataState();
     const [cutAnchorEl, setCutAnchorEl] = React.useState<HTMLButtonElement | null>(null);
     const [cutOpen, setCutOpen] = useState<string>();
+    const [value, setValue] = useState(items ?? tracks);
     const {t} = useTranslation();
+
+    useEffect(() => {
+        setValue(items ?? tracks);
+    }, [items, tracks]);
 
     const formatTime = (value: string) => {
         const formatted = moment.duration(value, "seconds").format("HH:mm:ss", {trim: "left"});
@@ -71,7 +77,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
 
     const sanitizeTrackCuts = (source: {[key: string]: number[]}) => {
         return _omitBy(source, (v, k) => {
-            const track = _find(tracks, ["id", k]);
+            const track = _find(value, ["id", k]);
             
             return v[0] === 0 && v[1] === track.duration;
         });
@@ -88,7 +94,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     
     const onOpenInBrowser = (event: React.MouseEvent<HTMLButtonElement>) => {
         const trackId = event.currentTarget.getAttribute("data-id");
-        const track = _find(tracks, ["id", trackId]);
+        const track = _find(value, ["id", trackId]);
 
         if (_isFunction(onOpenUrl)) {
             onOpenUrl(track.original_url);
@@ -131,7 +137,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     };
 
     const onCutStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const track = _find(tracks, ["id", cutOpen]);
+        const track = _find(value, ["id", cutOpen]);
 
         setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [timeStringToNumber(e.target.value), _get(prev, `${cutOpen}.1`, track.duration) as number]}));
     };
@@ -139,18 +145,18 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     const onCutEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [_get(prev, `${cutOpen}.0`, 0) as number, timeStringToNumber(e.target.value)]}));
     };
-
-    const onCutTimeChange = (event: Event, value: number | number[], activeThumb: number) => {
-        if (!Array.isArray(value)) {
+    
+    const onCutTimeChange = (event: Event, newValue: number | number[], activeThumb: number) => {
+        if (!Array.isArray(newValue)) {
             return;
         }
         
-        const track = _find(tracks, ["id", cutOpen]);
+        const track = _find(value, ["id", cutOpen]);
 
         if (activeThumb === 0) {
-            setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [value[0], _get(prev, `${cutOpen}.1`, track.duration) as number]}));
+            setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [newValue[0], _get(prev, `${cutOpen}.1`, track.duration) as number]}));
         } else {
-            setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [_get(prev, `${cutOpen}.0`, 0) as number, value[1]]}));
+            setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [_get(prev, `${cutOpen}.0`, 0) as number, newValue[1]]}));
         }
     };
 
@@ -167,7 +173,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     return (
         <Grid size={12} className={Styles.trackList}>
             <List className={Styles.trackList} dense>
-                {_map(tracks, (item) => {
+                {_map(value, (item) => {
                     const info = getTrackStatusInfo(item);
                     const open = Boolean(cutAnchorEl) && cutOpen === item.id;
 

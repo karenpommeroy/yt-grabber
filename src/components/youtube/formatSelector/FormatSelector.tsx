@@ -16,7 +16,6 @@ import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui
 import Grid from "@mui/material/Grid2";
 
 import {AudioType, MediaFormat, VideoType} from "../../../common/Media";
-import {ApplicationOptions} from "../../../common/Store";
 import {FormatInfo} from "../../../common/Youtube";
 import {useDataState} from "../../../react/contexts/DataContext";
 import NumberField from "../../numberField/NumberField";
@@ -35,22 +34,22 @@ export type FormatSelectorProps = {
 }
 
 export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
-    const {value, onSelected} = props;
-    const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
-    const {tracks} = useDataState();
+    // const {value, onSelected} = props;
+    // const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
+    const {tracks, format,  setFormat} = useDataState();
     
     const audioExtensions = Object.values(AudioType);
     const videoExtensions = Object.values(VideoType);
-    const [formats, setFormats] = useState<Array<AudioType | VideoType>>(value.type === MediaFormat.Audio ? audioExtensions : videoExtensions);
+    const [formats, setFormats] = useState<Array<AudioType | VideoType>>(format.type === MediaFormat.Audio ? audioExtensions : videoExtensions);
     const [resolutions, setResolutions] = useState<string[]>();
     
-    const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(value.type ?? MediaFormat.Audio);
-    const [selectedAudioExtension, setSelectedAudioExtension] = useState<AudioType>(value.type === MediaFormat.Audio ? value.extension as AudioType :_first(audioExtensions));
-    const [selectedVideoExtension, setSelectedVideoExtension] = useState<VideoType>(value.type === MediaFormat.Video ? value.extension as VideoType :_first(videoExtensions));
-    const [selectedFormat, setSelectedFormat] = useState<AudioType | VideoType>(value.extension ?? _first(formats));
-    const [selectedResolution, setSelectedResolution] = useState<string>(value.videoQuality);
-    const [selectedQuality, setSelectedQuality] = useState(value.audioQuality ?? appOptions.quality);
-    const [currentValue, setCurrentValue] = useState<Format>(value);
+    const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(format.type ?? MediaFormat.Audio);
+    const [selectedAudioExtension, setSelectedAudioExtension] = useState<AudioType>(format.type === MediaFormat.Audio ? format.extension as AudioType :_first(audioExtensions));
+    const [selectedVideoExtension, setSelectedVideoExtension] = useState<VideoType>(format.type === MediaFormat.Video ? format.extension as VideoType :_first(videoExtensions));
+    const [selectedFormat, setSelectedFormat] = useState<AudioType | VideoType>(format.extension ?? _first(formats));
+    const [selectedResolution, setSelectedResolution] = useState<string>(format.videoQuality);
+    const [selectedQuality, setSelectedQuality] = useState(format.audioQuality ?? format.audioQuality);
+    const [currentValue, setCurrentValue] = useState<Format>(format);
     const {t} = useTranslation();
 
     const isFormatValid = (val: Format) => {
@@ -67,9 +66,9 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     };
 
     useEffect(() => {
-        if (!_isFunction(onSelected) || !isFormatValid(currentValue)) return;
+        if (!isFormatValid(currentValue)) return;
 
-        onSelected(currentValue);
+        setFormat(currentValue);
     }, [currentValue]);
 
     useEffect(() => {
@@ -86,7 +85,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
         const nextResolutions = _uniq(_map(_filter(formats, (f) => f.vcodec !== "none" && !!f.resolution), resolveResolutionText));
         
         setResolutions(nextResolutions);
-        setSelectedResolution(value.videoQuality ?? _last(nextResolutions));
+        setSelectedResolution(format.videoQuality ?? _last(nextResolutions));
     }, [tracks]);
 
     useEffect(() => {

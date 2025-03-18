@@ -8,6 +8,7 @@ import React, {useCallback, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import LaunchIcon from "@mui/icons-material/Launch";
 import {
@@ -22,21 +23,24 @@ import Progress from "../../progress/Progress";
 import Styles from "./MediaInfoPanel.styl";
 
 export type MediaInfoPanelProps = {
+    item?: AlbumInfo;
     className?: string;
     loading?: boolean;
     progress?: number;
     onCancel?: () => void;
+    onDownload?: (albumId: string) => void;
     onOpenOutput?: () => void;
 }
 
 export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPanelProps) => {
-    const {className, onCancel, onOpenOutput, loading, progress = 0} = props;
-    const {album, trackStatus, setAlbum} = useDataState();
+    const {item, className, onCancel, onDownload, onOpenOutput, loading, progress = 0} = props;
+    const {trackStatus} = useDataState();
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const {t} = useTranslation();
+    const [value, setValue] = useState(item);
     
     const onDetailsModalClose = (data: AlbumInfo) => {
-        setAlbum((prev) => _assign(prev, data));
+        setValue((prev) => _assign(prev, data));
         setDetailsModalOpen(false);
     };
 
@@ -56,6 +60,12 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
         setDetailsModalOpen(true);
     }, [detailsModalOpen, setDetailsModalOpen]);
     
+    const downloadPlaylist = () => {
+        if (_isFunction(onDownload)) {
+            onDownload(value.id);
+        }
+    };
+    
     return (
         <>
             <Grid className={classnames(className, Styles.mediaInfoPanel)} size={12}>
@@ -63,26 +73,26 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                     <CardMedia
                         component="img"
                         sx={{width: 100, height: "auto", marginRight: 1}}
-                        image={album.thumbnail}
-                        alt={album.title}
+                        image={value.thumbnail}
+                        alt={value.title}
                     />
                     <Box className={Styles.content}>
                         <CardContent className={Styles.info}>
                             <div className={classnames(Styles.row, Styles, Styles.title)}>
                                 <Typography variant="subtitle2" className={Styles.label}>{t("title")}:</Typography>
-                                <Typography variant="subtitle2" sx={{color: "text.secondary"}} className={classnames(Styles.label, Styles.bold)}>{album.title}</Typography>
+                                <Typography variant="subtitle2" sx={{color: "text.secondary"}} className={classnames(Styles.label, Styles.bold)}>{value.title}</Typography>
                             </div>
                             <div className={classnames(Styles.row, Styles, Styles.artist)}>
                                 <Typography variant="body1" className={Styles.label}>{t("artist")}:</Typography>
-                                <Typography variant="body1" sx={{color: "text.secondary"}}>{album.artist}</Typography>
+                                <Typography variant="body1" sx={{color: "text.secondary"}}>{value.artist}</Typography>
                             </div>
                             <div className={Styles.row}>
                                 <Typography variant="subtitle2" className={Styles.label}>{t("releaseYear")}:</Typography>
-                                <Typography variant="subtitle2" sx={{color: "text.secondary"}}>{album.releaseYear}</Typography>
+                                <Typography variant="subtitle2" sx={{color: "text.secondary"}}>{value.releaseYear}</Typography>
                             </div>
                             <div className={Styles.row}>
                                 <Typography variant="subtitle2" className={Styles.label}>{t("duration")}:</Typography>
-                                <Typography variant="subtitle2" sx={{color: "text.secondary"}}>{moment.duration(album.duration, "seconds").format("m:ss")}</Typography>
+                                <Typography variant="subtitle2" sx={{color: "text.secondary"}}>{moment.duration(value.duration, "seconds").format("m:ss")}</Typography>
                             </div>
                         </CardContent>
                         {!loading &&
@@ -98,7 +108,12 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                     <Button className={Styles.edit} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={editInfo}>
                                         <EditIcon />
                                     </Button>
-                                </Tooltip>    
+                                </Tooltip>
+                                <Tooltip title={t("downloadPlaylist")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                    <Button className={Styles.download} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={downloadPlaylist}>
+                                        <DownloadIcon/>
+                                    </Button>
+                                </Tooltip>
                             </Box>
                         }
                         {loading &&
@@ -123,7 +138,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
             </Grid>
             <DetailsModal
                 id="details-modal"
-                details={_pick(album, ["artist", "title", "releaseYear"])}
+                details={_pick(value, ["artist", "title", "releaseYear"])}
                 open={detailsModalOpen}
                 onClose={onDetailsModalClose}
             />
