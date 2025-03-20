@@ -18,10 +18,47 @@
   },
   "build": {
     "appId": "yt.grabber",
+    "productName": "YT Grabber",
+    "copyright": "© 2025 Marcin Karpiński",
     "files": [
       "dist/**/*",
-      "package.json"
+      "package.json",
+      "!node_modules/.cache",
+      "!.yarn/cache",
+      "!node_modules/electron",
+      "!src",
+      "!tests",
+      "!*.map",
+      "!*.md",
+      "!public",
+      "!webpack.config.js"
     ],
+    "asar": true,
+    "win": {
+      "target": "nsis",
+      "icon": "dist/resources/icons/logo.ico",
+      "artifactName": "${productName}-setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "dist/resources/icons/logo.ico",
+      "uninstallerIcon": "dist/resources/icons/logo.ico",
+      "installerHeaderIcon": "dist/resources/icons/logo.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "YT Grabber"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility"
+    },
     "directories": {
       "output": "release"
     },

@@ -57,7 +57,7 @@ export const renderConfig: Configuration & DevServerConfiguration = {
     mode: process.env.NODE_ENV as any,
     entry: "./src/renderer.tsx",
     target: "electron-renderer",
-    devtool: "eval",
+    devtool: process.env.NODE_ENV === "development" ? "eval" : false,
     devServer: {
         watchFiles: {
             paths: ["/src"],
