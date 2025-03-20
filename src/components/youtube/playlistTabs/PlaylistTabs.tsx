@@ -3,6 +3,7 @@ import {ipcRenderer, IpcRendererEvent} from "electron";
 import _difference from "lodash/difference";
 import _filter from "lodash/filter";
 import _find from "lodash/find";
+import _first from "lodash/first";
 import _get from "lodash/get";
 import _includes from "lodash/includes";
 import _isFunction from "lodash/isFunction";
@@ -16,11 +17,12 @@ import React, {useEffect, useState} from "react";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import {Avatar, Box} from "@mui/material";
+import {Avatar, Box, Skeleton, Stack} from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import Tab from "@mui/material/Tab";
 
 import {OpenSystemPathParams} from "../../../common/Messaging";
+import {useAppContext} from "../../../react/contexts/AppContext";
 import {useDataState} from "../../../react/contexts/DataContext";
 import Progress from "../../progress/Progress";
 import MediaInfoPanel from "../mediaInfoPanel/MediaInfoPanel";
@@ -28,7 +30,6 @@ import TrackList from "../trackList/TrackList";
 import Styles from "./PlaylistTabs.styl";
 
 export type PlaylistTabsProps = {
-    // items: PlaylistInfo[];
     queue: string[];
     onDownloadTrack?: (id: string) => void;
     onDownloadPlaylist?: (id: string) => void;
@@ -38,10 +39,16 @@ export type PlaylistTabsProps = {
 
 export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsProps) => {
     const {queue, onDownloadTrack, onDownloadPlaylist, onCancelPlaylist, onCancelTrack} = props;
-    const {trackStatus, playlists} = useDataState();
-    const [selected, setSelected] = useState(_get(playlists, "0.album.id"));
-    const onlyOnePlaylist = playlists.length === 1;
-    
+    const {trackStatus, playlists, urls} = useDataState();
+    const {state} = useAppContext();
+    const [selected, setSelected] = useState(_get(playlists, "0.url", _first(urls)));
+    const onlyOnePlaylist = (playlists.length === 1 && !state.loading) || (urls.length === 1 && state.loading);
+    const itemsBeingLoaded = state.loading ? _filter(urls, (url) => !_find(playlists, (p) => _includes(url, p.url))) : [];
+
+    useEffect(() => {
+        setSelected(_get(playlists, "0.url", _first(urls)));
+    }, [playlists]);
+
     const isPlaylistLoading = (id: string) => {
         const playlist = _find(playlists, ["album.id", id]);
         const playlistTracks = _map(_get(playlist, "tracks"), "id");
@@ -133,47 +140,70 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
 
     return (
         <Grid className={Styles.playlistTabs} size={12}>
-            <TabContext value={selected}>
-                {!onlyOnePlaylist && <Box borderBottom={1} borderColor="divider">
+            <TabContext value={selected || 0}>
+                {!onlyOnePlaylist &&<Box borderBottom={1} borderColor="divider">
                     <TabList scrollButtons="auto" onChange={handleTabChange} textColor="primary" indicatorColor="secondary" className={Styles.tablist}>
-                        {_map(playlists, (item) => {
-                            const progress = getTotalProgress(item.album.id);
+                        {_map(playlists, (playlist) => {
+                            const progress = getTotalProgress(playlist.album.id);
                             const loading = !isNaN(progress) && progress !== 100;
 
                             return <Tab
-                                key={item.album.id}
+                                key={playlist.album.id}
                                 className={Styles.tab}
                                 icon={
                                     <div>
-                                        <Avatar className={classnames(Styles.tabIcon, {[Styles.loading]: loading})} src={item.album.thumbnail} />
+                                        <Avatar className={classnames(Styles.tabIcon, {[Styles.loading]: loading})} src={playlist.album.thumbnail} />
                                         {loading && <Progress variant="indeterminate" className={Styles.tabProgress} thickness={4} color="primary" value={progress} />}
                                     </div>
                                 }
                                 iconPosition="start"
-                                label={<div className={Styles.tabTitle}>{item.album.title}</div>}
-                                value={item.album.id}
+                                label={<div className={Styles.tabTitle}>{playlist.album.title}</div>}
+                                value={playlist.url}
+                            />;
+                        })}
+                        {_map(itemsBeingLoaded, (item) => {
+                            return <Tab
+                                key={item}
+                                className={Styles.tab}
+                                icon={<Skeleton variant="circular" width={40} height={40} />}
+                                iconPosition="start"
+                                label={<Skeleton className={Styles.tabTitle} height={30} width={60} />}
+                                value={item}
                             />;
                         })}
                     </TabList>
                 </Box>}
-                {_map(playlists, (item) =>
-                    <TabPanel className={Styles.tabPanel} value={item.album.id} key={item.album.id}>
+                {_map(playlists, (playlist) =>
+                    <TabPanel className={Styles.tabPanel} value={playlist.url} key={playlist.url}>
                         <MediaInfoPanel
-                            item={item.album}
-                            loading={isPlaylistLoading(item.album.id)}
-                            progress={getTotalProgress(selected)}
+                            item={playlist.album}
+                            loading={isPlaylistLoading(playlist.album.id)}
+                            progress={getTotalProgress(playlist.album.id)}
                             onDownload={handleDownloadAlbum}
                             onCancel={onCancel}
                             onOpenOutput={onOpenDirectory}
                         />
                         <TrackList
-                            items={item.tracks}
+                            items={playlist.tracks}
                             queue={queue}
                             onDownloadTrack={handleDownloadTrack}
                             onOpenUrl={openInBrowser}
                             onCancelTrack={cancelTrack}
                             onOpenFile={onOpenFile}
                         />
+                    </TabPanel>
+                )}
+                {_map(itemsBeingLoaded, (item) =>
+                    <TabPanel className={Styles.tabPanel} value={item} key={item}>
+                        <Stack spacing={3}>
+                            <Stack spacing={3} direction="row">
+                                <Skeleton variant="rounded" width={100} height={80} />
+                                <Skeleton variant="rounded" width="100%" height={80} />
+                            </Stack>
+                            <Skeleton variant="rounded" width="100%" height={50} />
+                            <Skeleton variant="rounded" width="100%" height={50} />
+                            <Skeleton variant="rounded" width="100%" height={50} />
+                        </Stack>
                     </TabPanel>
                 )}
             </TabContext>

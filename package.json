@@ -32,6 +32,10 @@
         "filter": [
           "*.exe"
         ]
+      },
+      {
+        "from": "dist/resources/locales",
+        "to": "locales"
       }
     ]
   },

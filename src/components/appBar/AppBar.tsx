@@ -18,19 +18,30 @@ import LanguagePicker from "../languagePicker/LanguagePicker";
 import Logo from "../logo/Logo";
 import Styles from "./AppBar.styl";
 
-function AppBar() {
-    const { state, actions } = useAppContext();
-    const { onClick } = useClickCounter(() => handleOpenDevelopment(), 3, 500);
+export type AppBarProps = {
+    disableNavigation?: boolean;
+};
+
+const AppBar = (props: AppBarProps) => {
+    const {disableNavigation} = props;
+    const {state, actions} = useAppContext();
+    const {onClick} = useClickCounter(() => handleOpenDevelopment(), 3, 500);
 
     const handleOpenDevelopment = () => {
+        if (disableNavigation) return;
+
         actions.setLocation("/development");
     };
 
     const handleOpenSettings = () => {
+        if (disableNavigation) return;
+
         actions.setLocation("/settings");
     };
 
     const handleClose = () => {
+        if (disableNavigation) return;
+
         actions.setLocation("/");
     };
 
@@ -43,7 +54,7 @@ function AppBar() {
             );
         } else {
             return (
-                <IconButton onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
+                <IconButton disabled={disableNavigation} onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
                     <SettingsIcon />
                 </IconButton>
             );
@@ -69,5 +80,6 @@ function AppBar() {
             </Container>
         </ApplicationBar>
     );
-}
+};
+
 export default AppBar;

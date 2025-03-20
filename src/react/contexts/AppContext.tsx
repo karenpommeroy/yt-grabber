@@ -12,7 +12,6 @@ interface IAppContext {
         setTheme: (theme: string) => void;
         setMode: (mode: ColorMode) => void;
         setLoading: (loading: boolean) => void;
-        setQueue: (queue: string[]) => void;
     };
 }
 

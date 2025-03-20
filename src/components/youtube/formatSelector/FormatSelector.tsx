@@ -3,7 +3,6 @@ import _filter from "lodash/filter";
 import _first from "lodash/first";
 import _get from "lodash/get";
 import _includes from "lodash/includes";
-import _isFunction from "lodash/isFunction";
 import _isNumber from "lodash/isNumber";
 import _last from "lodash/last";
 import _map from "lodash/map";
@@ -30,11 +29,12 @@ export type Format = {
 
 export type FormatSelectorProps = {
     value?: Format;
+    disabled?: boolean;
     onSelected?: (format: Format) => void;
 }
 
 export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
-    // const {value, onSelected} = props;
+    const {disabled} = props;
     // const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const {tracks, format,  setFormat} = useDataState();
     
@@ -138,7 +138,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     return (
         <Grid className={Styles.formatSelector} container spacing={2} padding={2}>
             <Grid size={4}>
-                <FormControl fullWidth>
+                <FormControl fullWidth disabled={disabled}>
                     <InputLabel id="media-type-label">{t("mediaType")}</InputLabel>
                     <Select<MediaFormat>
                         labelId="media-type-label"
@@ -151,7 +151,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                 </FormControl>
             </Grid>
             <Grid size={4}>
-                <FormControl fullWidth>
+                <FormControl fullWidth disabled={disabled}>
                     <InputLabel id="format-label">{t("format")}</InputLabel>
                     <Select<string>
                         labelId="format-label"
@@ -165,7 +165,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
             </Grid>
             {selectedMediaType === MediaFormat.Video &&
                 <Grid size={4}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth disabled={disabled}>
                         <InputLabel id="resolution-label">{t("resolution")}</InputLabel>
                         <Select<string>
                             labelId="resolution-label"
@@ -181,6 +181,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
             {selectedMediaType === MediaFormat.Audio &&
                 <Grid size={4}>
                     <NumberField
+                        disabled={disabled}
                         fullWidth
                         label={t("audioQuality")}
                         id="audioQuality"

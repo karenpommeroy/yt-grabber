@@ -19,10 +19,6 @@ const reducer = (state: IAppState, action: IAppAction): IAppState => {
         return reduce(state, { loading: action.loading });
     }
 
-    if (action.type === AppActions.SetQueue) {
-        return reduce(state, { queue: action.queue });
-    }
-
     throw new Error();
 };
 

@@ -8,7 +8,6 @@ export enum AppActions {
     SetTheme = "SET_THEME",
     SetMode = "SET_MODE",
     SetLoading = "SET_LOADING",
-    SetQueue = "SET_QUEUE",
 }
 
 export interface IAppAction extends IAction<AppActions> {
@@ -16,7 +15,6 @@ export interface IAppAction extends IAction<AppActions> {
     theme?: string;
     mode?: ColorMode;
     loading?: boolean;
-    queue?: string[];
 }
 
 export const actions = (dispatch: Dispatch<IAppAction>) => ({
@@ -24,5 +22,4 @@ export const actions = (dispatch: Dispatch<IAppAction>) => ({
     setTheme: (theme: string) => dispatch({ type: AppActions.SetTheme, theme }),
     setMode: (mode: ColorMode) => dispatch({ type: AppActions.SetMode, mode }),
     setLoading: (loading: boolean) => dispatch({ type: AppActions.SetLoading, loading }),
-    setQueue: (queue: string[]) => dispatch({ type: AppActions.SetQueue, queue }),
 });

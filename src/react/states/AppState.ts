@@ -6,7 +6,6 @@ export interface IAppState {
     theme?: string;
     mode?: ColorMode;
     loading?: boolean;
-    queue?: string[];
 }
 
 export const createDefaultState = () => {
@@ -15,6 +14,5 @@ export const createDefaultState = () => {
         theme: "purple-rain",
         mode: ColorMode.Light,
         loading: false,
-        queue: [],
     });
 };

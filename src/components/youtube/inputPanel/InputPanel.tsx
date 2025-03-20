@@ -1,7 +1,5 @@
 import _compact from "lodash/compact";
 import _filter from "lodash/filter";
-import _first from "lodash/first";
-import _includes from "lodash/includes";
 import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
 import _map from "lodash/map";
@@ -27,9 +25,8 @@ import {useDataState} from "../../../react/contexts/DataContext";
 import Styles from "./InputPanel.styl";
 
 export type InputPanelProps = {
-    mode?: "single" | "multi";
     loading?: boolean;
-    onChange?: (value: string | string[]) => void;
+    onChange?: (value: string[]) => void;
     onDownload: (...args: any[]) => void;
     onDownloadFailed: () => void;
     onLoadInfo: (...args: any[]) => void;
@@ -37,10 +34,9 @@ export type InputPanelProps = {
 };
 
 export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) => {
-    const {mode = "single", loading, onChange, onDownload, onCancel, onDownloadFailed, onLoadInfo} = props;
+    const {loading, onDownload, onCancel, onDownloadFailed, onChange, onLoadInfo} = props;
     const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const {playlists, trackStatus, urls, setUrls} = useDataState();
-    const [validationError, setValidationError] = useState<string>();
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const valueCount = urls.length;
@@ -48,16 +44,17 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const truncateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)/;
     const validateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)([\w-]{11})/;
 
-    const isVAaid = (value: string) => {
+    const isValid = (value: string) => {
         return appOptions.debugMode ? true : validateRegex.test(value);
     };
 
-    const isDuplicated = (value: string) => {
-        return _includes(urls, value);
-    };
-
     const handleDelete = (valueToDelete: string) => {
-        setUrls((prev) => _without(prev, valueToDelete));
+        const newUrls = _without(urls, valueToDelete);
+        
+        setUrls(newUrls);
+        if (_isFunction(onChange)) {
+            onChange(newUrls);
+        }
     };
     
     const handleOpenFromFile = () => {
@@ -68,21 +65,12 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         return !_isEmpty(_filter(trackStatus, "error"));
     }, [trackStatus]);
 
-    const onSingleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        // if (!isVAaid(event.target.value)) return;
-
-        // if (_isFunction(onChange)) {
-        //     onChange(event.target.value);
-        // }
-    };
-
     const onMultiValueChange = (value: React.ChangeEvent<HTMLInputElement>, newValue: []) => {
-        setUrls(_uniq(_filter(newValue, isVAaid)));
-    };
-
-    const onKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === "Enter") {
-            onDownload(urls);
+        const newUrls = _uniq(_filter(newValue, isValid)); 
+        
+        setUrls(newUrls);
+        if (_isFunction(onChange)) {
+            onChange(newUrls);
         }
     };
 
@@ -96,10 +84,12 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         reader.onload = (e) => {
             const content = e.target?.result as string;
             const lines = _compact(content.split("\n"));
-            const nextUrls = _uniq(_filter(lines, isVAaid));
-
+            const nextUrls = _uniq(_filter(lines, isValid));
 
             setUrls(nextUrls);
+            if (_isFunction(onChange)) {
+                onChange(nextUrls);
+            }
         };
         reader.readAsText(file);
         event.target.value = "";
@@ -110,8 +100,8 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             <Tooltip key={option} title={option} arrow disableHoverListener={valueCount === 1} enterDelay={500} leaveDelay={100} enterNextDelay={500} placement="bottom">
                 <Chip
                     variant="filled"
-                    label={valueCount === 1 ? _replace(option, truncateRegex, "") : _truncate(_replace(option, truncateRegex, ""), {length: valueCount === 2 ? 45 : 30})}
-                    onDelete={() => handleDelete(option)}
+                    label={valueCount === 1 ? _replace(option, truncateRegex, "") : _truncate(_replace(option, truncateRegex, ""), {length: valueCount === 2 ? 30 : 20})}
+                    onDelete={() => !loading && handleDelete(option)}
                 />
             </Tooltip>
         );
@@ -120,47 +110,36 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     return (
         <Grid className={Styles.inputPanel} container spacing={2} padding={2}>
             <Grid size="grow">
-                {mode === "single" && <TextField
-                    onKeyUp={onKeyUp}
+                <Autocomplete
+                    multiple
+                    freeSolo
                     fullWidth
-                    label={t("youtubeUrl")}
-                    variant="outlined"
-                    value={_first(urls)}
-                    onChange={onSingleValueChange}
-                    helperText={validationError}
-                    error={!!validationError}
-                />}
-                {mode === "multi" &&
-                    <Autocomplete
-                        multiple
-                        freeSolo
-                        fullWidth
-                        autoSelect
-                        limitTags={3}
-                        options={[]}
-                        value={urls}
-                        onChange={onMultiValueChange}
-                        defaultValue={[]}
-                        renderTags={(value) => _map(value, renderTag)}
-                        renderInput={(params: AutocompleteRenderInputParams) => (
-                            <TextField
-                                {...params}
-                                fullWidth
-                                variant="outlined"
-                                label={t("youtubeUrl")}
-                                slotProps={{
-                                    input: {
-                                        ...params.InputProps,
-                                        startAdornment: <>
-                                            {params.InputProps.startAdornment}
-                                            <input ref={fileInputRef} type="file" hidden onChange={onSelectFile} accept=".txt,.json" />
-                                        </>
-                                    }
-                                }}
-                            />
-                        )}
-                    />
-                }
+                    autoSelect
+                    readOnly={loading}
+                    limitTags={3}
+                    options={[]}
+                    value={urls}
+                    onChange={onMultiValueChange}
+                    defaultValue={[]}
+                    renderTags={(value) => _map(value, renderTag)}
+                    renderInput={(params: AutocompleteRenderInputParams) => (
+                        <TextField
+                            {...params}
+                            fullWidth
+                            variant="outlined"
+                            label={t("youtubeUrl")}
+                            slotProps={{
+                                input: {
+                                    ...params.InputProps,
+                                    startAdornment: <>
+                                        {params.InputProps.startAdornment}
+                                        <input ref={fileInputRef} type="file" hidden onChange={onSelectFile} accept=".txt,.json" />
+                                    </>
+                                }
+                            }}
+                        />
+                    )}
+                />
             </Grid>
             <Grid>
                 <Stack direction="row" spacing={1} height={54}>

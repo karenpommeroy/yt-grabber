@@ -11,7 +11,9 @@ import {
 } from "./common/Messaging";
 import i18n from "./i18next";
 
-electronReload(__dirname, {
+const isDev = () => !app.isPackaged;
+
+isDev() && electronReload(__dirname, {
     electron: path.join(__dirname, "..", 'node_modules', "electron", 'dist', "electron.exe"),
     interval: 2000,
 });
@@ -28,8 +30,6 @@ let mainWindow: BrowserWindow | null;
 
 process.traceProcessWarnings = true;
 Store.initRenderer();
-
-const isDev = () => !app.isPackaged;
 
 const createWindow = async () => {
     mainWindow = new BrowserWindow({
@@ -78,7 +78,7 @@ app.on("before-quit", () => {
 });
 
 app.whenReady().then(() => {
-    installExtension(REACT_DEVELOPER_TOOLS)
+    isDev() && installExtension(REACT_DEVELOPER_TOOLS)
         .then((name) => console.log(`Added Extension:  ${name}`))
         .catch((err) => console.log("An error occurred: ", err));
 });
