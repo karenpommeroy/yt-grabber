@@ -1,0 +1,129 @@
+[
+  {
+    "name": "__Secure-ROLLOUT_TOKEN",
+    "value": "CJfqzf2Iy8GEeBDi-r_br6uMAxj5mojcr6uMAw%3D%3D",
+    "domain": ".youtube.com",
+    "path": "/",
+    "expires": 2298668700.829343,
+    "size": 66,
+    "httpOnly": true,
+    "secure": true,
+    "session": false,
+    "sameSite": "None",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 443,
+    "partitionKey": {
+      "sourceOrigin": "https://youtube.com",
+      "hasCrossSiteAncestor": false
+    }
+  },
+  {
+    "name": "_gcl_au",
+    "value": "1.1.1536623215.1743116700",
+    "domain": ".youtube.com",
+    "path": "/",
+    "expires": 2250892699,
+    "size": 32,
+    "httpOnly": false,
+    "secure": false,
+    "session": false,
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 80
+  },
+  {
+    "name": "SOCS",
+    "value": "CAISNQgREitib3FfaWRlbnRpdHlmcm9udGVuZHVpc2VydmVyXzIwMjUwMzI2LjA4X3AwGgJwbCACGgYIgKqSvwY",
+    "domain": ".youtube.com",
+    "path": "/",
+    "expires": 2298668700.829343,
+    "size": 91,
+    "httpOnly": false,
+    "secure": true,
+    "session": false,
+    "sameSite": "Lax",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 443
+  },
+  {
+    "name": "VISITOR_PRIVACY_METADATA",
+    "value": "CgJQTBIcEhgSFhMLFBUWFwwYGRobHB0eHw4PIBAREiEgRw%3D%3D",
+    "domain": ".youtube.com",
+    "path": "/",
+    "expires": 2298668700.829343,
+    "size": 76,
+    "httpOnly": true,
+    "secure": true,
+    "session": false,
+    "sameSite": "None",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 443,
+    "partitionKey": {
+      "sourceOrigin": "https://youtube.com",
+      "hasCrossSiteAncestor": false
+    }
+  },
+  {
+    "name": "VISITOR_INFO1_LIVE",
+    "value": "zDIAVL9aRWg",
+    "domain": ".youtube.com",
+    "path": "/",
+    "expires": 2298668700.829343,
+    "size": 29,
+    "httpOnly": true,
+    "secure": true,
+    "session": false,
+    "sameSite": "None",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 443,
+    "partitionKey": {
+      "sourceOrigin": "https://youtube.com",
+      "hasCrossSiteAncestor": false
+    }
+  },
+  {
+    "name": "VISITOR_INFO1_LIVE",
+    "value": "zDIAVL9aRWg",
+    "domain": ".youtube.com",
+    "path": "/",
+    "expires": 2298668700.829343,
+    "size": 29,
+    "httpOnly": true,
+    "secure": true,
+    "session": false,
+    "sameSite": "None",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 443
+  },
+  {
+    "name": "YSC",
+    "value": "NgRIhY2uzOA",
+    "domain": ".youtube.com",
+    "path": "/",
+    "expires": -1,
+    "size": 14,
+    "httpOnly": true,
+    "secure": true,
+    "session": true,
+    "sameSite": "None",
+    "priority": "Medium",
+    "sameParty": false,
+    "sourceScheme": "Secure",
+    "sourcePort": 443,
+    "partitionKey": {
+      "sourceOrigin": "https://youtube.com",
+      "hasCrossSiteAncestor": false
+    }
+  }
+]
