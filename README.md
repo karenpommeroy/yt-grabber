@@ -73,7 +73,7 @@ Each download can be customized to your needs for easy workflow automation.
 
 ## Usage
 
-Download and run latest release installer.
+Download and run latest release installer from [here](https://github.com/karenpommeroy/yt-grabber/releases).
 
 ## Development
 
