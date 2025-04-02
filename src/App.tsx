@@ -19,9 +19,14 @@ export const App: React.FC = () => {
     const {state} = useAppContext();
     const {anchorEl, help} = useHelp();
 
+    const renderLineBreaks = (value: string) => {
+        return _map(_split(value, "\n"), (v, k) => <React.Fragment key={k}>{v}<br /></React.Fragment>);
+    };
+
     const renderText = (value: string | string[]) => {
-        const res = _map(_isArray(value) ? value : [value], (v, k) => <p key={k}>{_map(_split(v, "\n"), (m, i) => <React.Fragment key={i}>{m}<br /></React.Fragment>)}</p>);
-        return res;
+        const valueArray = _isArray(value) ? value : [value];
+        
+        return _map(valueArray, (v, k) => <p key={k}>{renderLineBreaks(v)}</p>);
     };
 
     return (
@@ -38,7 +43,6 @@ export const App: React.FC = () => {
                     className={Styles.helpPopup}
                     open={Boolean(anchorEl)}
                     anchorEl={anchorEl}
-
                     disablePortal
                 >
                     <Paper sx={{p: 2}}>

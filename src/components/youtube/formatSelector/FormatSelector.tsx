@@ -23,7 +23,6 @@ import NumberField from "../../numberField/NumberField";
 import Styles from "./FormatSelector.styl";
 
 export type FormatSelectorProps = {
-    // value?: Format;
     disabled?: boolean;
     onSelected?: (format: Format) => void;
 }

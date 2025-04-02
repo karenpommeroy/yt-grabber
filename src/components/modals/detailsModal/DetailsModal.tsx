@@ -39,10 +39,6 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
         }
     };
 
-    // useEffect(() => {
-    //     setValue(details);
-    // }, [details]);
-
     return (
         <Dialog
             open={open}
