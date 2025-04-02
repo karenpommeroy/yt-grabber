@@ -1,9 +1,8 @@
 import React, {createContext, useContext, useState} from "react";
 
-import {AudioType, MediaFormat} from "../../common/Media";
+import {AudioType, Format, MediaFormat} from "../../common/Media";
 import {ApplicationOptions} from "../../common/Store";
 import {PlaylistInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
-import {Format} from "../../components/youtube/formatSelector/FormatSelector";
 
 export type Task = {
     id: string;
@@ -12,32 +11,32 @@ export type Task = {
     state: "starting" | "running" | "completed" | "cancelled";
     event?: string;
     dirty?: boolean;
-}
+};
 
 export type DataState = {
     playlists: PlaylistInfo[];
-    tracks: TrackInfo[]; 
-    trackStatus: TrackStatusInfo[]; 
+    tracks: TrackInfo[];
+    trackStatus: TrackStatusInfo[];
     trackCuts: {[key: string]: number[];};
-    format: Format;
+    formats: Record<string, Format>;
     urls: string[];
     autoDownload: boolean;
     operation: string;
+    activeTab: string;
     queue: string[];
-    tasks: Task[];
 
     setPlaylists: React.Dispatch<React.SetStateAction<PlaylistInfo[]>>;
     setTracks: React.Dispatch<React.SetStateAction<TrackInfo[]>>;
     setTrackStatus: React.Dispatch<React.SetStateAction<TrackStatusInfo[]>>;
-    setTrackCuts: React.Dispatch<React.SetStateAction<{[key: string]: number[]}>>;
-    setFormat: React.Dispatch<React.SetStateAction<Format>>;
+    setTrackCuts: React.Dispatch<React.SetStateAction<{[key: string]: number[];}>>;
+    setFormats: React.Dispatch<React.SetStateAction<Record<string, Format>>>;
     setUrls: React.Dispatch<React.SetStateAction<string[]>>;
     setAutoDownload: React.Dispatch<React.SetStateAction<boolean>>;
     setQueue: React.Dispatch<React.SetStateAction<string[]>>;
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
     setOperation: React.Dispatch<React.SetStateAction<string>>;
+    setActiveTab: React.Dispatch<React.SetStateAction<string>>;
     clear: () => void;
-}
+};
 
 const DataContext = createContext<DataState | undefined>(undefined);
 
@@ -47,12 +46,12 @@ export function DataProvider(props: any) {
     const [tracks, setTracks] = useState<TrackInfo[]>([]);
     const [trackStatus, setTrackStatus] = useState<TrackStatusInfo[]>([]);
     const [trackCuts, setTrackCuts] = useState<{[key: string]: number[]}>({});
-    const [format, setFormat] = useState<Format>({type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 0});
+    const [formats, setFormats] = useState<Record<string, Format>>({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 0}});
     const [urls, setUrls] = useState<string[]>(appOptions.urls);
     const [autoDownload, setAutoDownload] = useState<boolean>(false);
     const [queue, setQueue] = useState<string[]>([]);
-    const [tasks, setTasks] = useState<Task[]>([]);
     const [operation, setOperation] = useState<string>();
+    const [activeTab, setActiveTab] = useState<string>();
 
     const clear = () => {
         setPlaylists([]);
@@ -61,7 +60,7 @@ export function DataProvider(props: any) {
         setTrackCuts({});
         setAutoDownload(false);
         setQueue([]);
-        setTasks([]);
+        setFormats({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 0}});
         setOperation(undefined);
     };
 
@@ -71,12 +70,12 @@ export function DataProvider(props: any) {
             tracks,
             trackStatus,
             trackCuts,
-            format,
+            formats,
             urls,
             autoDownload,
             queue,
             operation,
-            tasks,
+            activeTab,
             
             setOperation,
             setPlaylists,
@@ -84,17 +83,17 @@ export function DataProvider(props: any) {
             setTracks,
             setTrackStatus,
             setTrackCuts,
-            setFormat,
+            setFormats,
             setUrls,
             setQueue,
-            setTasks,
+            setActiveTab,
             clear
         }}>
             {props.children}
         </DataContext.Provider>
     );
-}
+};
 
 export function useDataState() {
     return useContext(DataContext);
-}
+};

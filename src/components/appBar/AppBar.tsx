@@ -1,6 +1,9 @@
+import classnames from "classnames";
 import React from "react";
+import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
+import HelpIcon from "@mui/icons-material/Help";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {Stack} from "@mui/material";
 import ApplicationBar from "@mui/material/AppBar";
@@ -26,6 +29,7 @@ const AppBar = (props: AppBarProps) => {
     const {disableNavigation} = props;
     const {state, actions} = useAppContext();
     const {onClick} = useClickCounter(() => handleOpenDevelopment(), 3, 500);
+    const {t} = useTranslation();
 
     const handleOpenDevelopment = () => {
         if (disableNavigation) return;
@@ -37,6 +41,10 @@ const AppBar = (props: AppBarProps) => {
         if (disableNavigation) return;
 
         actions.setLocation("/settings");
+    };
+
+    const onHelpClick = () => {
+        actions.setHelp(!state.help);
     };
 
     const handleClose = () => {
@@ -54,7 +62,7 @@ const AppBar = (props: AppBarProps) => {
             );
         } else {
             return (
-                <IconButton disabled={disableNavigation} onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
+                <IconButton data-help="settings" disabled={disableNavigation} onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
                     <SettingsIcon />
                 </IconButton>
             );
@@ -71,8 +79,9 @@ const AppBar = (props: AppBarProps) => {
                     </Typography>
                     <Box sx={{flexGrow: 1}}></Box>
                     <Stack direction="row" gap={1}>
-                        <LanguagePicker showArrow={false} mode={ComponentDisplayMode.Minimal} />
-                        <Tooltip title={state.location === "/settings" ? "Close settings" : "Open settings"}>
+                        <LanguagePicker data-help="languagePicker" className={Styles.languagePicker} showArrow={false} mode={ComponentDisplayMode.Minimal} />
+                        <IconButton data-help="help-toggle" className={classnames(Styles.icon, Styles.help, {[Styles.active]: state.help})} onClick={onHelpClick}><HelpIcon/></IconButton>
+                        <Tooltip title={state.location === "/settings" ? t("closeSettings") : t("openSettings")}>
                             {createSettingsButton()}
                         </Tooltip>
                     </Stack>

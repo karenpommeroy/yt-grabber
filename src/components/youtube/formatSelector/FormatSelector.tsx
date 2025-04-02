@@ -1,5 +1,7 @@
+import _assign from "lodash/assign";
 import _capitalize from "lodash/capitalize";
 import _filter from "lodash/filter";
+import _find from "lodash/find";
 import _first from "lodash/first";
 import _get from "lodash/get";
 import _includes from "lodash/includes";
@@ -11,42 +13,43 @@ import _values from "lodash/values";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
-import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import {FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 
-import {AudioType, MediaFormat, VideoType} from "../../../common/Media";
+import {AudioType, Format, FormatScope, MediaFormat, VideoType} from "../../../common/Media";
+import {ApplicationOptions} from "../../../common/Store";
 import {FormatInfo} from "../../../common/Youtube";
 import {useDataState} from "../../../react/contexts/DataContext";
 import NumberField from "../../numberField/NumberField";
 import Styles from "./FormatSelector.styl";
 
-export type Format = {
-    type?: MediaFormat;
-    extension?: AudioType | VideoType;
-    videoQuality?: string;
-    audioQuality?: number;
-}
-
 export type FormatSelectorProps = {
-    value?: Format;
+    // value?: Format;
     disabled?: boolean;
     onSelected?: (format: Format) => void;
 }
 
+const resolveFormat = (scope: FormatScope, formats: Record<string, Format>, activeTab: string) => {
+    if (scope === FormatScope.Tab) {
+        return _get(formats, activeTab, formats.global);
+    }
+
+    return formats.global;
+};
+
 export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     const {disabled} = props;
-    // const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
-    const {tracks, format,  setFormat} = useDataState();
-    
+    const {formats, playlists, setFormats, activeTab} = useDataState();
+    const [options] = useState<ApplicationOptions>(global.store.get("application"));
     const audioExtensions = Object.values(AudioType);
     const videoExtensions = Object.values(VideoType);
-    const [formats, setFormats] = useState<Array<AudioType | VideoType>>(format.type === MediaFormat.Audio ? audioExtensions : videoExtensions);
+    const [format, setFormat] = useState(resolveFormat(options.formatScope, formats, activeTab)); 
+    const [extensions, setExtensions] = useState<Array<AudioType | VideoType>>(format.type === MediaFormat.Audio ? audioExtensions : videoExtensions);
     const [resolutions, setResolutions] = useState<string[]>();
     
     const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(format.type ?? MediaFormat.Audio);
     const [selectedAudioExtension, setSelectedAudioExtension] = useState<AudioType>(format.type === MediaFormat.Audio ? format.extension as AudioType :_first(audioExtensions));
     const [selectedVideoExtension, setSelectedVideoExtension] = useState<VideoType>(format.type === MediaFormat.Video ? format.extension as VideoType :_first(videoExtensions));
-    const [selectedFormat, setSelectedFormat] = useState<AudioType | VideoType>(format.extension ?? _first(formats));
+    const [selectedFormat, setSelectedFormat] = useState<AudioType | VideoType>(format.extension ?? _first(extensions));
     const [selectedResolution, setSelectedResolution] = useState<string>(format.videoQuality);
     const [selectedQuality, setSelectedQuality] = useState(format.audioQuality ?? format.audioQuality);
     const [currentValue, setCurrentValue] = useState<Format>(format);
@@ -66,9 +69,13 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     };
 
     useEffect(() => {
-        if (!isFormatValid(currentValue)) return;
+        if (!isFormatValid(currentValue) || !activeTab) return;
 
-        setFormat(currentValue);
+        setFormats((prev) => {
+            const newFormat = options.formatScope === FormatScope.Tab ? prev[activeTab] ? {[activeTab]: currentValue} : {[activeTab]: prev.global} : {global: currentValue};
+            
+            return _assign({}, prev, newFormat);
+        });
     }, [currentValue]);
 
     useEffect(() => {
@@ -80,13 +87,30 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
         });
     }, [selectedMediaType, selectedFormat, selectedVideoExtension, selectedResolution, selectedQuality]);
 
+    useEffect(() => {        
+        setFormat(resolveFormat(options.formatScope, formats, activeTab));
+    }, [options.formatScope, activeTab, formats]);
+
     useEffect(() => {
+        setExtensions(format.type === MediaFormat.Audio ? audioExtensions : videoExtensions);
+        setSelectedMediaType(format.type ?? MediaFormat.Audio);
+        setSelectedAudioExtension(format.type === MediaFormat.Audio ? format.extension as AudioType :_first(audioExtensions));
+        setSelectedVideoExtension(format.type === MediaFormat.Video ? format.extension as VideoType :_first(videoExtensions));
+        setSelectedFormat(format.extension ?? _first(extensions));
+        setSelectedQuality(format.audioQuality ?? format.audioQuality);
+    }, [format, activeTab]);
+
+    useEffect(() => {
+        const tracks = _get(_find(playlists, ["url", activeTab]), "tracks");
         const formats = _get(tracks, "0.formats");
         const nextResolutions = _uniq(_map(_filter(formats, (f) => f.vcodec !== "none" && !!f.resolution), resolveResolutionText));
-        
+
         setResolutions(nextResolutions);
-        setSelectedResolution(format.videoQuality ?? _last(nextResolutions));
-    }, [tracks]);
+    }, [playlists, activeTab]);
+
+    useEffect(() => {
+        setSelectedResolution(format.videoQuality && _includes(resolutions, format.videoQuality) ? format.videoQuality : _last(resolutions));
+    }, [resolutions]);
 
     useEffect(() => {
         const extensionsByMediaType = {
@@ -98,18 +122,9 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
             [MediaFormat.Video]: selectedVideoExtension,
         };
 
-        setFormats(extensionsByMediaType[selectedMediaType]);
+        setExtensions(extensionsByMediaType[selectedMediaType]);
         setSelectedFormat(selectedExtensionByMediaType[selectedMediaType]);
     }, [selectedMediaType]);
-
-    // useEffect(() => {
-    //     const selectedExtensionByMediaType = {
-    //         [MediaFormat.Audio]: selectedAudioExtension,
-    //         [MediaFormat.Video]: selectedVideoExtension,
-    //     };
-
-    //     setSelectedFormat(selectedExtensionByMediaType[selectedMediaType]);
-    // }, [formats]);
 
     const handleMediaTypeChange = (event: SelectChangeEvent<MediaFormat>) => {       
         setSelectedMediaType(event.target.value as MediaFormat);
@@ -138,12 +153,15 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     return (
         <Grid className={Styles.formatSelector} container spacing={2} padding={2}>
             <Grid size={4}>
-                <FormControl fullWidth disabled={disabled}>
+                <FormControl fullWidth disabled={disabled} data-help="mediaType">
                     <InputLabel id="media-type-label">{t("mediaType")}</InputLabel>
                     <Select<MediaFormat>
                         labelId="media-type-label"
                         value={selectedMediaType}
                         label={t("mediaType")}
+                        MenuProps={{
+                            disablePortal: true,
+                        }}
                         onChange={handleMediaTypeChange}
                     >
                         {_map(_values(MediaFormat), (f) => <MenuItem key={f} value={f}>{_capitalize(f)}</MenuItem>)}
@@ -151,7 +169,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                 </FormControl>
             </Grid>
             <Grid size={4}>
-                <FormControl fullWidth disabled={disabled}>
+                <FormControl fullWidth disabled={disabled} data-help="format">
                     <InputLabel id="format-label">{t("format")}</InputLabel>
                     <Select<string>
                         labelId="format-label"
@@ -159,13 +177,13 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                         label={t("format")}
                         onChange={handleFormatChange}
                     >
-                        {_map(formats, (item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                        {_map(extensions, (item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
                     </Select>
                 </FormControl>
             </Grid>
             {selectedMediaType === MediaFormat.Video &&
                 <Grid size={4}>
-                    <FormControl fullWidth disabled={disabled}>
+                    <FormControl fullWidth disabled={disabled} data-help="resolution">
                         <InputLabel id="resolution-label">{t("resolution")}</InputLabel>
                         <Select<string>
                             labelId="resolution-label"
@@ -181,6 +199,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
             {selectedMediaType === MediaFormat.Audio &&
                 <Grid size={4}>
                     <NumberField
+                        data-help="audioQuality"
                         disabled={disabled}
                         fullWidth
                         label={t("audioQuality")}

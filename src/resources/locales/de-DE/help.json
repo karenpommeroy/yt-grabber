@@ -1,0 +1,120 @@
+{
+    "youtubeUrlHeader": "YouTube-URL-Feld",
+    "youtubeUrlContent": [
+        "Geben Sie eine URL zu einem Video, einer Playlist oder einem Kanal von YouTube oder YouTube Music ein.",
+        "URLs werden automatisch erkannt und markiert.",
+        "Kanäle werden grün markiert, Playlists in der Primärfarbe und Videos in der Standardfarbe.",
+        "Ungültige Links werden herausgefiltert.",
+        "Sie können eine beliebige Anzahl und Kombination von URLs eingeben."
+    ],
+    "loadFromFileHeader": "Aus Datei laden",
+    "loadFromFileContent": [
+        "Einträge aus einer Datei laden.",
+        "Die Datei sollte eine URL pro Zeile enthalten.",
+        "Ungültige Einträge werden übersprungen."
+    ],
+    "loadInfoHeader": "Informationen laden",
+    "loadInfoContent": [
+        "Laden Sie Informationen zu jeder angegebenen URL.",
+        "Dies startet keinen Download, sondern ruft nur Details zu Playlists und Titeln ab."
+    ],
+    "downloadAllHeader": "Alles herunterladen",
+    "downloadAllContent": "Alle Alben, Playlists und Videos herunterladen.",
+    "languagePickerHeader": "Sprachauswahl",
+    "languagePickerContent": "Aktuelle Anzeigesprache ändern.",
+    "settingsHeader": "Einstellungen",
+    "settingsContent": "Anwendungseinstellungen öffnen.",
+    "mediaTypeHeader": "Medientyp",
+    "mediaTypeContent": "Legen Sie den Medientyp für den Download fest – Audio oder Video.",
+    "formatHeader": "Format",
+    "formatContent": "Bevorzugtes Ausgabeformat (Erweiterung) festlegen.",
+    "audioQualityHeader": "Audioqualität",
+    "audioQualityContent": [
+        "Gewünschte Audioqualität festlegen.",
+        "0 bedeutet höchste Qualität, 10 bedeutet niedrigste Qualität."
+    ],
+    "showThumbnailHeader": "Bild/Vorschau",
+    "showThumbnailContent": "Vorschau des zugehörigen Bildes für diese Playlist, diesen Titel oder dieses Video.",
+    "mediaInfoHeader": "Medieninformationen",
+    "mediaInfoContent": "Informationen zur Playlist oder zum Album.",
+    "removePlaylistHeader": "Tab schließen",
+    "removePlaylistContent": "Daten dieses Tabs verwerfen.",
+    "editInfoHeader": "Informationen bearbeiten",
+    "editInfoContent": "Details wie Titel, Künstler und Veröffentlichungsjahr bearbeiten.",
+    "downloadPlaylistHeader": "Playlist herunterladen",
+    "downloadPlaylistContent": "Alle Elemente in dieser Playlist herunterladen.",
+    "trackInfoHeader": "Titelinformationen",
+    "trackInfoContent": "Informationen zum Titel oder Video.",
+    "cutHeader": "Schneiden",
+    "cutContent": "Ermöglicht das Zuschneiden des ursprünglichen Titels auf eine bestimmte Länge.",
+    "openInBrowserHeader": "Im Browser öffnen",
+    "openInBrowserContent": "Aktuellen Eintrag im Browser öffnen.",
+    "downloadTrackHeader": "Titel herunterladen",
+    "downloadTrackContent": "Nur diesen Titel herunterladen.",
+    "resolutionHeader": "Auflösung",
+    "resolutionContent": "Legen Sie die Ausgabeauflösung für das Video fest.",
+    "concurrencyHeader": "Parallelität",
+    "concurrencyContent": "Anzahl der gleichzeitigen Downloads festlegen.",
+    "globalAudioQualityHeader": "Audioqualität (Global)",
+    "globalAudioQualityContent": [
+        "Globale Audioqualität für alle Downloads festlegen (sofern nicht überschrieben).",
+        "0 bedeutet höchste Qualität, 10 bedeutet niedrigste Qualität."
+    ],
+    "themePickerHeader": "Themenauswahl",
+    "themePickerContent": "Anzeige-Thema der Anwendung auswählen.",
+    "formatScopeHeader": "Formatbereich",
+    "formatScopeContent": [
+        "Legen Sie den Geltungsbereich des ausgewählten Formats für Downloads fest.",
+        "Wenn der Bereich `global` ist, wird das ausgewählte Format auf alle heruntergeladenen Dateien angewendet, sobald der Download gestartet wird.",
+        "Wenn der Bereich `pro Tab` ist, können Sie für jeden Tab ein anderes Format festlegen, sodass die zugehörigen Downloads unterschiedliche Ausgabeformate haben."
+    ],
+    "alwaysOverwriteHeader": "Dateiüberschreibung",
+    "alwaysOverwriteContent": "Legt fest, ob vorhandene heruntergeladene Dateien überschrieben werden.\nWenn deaktiviert, wird kein Download durchgeführt, wenn die entsprechende Datei bereits vorhanden ist.",
+    "discographyDownloadHeader": "Diskografie-Download",
+    "discographyDownloadContent": [
+        "Wenn aktiviert, können Sie URLs zu YouTube Music-Kanälen eingeben.",
+        "YT Grabber versucht automatisch, alle mit den angegebenen Kanälen verbundenen Alben zu ermitteln."
+    ],
+    "outputDirectoryHeader": "Ausgabeverzeichnis",
+    "outputDirectoryContent": "Legt das Ausgabeverzeichnis für alle Downloads fest.",
+    "albumOutputTemplateHeader": "Album-Ausgabevorlage",
+    "albumOutputTemplateContent": [
+        "Legt die Vorlage (Pfad/Dateiname) fest, die beim Herunterladen von Alben verwendet wird.",
+        "Folgende Token sind verfügbar:",
+        "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}\n{{trackNo}}",
+        "Beim Schreiben der Ausgabedatei werden die Token durch entsprechende Werte ersetzt."
+    ],
+    "playlistOutputTemplateHeader": "Playlist-Ausgabevorlage",
+    "playlistOutputTemplateContent": [
+        "Legt die Vorlage (Pfad/Dateiname) fest, die beim Herunterladen von Video-Playlists verwendet wird.",
+        "Folgende Token sind verfügbar:",
+        "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}\n{{trackNo}}",
+        "Beim Schreiben der Ausgabedatei werden die Token durch entsprechende Werte ersetzt."
+    ],
+    "videoOutputTemplateHeader": "Video-Ausgabevorlage",
+    "videoOutputTemplateContent": [
+        "Legt die Vorlage (Pfad/Dateiname) fest, die beim Herunterladen von Videos verwendet wird.",
+        "Folgende Token sind verfügbar:",
+        "{{artist}}\n{{releaseYear}}\n{{trackTitle}}",
+        "Beim Schreiben der Ausgabedatei werden die Token durch entsprechende Werte ersetzt."
+    ],
+    "trackOutputTemplateHeader": "Titel-Ausgabevorlage",
+    "trackOutputTemplateContent": [
+        "Legt die Vorlage (Pfad/Dateiname) fest, die beim Herunterladen von Titeln verwendet wird.",
+        "Folgende Token sind verfügbar:",
+        "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}",
+        "Beim Schreiben der Ausgabedatei werden die Token durch entsprechende Werte ersetzt."
+    ],
+    "youtubeDomainUrlHeader": "YouTube-Domain-URL",
+    "youtubeDomainUrlContent": "URL für YouTube Music festlegen.",
+    "infoBarHeader": "Infoleiste",
+    "infoBarContent": "Zeigt Informationen über aktuelle Playlists und Titel sowie den Downloadstatus/-fortschritt an.",
+    "allPlaylistsHeader": "Playlists",
+    "allPlaylistsContent": "Anzahl aller geladenen Playlists.",
+    "grabbedPlaylistsHeader": "Heruntergeladene Playlists",
+    "grabbedPlaylistsContent": "Anzahl der heruntergeladenen Playlists.",
+    "allTracksHeader": "Titel",
+    "allTracksContent": "Anzahl aller geladenen Titel.",
+    "grabbedTracksHeader": "Heruntergeladene Titel",
+    "grabbedTracksContent": "Anzahl der heruntergeladenen Titel."
+}

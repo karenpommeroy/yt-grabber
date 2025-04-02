@@ -8,6 +8,7 @@ export enum AppActions {
     SetTheme = "SET_THEME",
     SetMode = "SET_MODE",
     SetLoading = "SET_LOADING",
+    SetHelp = "SET_HELP",
 }
 
 export interface IAppAction extends IAction<AppActions> {
@@ -15,6 +16,7 @@ export interface IAppAction extends IAction<AppActions> {
     theme?: string;
     mode?: ColorMode;
     loading?: boolean;
+    help?: boolean;
 }
 
 export const actions = (dispatch: Dispatch<IAppAction>) => ({
@@ -22,4 +24,5 @@ export const actions = (dispatch: Dispatch<IAppAction>) => ({
     setTheme: (theme: string) => dispatch({ type: AppActions.SetTheme, theme }),
     setMode: (mode: ColorMode) => dispatch({ type: AppActions.SetMode, mode }),
     setLoading: (loading: boolean) => dispatch({ type: AppActions.SetLoading, loading }),
+    setHelp: (help: boolean) => dispatch({ type: AppActions.SetHelp, help }),
 });

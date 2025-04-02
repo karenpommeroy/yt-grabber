@@ -1,0 +1,120 @@
+{
+    "youtubeUrlHeader": "Youtube URL field",
+    "youtubeUrlContent": [
+        "Input url to video, playlist or channel from YouTube or YouTubeMusic.",
+        "Urls are automatically recognized and marked.",
+        "Channels are marked with green color, playlists with primary color and videos with default color.",
+        "Invalid links are filtered out.",
+        "You can input any number and combination of urls."
+    ],
+    "loadFromFileHeader": "Load From File",
+    "loadFromFileContent": [
+        "Load entries from file.",
+        "File should contain one url per line.",
+        "Invalid entries are skipped."
+    ],
+    "loadInfoHeader": "Load Info",
+    "loadInfoContent": [
+        "Load info about for each of specified url's.",
+        "This does not start downloading but only retrieves details about playlists and tracks."
+    ],
+    "downloadAllHeader": "Download All",
+    "downloadAllContent": "Download all albums, playlists and videos.",
+    "languagePickerHeader": "Language Picker",
+    "languagePickerContent": "Change current display langauage.",
+    "settingsHeader": "Settings",
+    "settingsContent": "Open application settings.",
+    "mediaTypeHeader": "Media Type",
+    "mediaTypeContent": "Specify media type for download - Audio or Video",
+    "formatHeader": "Format",
+    "formatContent": "Specify preferred output file format (extension).",
+    "audioQualityHeader": "Audio Quality",
+    "audioQualityContent": [
+        "Specify desired audio quality.",
+        "0 means highest quality, 10 means lowest quality."
+    ],
+    "showThumbnailHeader": "Image/Thumbnail",
+    "showThumbnailContent": "Preview image related to this playlist, track or video.",
+    "mediaInfoHeader": "Media Info",
+    "mediaInfoContent": "Information about playlist/album.",
+    "removePlaylistHeader": "Remove Tab",
+    "removePlaylistContent": "Discard data related to this tab.",
+    "editInfoHeader": "Edit Info",
+    "editInfoContent": "Edit details such as title, artist, release year.",
+    "downloadPlaylistHeader": "Download Playlist",
+    "downloadPlaylistContent": "Download all items in this playlist.",
+    "trackInfoHeader": "Track Info",
+    "trackInfoContent": "Information about track/video.",
+    "cutHeader": "Cut",
+    "cutContent": "Allows you to crop original track to specified length.",
+    "openInBrowserHeader": "Open In Browser",
+    "openInBrowserContent": "Open current entry in browser.",
+    "downloadTrackHeader": "Download Track",
+    "downloadTrackContent": "Download this track only.",
+    "resolutionHeader": "Resolution",
+    "resolutionContent": "Specify resolution of output video.",
+    "concurrencyHeader": "Concurrency",
+    "concurrencyContent": "Specify how many concurrent downloads are allowed.",
+    "globalAudioQualityHeader": "Audio Quality (Global)",
+    "globalAudioQualityContent": [
+        "Specify global audio quality that applies to all downloads (unless overwriten)",
+        "0 means highest quality, 10 means lowest quality."
+    ],
+    "themePickerHeader": "Theme Picker",
+    "themePickerContent": "Select application display theme.",
+    "formatScopeHeader": "Format Scope",
+    "formatScopeContent": [
+        "Specify scope of format selected for downloads.",
+        "If scope is `global` then format you select will be applied to all downloaded files once download is started.",
+        "If scope is `per tab` then you can specify different format for each tab so that related downloads will have different output formats."
+    ],
+    "alwaysOverwriteHeader": "File Overwriting",
+    "alwaysOverwriteContent": "Specifies whether existing downloaded files are overwritten.\nIf disabled, no download is performed when related file is already present.",
+    "discographyDownloadHeader": "Discography Download",
+    "discographyDownloadContent": [
+        "When enabled you can input urls to Youtube Music channel's.",
+        "YT Grabber will automatically try to resolve all albums related specified channels."
+    ],
+    "outputDirectoryHeader": "Outptut Directory",
+    "outputDirectoryContent": "Specifies the output directory for all downloads.",
+    "albumOutputTemplateHeader": "Album Output Template",
+    "albumOutputTemplateContent": [
+        "Specifies tenplate (path/filename) that is used when downloading albums.",
+        "Following tokens are available:",
+        "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}\n{{trackNo}}",
+        "Tokens will be replaced with corresponding values when writing output file."
+    ],
+    "playlistOutputTemplateHeader": "Playlist Output Template",
+    "playlistOutputTemplateContent": [
+        "Specifies tenplate (path/filename) that is used when downloading video playlists.",
+        "Following tokens are available:",
+        "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}\n{{trackNo}}",
+        "Tokens will be replaced with corresponding values when writing output file."
+    ],
+    "videoOutputTemplateHeader": "Video Output Template",
+    "videoOutputTemplateContent": [
+        "Specifies tenplate (path/filename) that is used when downloading videos.",
+        "Following tokens are available:",
+        "{{artist}}\n{{releaseYear}}\n{{trackTitle}}",
+        "Tokens will be replaced with corresponding values when writing output file."
+    ],
+    "trackOutputTemplateHeader": "Track Output Template",
+    "trackOutputTemplateContent": [
+        "Specifies tenplate (path/filename) that is used when downloading tracks.",
+        "Following tokens are available:",
+        "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}",
+        "Tokens will be replaced with corresponding values when writing output file."
+    ],
+    "youtubeDomainUrlHeader": "Youtube Domain Url",
+    "youtubeDomainUrlContent": "Specify url to Youtube Music",
+    "infoBarHeader": "Info Bar",
+    "infoBarContent": "Displays info about current playlists and tracks and downloading status/progress.",
+    "allPlaylistsHeader": "Playlists",
+    "allPlaylistsContent": "Number of all loaded playlists.",
+    "grabbedPlaylistsHeader": "Grabbed Playlists",
+    "grabbedPlaylistsContent": "Number of downloaded playlists.",
+    "allTracksHeader": "Tracks",
+    "allTracksContent": "Number of all loaded tracks.",
+    "grabbedTracksHeader": "Grabbed Tracks",
+    "grabbedTracksContent": "Number of downloaded tracks."
+}

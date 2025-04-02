@@ -21,10 +21,9 @@ import DownloadIcon from "@mui/icons-material/Download";
 import LaunchIcon from "@mui/icons-material/Launch";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import {
-    Avatar, Button, Fade, List, ListItem, ListItemText, Popover, Slider, Stack, TextField, Tooltip,
-    Typography
+    Avatar, Button, Fade, Grid, List, ListItem, ListItemText, Popover, Slider, Stack, TextField,
+    Tooltip, Typography
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 
 import {formatFileSize} from "../../../common/Helpers";
 import {TrackInfo, TrackStatusInfo} from "../../../common/Youtube";
@@ -182,11 +181,12 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                         dense
                         key={item.id}
                         className={Styles.track}
+                        data-help="trackInfo"
                         secondaryAction={
                             <Stack direction="row" spacing={1.5} className={Styles.actions}>
                                 {info?.completed &&
                                     <Tooltip title={t("findFileInSystem")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onFindFileInSystem}>
+                                        <Button data-help="findInFileSystem" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onFindFileInSystem}>
                                             <LaunchIcon />
                                         </Button>
                                     </Tooltip>
@@ -194,7 +194,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                 {!_includes(queue, item.id) &&
                                     <div>
                                         <Tooltip title={t("cut")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                            <Button size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenTrackCut}>
+                                            <Button data-help="cut" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenTrackCut}>
                                                 <ContentCutIcon />
                                             </Button>
                                         </Tooltip>
@@ -260,20 +260,20 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                     </div>
                                 }
                                 <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenInBrowser}>
+                                    <Button data-help="openInBrowser" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenInBrowser}>
                                         <YouTubeIcon />
                                     </Button>
                                 </Tooltip>
                                 {!_includes(queue, item.id) &&
                                     <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
+                                        <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
                                             <DownloadIcon />
                                         </Button>
                                     </Tooltip>
                                 }
                                 {_includes(queue, item.id) &&
                                     <Tooltip title={t("cancel")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
+                                        <Button data-help="cancelDownloadTrack" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
                                             <CloseIcon />
                                         </Button>
                                     </Tooltip>
@@ -303,7 +303,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                     </>
                                 }
                             </Grid>
-                            {info && <>
+                            {info && !info.skipped && <>
                                 <Grid size={1} className={Styles.column}>
                                     {!info.error && <Typography variant="body1">{formatFileSize(info.totalSize)}</Typography>}
                                 </Grid>

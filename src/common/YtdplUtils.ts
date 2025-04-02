@@ -5,10 +5,9 @@ import _template from "lodash/template";
 import _toString from "lodash/toString";
 import moment from "moment";
 
-import {Format} from "../components/youtube/formatSelector/FormatSelector";
 import {isAlbumTrack} from "./Formatters";
 import {escapePathString} from "./Helpers";
-import {MediaFormat} from "./Media";
+import {Format, MediaFormat} from "./Media";
 import StoreSchema from "./Store";
 import {AlbumInfo, TrackInfo} from "./Youtube";
 

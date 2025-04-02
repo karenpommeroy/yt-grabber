@@ -2,7 +2,7 @@ import classnames from "classnames";
 import $_ from "lodash";
 import moment from "moment";
 import path from "path";
-import React, {useState} from "react";
+import React, {HTMLProps, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -17,24 +17,24 @@ const isMac = process.platform === "darwin";
 const isDev = process.env.NODE_ENV === "development";
 const prependPath = isMac && !isDev ? path.join(process.resourcesPath, "..") : ".";
 
-export interface ILanguagePickerProps {
+export type LanguagePickerProps = Omit<HTMLProps<HTMLDivElement>, "onClick"> & {
     className?: string;
     mode?: ComponentDisplayMode;
     showArrow?: boolean;
 }
 
-export interface ILanguagePickerTriggerProps extends ILanguagePickerProps {
+export type LanguagePickerTriggerProps = Omit<HTMLProps<HTMLButtonElement>, "onClick"> & LanguagePickerProps & {
     loading?: boolean;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-export interface ILanguagePickerItemProps extends ILanguagePickerProps {
+export type LanguagePickerItemProps = LanguagePickerProps & {
     lang?: string;
     onClick?: (lang: string) => void;
 }
 
-export const LanguagePicker = (props: ILanguagePickerProps) => {
-    const { mode, showArrow = true } = props;
+export const LanguagePicker = (props: LanguagePickerProps) => {
+    const { mode, showArrow = true, className, ...rest } = props;
     const { i18n } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -69,7 +69,7 @@ export const LanguagePicker = (props: ILanguagePickerProps) => {
     };
 
     return (
-        <div className={classnames(Styles.languagePicker, $_.get(props, "className"))}>
+        <div className={classnames(Styles.languagePicker,className)} {...rest}>
             <LanguagePickerTrigger showArrow={showArrow} mode={displayMode} loading={loading} onClick={onTriggerClick} />
             <ClickAwayListener onClickAway={onClickAway}>
                 <Menu
@@ -95,7 +95,7 @@ export const LanguagePicker = (props: ILanguagePickerProps) => {
     );
 };
 
-export const LanguagePickerTrigger = (props: ILanguagePickerTriggerProps) => {
+export const LanguagePickerTrigger = (props: LanguagePickerTriggerProps) => {
     const { loading, onClick, mode, showArrow } = props;
     const { i18n, t } = useTranslation();
     
@@ -125,7 +125,7 @@ export const LanguagePickerTrigger = (props: ILanguagePickerTriggerProps) => {
     );
 };
 
-export const LanguagePickerItem = (props: ILanguagePickerItemProps) => {
+export const LanguagePickerItem = (props: LanguagePickerItemProps) => {
     const { lang, onClick } = props;
     const { t } = useTranslation();
 

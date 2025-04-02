@@ -1,3 +1,5 @@
+@import "../../styles/mixins.styl";
+
 .app-bar {
     padding: 0;
 
@@ -16,12 +18,30 @@
             line-height: 1.8;
         }
 
+        .language-picker {
+            margin-right: .5em;
+        }
+
         .icon {
             margin-left: 0;
+            padding: 0;
 
             svg {
                 width: 1.4em;
                 height: 1.4em;
+            }
+
+            &.help {
+                opacity: .15;
+                vendor("transition", opacity .25s ease-in-out);
+                
+                &:hover {
+                    opacity: .35;
+                }
+
+                &.active {
+                    opacity: 1;
+                }
             }
         }
     }

@@ -57,6 +57,7 @@ export type TrackStatusInfo = {
     percent: number;
     totalSize: number;
     completed?: boolean;
+    skipped?: boolean;
     status?: string;
     error?: boolean;
     path?: string;
@@ -93,4 +94,16 @@ export type Format = {
 export type TrackCut = {
     from: number;
     to: number;
+};
+
+export type Release = {
+    title: string;
+    artist: string;
+    releaseYear: number;
+};
+
+export enum UrlType {
+    Artist = "artist",
+    Playlist = "playlist",
+    Track = "track",
 };

@@ -14,3 +14,15 @@ export enum VideoType {
     Mp4 = "mp4",
     Mkv = "mkv"
 };
+
+export type Format = {
+    type?: MediaFormat;
+    extension?: AudioType | VideoType;
+    videoQuality?: string;
+    audioQuality?: number;
+}
+
+export enum FormatScope {
+    Global = "global",
+    Tab =  "tab"
+}

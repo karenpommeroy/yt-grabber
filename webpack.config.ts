@@ -64,13 +64,21 @@ export const renderConfig: Configuration & DevServerConfiguration = {
             options: {
                 ignored: [
                     "**/resources/locales/**/translation.json",
-                    "**/resources/locales/**/translation_old.json"
+                    "**/resources/locales/**/translation_old.json",
+                    "**/resources/locales/**/help.json",
+                    "**/resources/locales/**/help_old.json",
                 ]
             }
         }
     },
     watchOptions: {
-        ignored: ["**/resources/locales/**/translation.json", "**/resources/locales/**/translation_old.json", "/dist",]
+        ignored: [
+            "**/resources/locales/**/translation.json",
+            "**/resources/locales/**/translation_old.json",
+            "**/resources/locales/**/help.json",
+            "**/resources/locales/**/help_old.json",
+            "/dist",
+        ]
     },
     context: getRoot(__dirname, ""),
     module: {
@@ -192,10 +200,7 @@ export const renderConfig: Configuration & DevServerConfiguration = {
                     to: "resources",
                     noErrorOnMissing: true,
                     force: false,
-                    globOptions: {
-                        // ignore: ["**/locales/**/*.json"]
-                    }
-                }
+                },
             ],
         }),
         new MiniCssExtractPlugin({filename: "bundle.css"}),

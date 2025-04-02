@@ -19,6 +19,10 @@ const reducer = (state: IAppState, action: IAppAction): IAppState => {
         return reduce(state, { loading: action.loading });
     }
 
+    if (action.type === AppActions.SetHelp) {
+        return reduce(state, { help: action.help });
+    }
+
     throw new Error();
 };
 

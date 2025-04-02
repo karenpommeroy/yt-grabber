@@ -1,8 +1,11 @@
+import {ipcRenderer, IpcRendererEvent} from "electron";
 import fs from "fs-extra";
 import _difference from "lodash/difference";
 import _filter from "lodash/filter";
 import _find from "lodash/find";
+import _forEach from "lodash/forEach";
 import _get from "lodash/get";
+import _groupBy from "lodash/groupBy";
 import _includes from "lodash/includes";
 import _isArray from "lodash/isArray";
 import _isEmpty from "lodash/isEmpty";
@@ -13,24 +16,28 @@ import _min from "lodash/min";
 import _size from "lodash/size";
 import _some from "lodash/some";
 import _times from "lodash/times";
+import _uniq from "lodash/uniq";
 import path from "path";
+import {LaunchOptions} from "puppeteer";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 import YTDlpWrap, {Progress as YtDlpProgress} from "yt-dlp-wrap";
 
-import {Alert, Box} from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import {Alert, Box, Grid} from "@mui/material";
 
 import {getBinPath} from "../../common/FileSystem";
 import {getAlbumInfo} from "../../common/Formatters";
-import {mapRange, resolveMockData} from "../../common/Helpers";
-import {MediaFormat} from "../../common/Media";
+import {getUrlType, mapRange, resolveMockData} from "../../common/Helpers";
+import {FormatScope, MediaFormat} from "../../common/Media";
+import {GetYoutubeUrlResult} from "../../common/Messaging";
 import {afterEach} from "../../common/Promise";
+import {ProgressInfo} from "../../common/Reporter";
 import {ApplicationOptions} from "../../common/Store";
-import {TrackStatusInfo, YoutubeInfoResult} from "../../common/Youtube";
+import {PlaylistInfo, TrackStatusInfo, UrlType, YoutubeInfoResult} from "../../common/Youtube";
 import {getOutputFilePath, getYtdplRequestParams} from "../../common/YtdplUtils";
 import FormatSelector from "../../components/youtube/formatSelector/FormatSelector";
+import InfoBar from "../../components/youtube/infoBar/InfoBar";
 import InputPanel from "../../components/youtube/inputPanel/InputPanel";
 import PlaylistTabs from "../../components/youtube/playlistTabs/PlaylistTabs";
 import {useAppContext} from "../../react/contexts/AppContext";
@@ -42,12 +49,13 @@ const abortControllers: {[key: string]: AbortController} = {};
 
 export const HomeView: React.FC = () => {
     const [appOptions, setAppOptions] = useState<ApplicationOptions>(global.store.get("application"));
-    const {operation, playlists, tracks, trackStatus, trackCuts, format, autoDownload, queue, setOperation, setPlaylists, setTracks, setTrackStatus, setAutoDownload, setQueue, clear} = useDataState();
+    const {operation, playlists, tracks, trackStatus, trackCuts, formats, autoDownload, queue, setOperation, setPlaylists, setTracks, setTrackStatus, setAutoDownload, setQueue, clear} = useDataState();
     const {state, actions} = useAppContext();
     const [error, setError] = useState(false);
     const [abort, setAbort] = useState<string>();
+    const [pendingTabs, setPendingTabs] = useState<string[]>([]);
     const [debouncedAppOptions] = useDebounceValue(appOptions, 500, {leading: true});
-    const {t} = useTranslation();
+    const {t, i18n} = useTranslation();
     const trackStatusRef = useRef<TrackStatusInfo[]>(trackStatus);
     const abortRef = useRef<string>(abort);
     
@@ -56,10 +64,10 @@ export const HomeView: React.FC = () => {
     }, [debouncedAppOptions]);
 
     useEffect(() => {
-        if (!autoDownload || !format) return;
+        if (!autoDownload || _isEmpty(formats) || _isEmpty(tracks) || _isEmpty(playlists) || state.loading) return;
   
         downloadAll();
-    }, [format, autoDownload]);
+    }, [formats, autoDownload, tracks, playlists, state.loading]);
 
     useEffect(() => {
         trackStatusRef.current = trackStatus;
@@ -70,12 +78,18 @@ export const HomeView: React.FC = () => {
 
         if (operation === "download") {
             setOperation(undefined);
-            _times(_min([appOptions.concurrency, _size(queue)]), (num) => {
-                const id = queue[num];
-                
-                trackStatusRef.current = _map(trackStatusRef.current, (item) => ({...item, percent: 0}));
-                setTrackStatus((prev) => _map(prev, (item) => ({...item, percent: 0})));
-                downloadTrack(id);
+            const unallocated = _filter(queue, (item) => {
+                const found = _find(trackStatusRef.current, ["trackId", item]);
+                return !found;
+            });
+            const currentlyRunning = _size(_filter(abortControllers, (a) => !a.signal.aborted));
+
+            if (currentlyRunning >= appOptions.concurrency) {
+                return;
+            }
+
+            _times(_min([appOptions.concurrency - currentlyRunning, _size(unallocated)]), (num) => {                
+                downloadTrack(unallocated[num]);
             });
         }
     }, [operation]);
@@ -84,7 +98,39 @@ export const HomeView: React.FC = () => {
         abortRef.current = abort;
     }, [abort]);
 
-    const handleUrlChange = (urls: string[]) => {       
+    useEffect(() => {
+        actions.setLoading(queue.length > 0);
+    }, [queue]);
+
+
+    useEffect(() => {
+        ipcRenderer.on("get-youtube-urls-progress", onGetYoutubeUrlsCompleted);
+
+        return () => {
+            ipcRenderer.off("get-youtube-urls-progress", onGetYoutubeUrlsCompleted);
+        };
+    }, []);
+
+    const onGetYoutubeUrlsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
+        if (!data.result) return;
+
+        setPendingTabs((prev) => [...prev, ...data.result.urls]);
+        
+        try {
+            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
+                .then((result) => {
+                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+                    
+                    return result;
+                });
+
+            return promise;
+        } catch {
+            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+        }
+    };
+
+    const handleUrlChange = (urls: string[]) => {
         setAppOptions((prev) => ({...prev, urls}));
     };
 
@@ -96,24 +142,54 @@ export const HomeView: React.FC = () => {
     };
 
     const loadInfo = (urls: string[]) => {        
-        try {
-            clear();
-            actions.setLoading(true);
+        clear();
+        setPendingTabs(urls);
 
-            const promise = Promise.all(afterEach(getResolveDataPromise(urls), update))
+        const groups = _groupBy(urls, getUrlType);
+        const artists = groups[UrlType.Artist] ?? [];
+        const lists = groups[UrlType.Playlist] ?? []; 
+        const vids = groups[UrlType.Track] ?? []; 
+        const basic = [...lists, ...vids];
+
+        if (appOptions.debugMode) {
+            loadMedia(basic);
+            return;
+        }
+
+        if (basic.length) {
+            loadMedia(basic);
+        }
+
+        if (artists.length) {
+            loadDiscographyInfo(artists);
+        }
+    };
+
+    const loadMedia = (urls: string[]) => {        
+        try {
+            Promise.all(afterEach(getResolveDataPromise(urls), update))
                 .then((result) => {
-                    setQueue((prev) => _filter(prev, (p) => p !== "resolve-data"));
-                    actions.setLoading(false);
+                    setQueue((prev) => _filter(prev, (p) => p !== "load-single"));
                     
                     return result;
                 });
 
-            setQueue((prev) => [...prev, "resolve-data"]);
-
-            return promise;
+            setQueue((prev) => [...prev, "load-single"]);
         } catch {
-            actions.setLoading(false);
+            setQueue((prev) => [...prev, "load-single"]);
         }
+    };
+
+    const loadDiscographyInfo = (artists: string[]) => {
+        const options: LaunchOptions = global.store.get("options");
+        const params = {
+            lang: i18n.language,
+            url: appOptions.youtubeUrl,
+            artistUrls: artists,
+        };
+        
+        setQueue((prev) => [...prev, "load-multi"]);
+        ipcRenderer.send("get-youtube-urls", params, options);
     };
 
     const getResolveDataPromise = (urls: string[]) => {
@@ -143,13 +219,9 @@ export const HomeView: React.FC = () => {
         const albumUrls = _map(albums, "url");
 
         if (_isEmpty(playlists) || !_difference(albumUrls, urls)) {
-            const infos = await loadInfo(urls);
-            
-            if (_isEmpty(infos)) {
-                setError(true);
-            } else {
-                setAutoDownload(true);
-            }
+            loadInfo(urls);
+           
+            setAutoDownload(true);
         } else if (_some(albums, (album) =>_some(album, v => _isNil(v)))) {
             setError(true);
         } else {
@@ -159,6 +231,7 @@ export const HomeView: React.FC = () => {
     };
 
     const downloadAll = () => {
+        setPendingTabs([]);
         setTrackStatus([]);
         trackStatusRef.current = [];
         setAutoDownload(false);
@@ -167,13 +240,14 @@ export const HomeView: React.FC = () => {
     };
 
     const downloadAlbum = (id: string) => {
+        setPendingTabs([]);
         const playlist = _find(playlists, ["album.id", id]);
-        const playlistTracks = _get(playlist, "tracks");
+        const playlistTrackIds = _map(_get(playlist, "tracks"), "id");
         
-        setTrackStatus([]);
-        trackStatusRef.current = [];
+        setTrackStatus((prev) => _filter(prev, (p) => !_includes(playlistTrackIds, p.trackId)));
+        trackStatusRef.current = _filter(trackStatusRef.current, (p) => !_includes(playlistTrackIds, p.trackId));
         setAutoDownload(false);
-        setQueue(() => _map(playlistTracks, "id"));
+        setQueue((prev) => _uniq([...prev, ...playlistTrackIds]));
         setOperation("download");
     };
 
@@ -181,6 +255,8 @@ export const HomeView: React.FC = () => {
         const track = _find(tracks, ["id", trackId]);
         const controller = new AbortController();
         const album = getTrackAlbum(trackId);
+        const playlist = getTrackPlaylist(trackId);
+        const format = getPlaylistFormat(playlist);
         const trackPath = path.resolve(getOutputFilePath(track, album, format));
         const newTrackProgressInfo: TrackStatusInfo = {
             trackId: track.id,
@@ -195,7 +271,7 @@ export const HomeView: React.FC = () => {
         if (!_includes(queue, trackId)) {
             setQueue((prev) => [...prev, trackId]);
         }
-
+        
         abortControllers[trackId] = controller;
         
         new Promise<boolean>((resolve) => {
@@ -224,9 +300,7 @@ export const HomeView: React.FC = () => {
         setTrackStatus((prev) => _filter(prev, (p) => !p.error));
         trackStatusRef.current = _filter(trackStatusRef.current, (p) => !p.error);
 
-        for (const failed of failedTracks) {
-            downloadTrack(failed.trackId);
-        }
+        setOperation("download");
     };
 
     const cancelAll = () => {       
@@ -239,18 +313,43 @@ export const HomeView: React.FC = () => {
         const playlistTrackIds = _map(_get(playlist, "tracks"), "id");
         
         setAbort(id);
-        _map(playlistTrackIds, (trackId) => abortControllers[trackId]?.abort());
+        _forEach(playlistTrackIds, (trackId) => {
+            if (!_find(trackStatusRef.current, ["trackId", trackId])) {
+                const cancelledProgressInfo: TrackStatusInfo = {
+                    trackId,
+                    percent: 0,
+                    totalSize: 0,
+                    skipped: true,
+                };
+
+                setTrackStatus((prev) => [...prev, cancelledProgressInfo]);
+                trackStatusRef.current = [...trackStatusRef.current, cancelledProgressInfo];
+            }
+            abortControllers[trackId]?.abort();
+        });
         const f = _filter(queue, (item) => !_includes(playlistTrackIds, item));
         setQueue((prev) => _filter(prev, (item) => !_includes(playlistTrackIds, item)));
-
+        
         if (!_isEmpty(f)) {
             setOperation("download");
         }
     };
 
-    const cancelTrack = (id: string) => {       
+    const cancelTrack = (id: string) => {
         setAbort(id);
         setQueue((prev) => _filter(prev, (item) => item !== id));
+
+        if (!_find(trackStatusRef.current, ["trackId", id])) {
+            const cancelledProgressInfo: TrackStatusInfo = {
+                trackId: id,
+                percent: 0,
+                totalSize: 0,
+                skipped: true,
+            };
+
+            setTrackStatus((prev) => [...prev, cancelledProgressInfo]);
+            trackStatusRef.current = [...trackStatusRef.current, cancelledProgressInfo];
+        }
         abortControllers[id]?.abort();
     };
     
@@ -307,6 +406,8 @@ export const HomeView: React.FC = () => {
         const aborted = controller?.signal.aborted;
         const track = _find(tracks, ["id", result.trackId]);
         const album = getTrackAlbum(track.id);
+        const playlist = getTrackPlaylist(result.trackId);
+        const format = getPlaylistFormat(playlist);
         const outputPath = getOutputFilePath(track, album, format);
         const dirPath = path.dirname(outputPath);
         const parsedPath = path.parse(outputPath);
@@ -341,6 +442,7 @@ export const HomeView: React.FC = () => {
             }
         }));
 
+        
         delete abortControllers[result.trackId];
 
         setQueue((prev) => _filter(prev, (item) => item !== result.trackId));
@@ -373,29 +475,45 @@ export const HomeView: React.FC = () => {
     const getTrackAlbum = useCallback((trackId: string) => {
         return _get(_find(playlists, (item) => !!_find(item.tracks, ["id", trackId])), "album");
     }, [playlists]);
+    
+    const getTrackPlaylist = useCallback((trackId: string) => {
+        return _find(playlists, (item) => !!_find(item.tracks, ["id", trackId]));
+    }, [playlists]);
+
+    const getPlaylistFormat = (playlist: PlaylistInfo) => {
+        if (appOptions.formatScope === FormatScope.Tab) {
+            return _get(formats, playlist.url, formats.global);
+        }
+    
+        return formats.global;
+    };
 
     return (
         <Box className={Styles.home}>
             <div className={Styles.header}>
                 <InputPanel
                     onChange={handleUrlChange}
-                    loading={state.loading || !_isEmpty(queue)}
+                    loading={state.loading}
                     onDownload={download}
                     onCancel={cancelAll}
                     onDownloadFailed={downloadFailed}
                     onLoadInfo={loadInfo}
                 />
-                {<FormatSelector value={format} disabled={_isEmpty(playlists) || _isEmpty(tracks)}/>} 
+                <FormatSelector disabled={_isEmpty(playlists) || _isEmpty(tracks)}/>
             </div>
             <Grid className={Styles.content} container spacing={2} padding={2}>
                 {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}
                 <PlaylistTabs
+                    pending={pendingTabs}
                     queue={queue}
                     onDownloadTrack={downloadTrack}
                     onDownloadPlaylist={downloadAlbum}
                     onCancelPlaylist={cancelPlaylist}
                     onCancelTrack={cancelTrack}
                 />
+            </Grid>
+            <Grid className={Styles.footer} container>
+                <InfoBar />
             </Grid>
         </Box>
     );

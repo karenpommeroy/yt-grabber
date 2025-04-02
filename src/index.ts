@@ -5,10 +5,14 @@ import installExtension, {REACT_DEVELOPER_TOOLS} from "electron-devtools-install
 import electronReload from "electron-reload";
 import Store from "electron-store";
 import path from "path";
+import {LaunchOptions} from "puppeteer";
 
+import getYoutubeUrls, {cancel} from "./automations/Youtube";
 import {
-    OpenSelectPathDialogParams, OpenSystemPathParams, OpenUrlInBrowserParams
+    GetYoutubeUrlParams, GetYoutubeUrlResult, OpenSelectPathDialogParams, OpenSystemPathParams,
+    OpenUrlInBrowserParams
 } from "./common/Messaging";
+import {ProgressInfo} from "./common/Reporter";
 import i18n from "./i18next";
 
 const isDev = () => !app.isPackaged;
@@ -33,7 +37,7 @@ Store.initRenderer();
 
 const createWindow = async () => {
     mainWindow = new BrowserWindow({
-        width: 1000,
+        width: 1100,
         height: 900,
         frame: true,
         roundedCorners: true,
@@ -130,5 +134,25 @@ ipcMain.on(
         }
         
         mainWindow.webContents.send("open-url-in-browser-completed", JSON.stringify(params));
+    },
+);
+
+ipcMain.on(
+    "get-youtube-urls",
+    async (
+        event: IpcMainEvent,
+        params: GetYoutubeUrlParams,
+        options: LaunchOptions,
+    ) => {
+        const onProgress = (data: ProgressInfo<GetYoutubeUrlResult>) => mainWindow.webContents.send("get-youtube-urls-progress", data);
+        
+        getYoutubeUrls(params, options, i18n, onProgress);
+    },
+);
+
+ipcMain.on(
+    "get-youtube-urls-cancel",
+    async (event: IpcMainEvent, options: LaunchOptions) => {
+        cancel();
     },
 );

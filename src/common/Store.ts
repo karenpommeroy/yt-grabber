@@ -1,6 +1,10 @@
 import {Schema} from "electron-store";
+import _values from "lodash/values";
+
+import {FormatScope} from "./Media";
 
 export type ApplicationOptions = {
+    youtubeUrl?: string;
     outputDirectory?: string;
     albumOutputTemplate?: string;
     playlistOutputTemplate?: string;
@@ -9,9 +13,11 @@ export type ApplicationOptions = {
     concurrency?: number;
     quality?: number;
     debugMode?: boolean;
+    formatScope?: FormatScope;
     urls?: string[];
     language?: string;
     alwaysOverwrite?: boolean;
+    discographyDownload?: boolean;
 };
 
 export interface IStore {
@@ -41,6 +47,10 @@ export const StoreSchema: Schema<IStore> = {
                     type: "string"
                 },
                 default: [],
+            },
+            youtubeUrl: {
+                type: "string",
+                default: "https://music.youtube.com",
             },
             outputDirectory: {
                 type: "string",
@@ -74,12 +84,21 @@ export const StoreSchema: Schema<IStore> = {
                 type: "boolean",
                 default: false
             },
+            formatScope: {
+                type: "string",
+                default: FormatScope.Global,
+                enum: _values(FormatScope),
+            },
             language: {
                 type: "string"
             },
             alwaysOverwrite: {
                 type: "boolean",
                 default: false
+            },
+            discographyDownload: {
+                type: "boolean",
+                default: true
             }
         },
         default: {},

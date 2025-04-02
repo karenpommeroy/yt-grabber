@@ -4,8 +4,7 @@ import _keys from "lodash/keys";
 import _map from "lodash/map";
 import _replace from "lodash/replace";
 
-import TracksMock from "../tests/MultipleMock";
-import {TrackInfo, YoutubeInfoResult} from "./Youtube";
+import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
 
 export const isDev = () => process.env.NODE_ENV === "development";
 
@@ -28,6 +27,7 @@ export const escapePathString = (value: string) => {
 };
 
 export const resolveMockData = (delay = 1000) => {
+    const TracksMock: any[] = [];
     const groupped = _groupBy(TracksMock as unknown as TrackInfo[], (item) => item.playlist_id ?? item.id);
     
     return _map(groupped, (v, k, c) => new Promise<YoutubeInfoResult>((resolve) => {
@@ -35,4 +35,22 @@ export const resolveMockData = (delay = 1000) => {
             resolve({url: k, value: v});
         }, delay * (_indexOf(_keys(c), k) + 1));
     }));
+};
+
+export const waitFor = (miliseconds: number) => new Promise((resolve) => setTimeout(resolve, miliseconds));
+
+export const getUrlType = (url: string) => {
+    const artistRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/|youtu\.be\/)?(channel)/;
+    const playlistRegex = /^(?:https?:\/\/)?(?:www\.)?(?:music\.)?youtube\.com\/(?:playlist\?list=|watch\?.*?\blist=)([a-zA-Z0-9_-]+)/;
+
+    const isArtist = artistRegex.test(url);
+    const isPlaylist = playlistRegex.test(url);
+    
+    if (isArtist) {
+        return UrlType.Artist;
+    } else if (isPlaylist) {
+        return UrlType.Playlist;
+    }
+
+    return UrlType.Track;
 };

@@ -1,11 +1,11 @@
 import classnames from "classnames";
 import {ipcRenderer, IpcRendererEvent} from "electron";
-import _difference from "lodash/difference";
 import _filter from "lodash/filter";
 import _find from "lodash/find";
 import _first from "lodash/first";
 import _get from "lodash/get";
 import _includes from "lodash/includes";
+import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
 import _map from "lodash/map";
 import _reduce from "lodash/reduce";
@@ -17,8 +17,7 @@ import React, {useEffect, useState} from "react";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import {Avatar, Box, Skeleton, Stack} from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import {Avatar, Box, Grid, Skeleton, Stack, Typography} from "@mui/material";
 import Tab from "@mui/material/Tab";
 
 import {OpenSystemPathParams} from "../../../common/Messaging";
@@ -31,6 +30,7 @@ import Styles from "./PlaylistTabs.styl";
 
 export type PlaylistTabsProps = {
     queue: string[];
+    pending?: string[];
     onDownloadTrack?: (id: string) => void;
     onDownloadPlaylist?: (id: string) => void;
     onCancelPlaylist?: (id: string) => void;
@@ -38,16 +38,34 @@ export type PlaylistTabsProps = {
 };
 
 export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsProps) => {
-    const {queue, onDownloadTrack, onDownloadPlaylist, onCancelPlaylist, onCancelTrack} = props;
-    const {trackStatus, playlists, urls} = useDataState();
+    const {queue, pending, onDownloadTrack, onDownloadPlaylist, onCancelPlaylist, onCancelTrack} = props;
+    const {trackStatus, playlists, activeTab, setActiveTab} = useDataState();
     const {state} = useAppContext();
-    const [selected, setSelected] = useState(_get(playlists, "0.url", _first(urls)));
-    const onlyOnePlaylist = (playlists.length === 1 && !state.loading) || (urls.length === 1 && state.loading);
-    const itemsBeingLoaded = state.loading ? _filter(urls, (url) => !_find(playlists, (p) => _includes(url, p.url))) : [];
+    const [pendingTabs, setPendingTabs] = useState([]);
+    const tabWidth = window.innerWidth / (pendingTabs.length + playlists.length) - 30; 
 
     useEffect(() => {
-        setSelected(_get(playlists, "0.url", _first(urls)));
-    }, [playlists]);
+        if (!state.loading && !_find(playlists, ["url", activeTab])) {
+            setActiveTab(_get(playlists, "0.url", _first(pendingTabs)));
+        }
+    }, [playlists, pendingTabs, state.loading]);
+
+    useEffect(() => {
+        if (!state.loading) {
+            setPendingTabs([]);
+            
+            return;
+        }
+
+        setPendingTabs(_filter(pending, (p) => !_find(playlists, (pl) => pl.url === p)));
+    }, [state.loading, playlists, pending]);
+
+    useEffect(() => {
+        if (activeTab) return;
+        
+        setActiveTab(_get(playlists, "0.url", _first(pendingTabs)));
+    }, []);
+
 
     const isPlaylistLoading = (id: string) => {
         const playlist = _find(playlists, ["album.id", id]);
@@ -57,7 +75,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     };
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
-        setSelected(newValue);
+        setActiveTab(newValue);
     };
 
     const handleDownloadTrack = (trackId: string) => {
@@ -74,7 +92,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
 
     const onCancel = () => {
         if (_isFunction(onCancelPlaylist)) {
-            onCancelPlaylist(selected);
+            onCancelPlaylist(activeTab);
         }
     };
 
@@ -95,16 +113,18 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     };
 
     const getTotalProgress = (albumId: string) => {
-        const trackIdsForSelectedTab = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
-        const filteredQueue = _filter(queue, (item) => _includes(trackIdsForSelectedTab, item));
+        const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
+        const tracksCompletedForAlbum = _filter(trackStatus, (item) => _includes(trackIdsForAlbum, item.trackId) && (item.completed || item.error));
+        const tracksPendingForAlbum = _filter(queue, (item) => _includes(trackIdsForAlbum, item));
 
-        const total = _size(trackIdsForSelectedTab) * 100;
-        const completed = _size(_difference(trackIdsForSelectedTab, filteredQueue)) * 100;
+        const completed = _size(tracksCompletedForAlbum);
+        const running = _size(tracksPendingForAlbum);
+        const total = completed + running;
 
-        const progress = _reduce(filteredQueue, (prev: number, curr: string) => {
+        const progress = _reduce(tracksPendingForAlbum, (prev, curr) => {
             const status = _find(trackStatus, ["trackId", curr]);
     
-            return status ? prev + status.percent : prev;
+            return status ? prev + status.percent / 100 : prev;
         }, 0);
 
         return (completed + progress) / total * 100;
@@ -137,12 +157,16 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
             ipcRenderer.off("open-url-in-browser-completed", onOpenUrlInBrowserCompleted);
         };
     }, []);
+    
+    if (_isEmpty(playlists) && _isEmpty(pendingTabs)) {
+        return null;
+    }
 
     return (
         <Grid className={Styles.playlistTabs} size={12}>
-            <TabContext value={selected || 0}>
-                {!onlyOnePlaylist &&<Box borderBottom={1} borderColor="divider">
-                    <TabList scrollButtons="auto" onChange={handleTabChange} textColor="primary" indicatorColor="secondary" className={Styles.tablist}>
+            <TabContext value={activeTab ?? _get(playlists, "0.url", _first(pendingTabs))}>
+                <Box borderBottom={1} borderColor="divider">
+                    <TabList variant="scrollable" scrollButtons="auto" onChange={handleTabChange} textColor="primary" indicatorColor="secondary" className={Styles.tablist}>
                         {_map(playlists, (playlist) => {
                             const progress = getTotalProgress(playlist.album.id);
                             const loading = !isNaN(progress) && progress !== 100;
@@ -157,11 +181,11 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                                     </div>
                                 }
                                 iconPosition="start"
-                                label={<div className={Styles.tabTitle}>{playlist.album.title}</div>}
+                                label={<Typography title={playlist.album.title} variant="button" className={Styles.tabTitle} sx={{maxWidth: tabWidth}}>{playlist.album.title}</Typography>}
                                 value={playlist.url}
                             />;
                         })}
-                        {_map(itemsBeingLoaded, (item) => {
+                        {_map(pendingTabs, (item) => {
                             return <Tab
                                 key={item}
                                 className={Styles.tab}
@@ -172,7 +196,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                             />;
                         })}
                     </TabList>
-                </Box>}
+                </Box>
                 {_map(playlists, (playlist) =>
                     <TabPanel className={Styles.tabPanel} value={playlist.url} key={playlist.url}>
                         <MediaInfoPanel
@@ -193,7 +217,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                         />
                     </TabPanel>
                 )}
-                {_map(itemsBeingLoaded, (item) =>
+                {_map(pendingTabs, (item) =>
                     <TabPanel className={Styles.tabPanel} value={item} key={item}>
                         <Stack spacing={3}>
                             <Stack spacing={3} direction="row">

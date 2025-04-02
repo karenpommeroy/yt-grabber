@@ -1,90 +1,90 @@
-@import "../../../styles/mixins.styl"
+@import '../../../styles/mixins.styl'
 
-.media-info-panel {
-    .header {
-        display: flex;
+.media-info-panel
+    .header
+        display flex
+        vendor('transition', background-color 0.25s ease-in-out)
 
-        .content {
-            display: flex;
-            flex-direction: row;
-            flex-grow: 1;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .info {
-            flex: 1 0 auto;
-            padding: .2rem .5rem;
-        }
+        &:hover
+            background-color var(--theme-palette-divider)
 
-        .actions {
-            display: flex;
-            align-items: center;
-            flex-direction: row;
-            opacity: 0;
-            vendor("transition", all .25s ease-in-out)
 
-            .edit {
-                min-width: 12px;
-                padding: 12px;
-            }
+        .image-button
+            cursor pointer
 
-            .download {
-                min-width: 12px;
-                padding: 12px;
-            }
+            &:hover
+                opacity 0.5
+            .test
+                ad
 
-            .open-output {
-                min-width: 12px;
-                padding: 12px;
-            }
-        }
-        
-        .loading {
-            z-index: 1;
-            align-items: center;
-            column-gap: 2rem;
-        }
-        
-        .progress-indicator {
-            display: flex;
-            align-items: center;
-            flex-direction: row;
-        }
+        .content
+            display flex
+            flex-direction row
+            flex-grow 1
+            position relative
+            // z-index 1
 
-        .progress {
-            display: flex;
-            align-items: center;
-            flex-direction: row;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            opacity: 0.25;
+        .info
+            flex 1 0 auto
+            padding 0.2rem 0.5rem
 
-            .progress-bar {
-                width: 100%;
-                height: 100%;
-            }
-        }
+        .actions
+            display flex
+            align-items center
+            flex-direction row
+            opacity 0
+            vendor('transition', all 0.25s ease-in-out)
 
-        .row {
-            display: flex;
+            .edit
+                min-width 12px
+                padding 12px
 
-            .label {
-                padding-right: .3rem;
-                capitalize();
+            .remove
+                min-width 12px
+                padding 12px
 
-                & .bold {
-                    font-weight: bold;
-                }
-            }
-        }
-    }
+            .download
+                min-width 12px
+                padding 12px
 
-    &:hover {
-        .actions {
-            opacity: 1;
-        }
-    }
-}
+            .open-output
+                min-width 12px
+                padding 12px
+
+        .loading
+            z-index 1
+            align-items center
+            column-gap 2rem
+
+        .progress-indicator
+            display flex
+            align-items center
+            flex-direction row
+
+        .progress
+            display flex
+            align-items center
+            flex-direction row
+            position absolute
+            width 100%
+            height 100%
+            z-index 0
+            opacity 0.25
+
+            .progress-bar
+                width 100%
+                height 100%
+
+        .row
+            display flex
+
+            .label
+                padding-right 0.3rem
+                capitalize()
+
+                & .bold
+                    font-weight bold
+
+    &:hover
+        .actions
+            opacity 1
