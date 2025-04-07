@@ -33,6 +33,16 @@ export const ThemePicker = (props: IThemePickerProps) => {
         return <SystemModeIcon className={Styles.icon} />;
     };
 
+    const resolveText = (mode: ThemeMode) => {
+        if (mode === "dark") {
+            return t("modeDark");
+        } else if (mode === "light") {
+            return t("modeLight");
+        }
+
+        return t("modeSystem");
+    };
+
     const onChangeMode = (event: SelectChangeEvent<ThemeMode>) => {       
         setMode(event.target.value as ThemeMode);
     };
@@ -55,7 +65,7 @@ export const ThemePicker = (props: IThemePickerProps) => {
             >
                 {_map(themeModes, (item) => <MenuItem key={item} value={item} className={Styles.menuItem}>
                     {resolveIcon(item)}
-                    <div>{item}</div>
+                    {resolveText(item)}
                 </MenuItem>)}
             </Select>
         </FormControl>

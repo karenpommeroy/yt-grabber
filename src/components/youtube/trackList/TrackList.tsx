@@ -266,9 +266,11 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                 </Tooltip>
                                 {!_includes(queue, item.id) &&
                                     <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
-                                            <DownloadIcon />
-                                        </Button>
+                                        <div>
+                                            <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
+                                                <DownloadIcon />
+                                            </Button>
+                                        </div>
                                     </Tooltip>
                                 }
                                 {_includes(queue, item.id) &&

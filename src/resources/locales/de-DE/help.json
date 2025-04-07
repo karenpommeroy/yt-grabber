@@ -65,8 +65,8 @@
     "formatScopeHeader": "Formatbereich",
     "formatScopeContent": [
         "Legen Sie den Geltungsbereich des ausgewählten Formats für Downloads fest.",
-        "Wenn der Bereich `global` ist, wird das ausgewählte Format auf alle heruntergeladenen Dateien angewendet, sobald der Download gestartet wird.",
-        "Wenn der Bereich `pro Tab` ist, können Sie für jeden Tab ein anderes Format festlegen, sodass die zugehörigen Downloads unterschiedliche Ausgabeformate haben."
+        "Wenn der Bereich `Allgemein` ist, wird das ausgewählte Format auf alle heruntergeladenen Dateien angewendet, sobald der Download gestartet wird.",
+        "Wenn der Bereich `Für jeden Tab unterschiedlich` ist, können Sie für jeden Tab ein anderes Format festlegen, sodass die zugehörigen Downloads unterschiedliche Ausgabeformate haben."
     ],
     "alwaysOverwriteHeader": "Dateiüberschreibung",
     "alwaysOverwriteContent": "Legt fest, ob vorhandene heruntergeladene Dateien überschrieben werden.\nWenn deaktiviert, wird kein Download durchgeführt, wenn die entsprechende Datei bereits vorhanden ist.",
@@ -116,5 +116,19 @@
     "allTracksHeader": "Titel",
     "allTracksContent": "Anzahl aller geladenen Titel.",
     "grabbedTracksHeader": "Heruntergeladene Titel",
-    "grabbedTracksContent": "Anzahl der heruntergeladenen Titel."
+    "grabbedTracksContent": "Anzahl der heruntergeladenen Titel.",
+    "logMenuHeader": "Fehler und Warnungen",
+    "logMenuContent": "Zeigt Fehler und Warnungen im Zusammenhang mit dem Downloadvorgang an.",
+    "downloadFailedHeader": "Download fehlgeschlagen",
+    "downloadFailedContent": "Versucht, fehlgeschlagene Elemente erneut herunterzuladen.",
+    "cancellAllHeader": "Alle Downloads abbrechen",
+    "cancellAllContent": "Alle aktiven und wartenden Downloads abbrechen.",
+    "cancelDownloadPlaylistHeader": "Playlist-Download abbrechen",
+    "cancelDownloadPlaylistContent": "Alle aktiven und wartenden Downloads, die mit dieser Playlist verbunden sind, abbrechen.",
+    "cancelDownloadTrackHeader": "Track-Download abbrechen",
+    "cancelDownloadTrackContent": "Allen Sie den Download des Titels ab.",
+    "findInFileSystemHeader": "In Dateisystem suchen",
+    "findInFileSystemContent": "Offnet die zugehörige Datei im Dateisystem.",
+    "openOutputDirectoryHeader": "Ausgabeverzeichnis öffnen",
+    "openOutputDirectoryContent": "Offnet das Ausgabeverzeichnis im Datei-Explorer."
 }

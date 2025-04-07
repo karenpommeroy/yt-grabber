@@ -65,8 +65,8 @@
     "formatScopeHeader": "Format Scope",
     "formatScopeContent": [
         "Specify scope of format selected for downloads.",
-        "If scope is `global` then format you select will be applied to all downloaded files once download is started.",
-        "If scope is `per tab` then you can specify different format for each tab so that related downloads will have different output formats."
+        "If scope is `Global` then format you select will be applied to all downloaded files once download is started.",
+        "If scope is `Different for each tab` then you can specify different format for each tab so that related downloads will have different output formats."
     ],
     "alwaysOverwriteHeader": "File Overwriting",
     "alwaysOverwriteContent": "Specifies whether existing downloaded files are overwritten.\nIf disabled, no download is performed when related file is already present.",
@@ -116,5 +116,19 @@
     "allTracksHeader": "Tracks",
     "allTracksContent": "Number of all loaded tracks.",
     "grabbedTracksHeader": "Grabbed Tracks",
-    "grabbedTracksContent": "Number of downloaded tracks."
+    "grabbedTracksContent": "Number of downloaded tracks.",
+    "logMenuHeader": "Errors and Warnings",
+    "logMenuContent": "Displays errors and warnings related to downloading process.",
+    "downloadFailedHeader": "Download Failed",
+    "downloadFailedContent": "Attempts to download failed items again.",
+    "cancellAllHeader": "Cancel All Downloads",
+    "cancellAllContent": "Cancels all active and queued downloads.",
+    "cancelDownloadPlaylistHeader": "Cancel Playlist Download",
+    "cancelDownloadPlaylistContent": "Cancels all active and queued downloads related to this playlist.",
+    "cancelDownloadTrackHeader": "Cancel Track Download",
+    "cancelDownloadTrackContent": "Cancels downlaoding track.",
+    "findInFileSystemHeader": "Find File",
+    "findInFileSystemContent": "Finds related file in the file system.",
+    "openOutputDirectoryHeader": "Open Output Directory",
+    "openOutputDirectoryContent": "Opens output directory in file explorer."
 }

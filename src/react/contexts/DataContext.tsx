@@ -13,6 +13,11 @@ export type Task = {
     dirty?: boolean;
 };
 
+export type LogEntry = {
+    url: string;
+    message: string;
+};
+
 export type DataState = {
     playlists: PlaylistInfo[];
     tracks: TrackInfo[];
@@ -24,6 +29,8 @@ export type DataState = {
     operation: string;
     activeTab: string;
     queue: string[];
+    errors: LogEntry[];
+    warnings: LogEntry[];
 
     setPlaylists: React.Dispatch<React.SetStateAction<PlaylistInfo[]>>;
     setTracks: React.Dispatch<React.SetStateAction<TrackInfo[]>>;
@@ -35,6 +42,8 @@ export type DataState = {
     setQueue: React.Dispatch<React.SetStateAction<string[]>>;
     setOperation: React.Dispatch<React.SetStateAction<string>>;
     setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+    setErrors: React.Dispatch<React.SetStateAction<LogEntry[]>>;
+    setWarnings: React.Dispatch<React.SetStateAction<LogEntry[]>>;
     clear: () => void;
 };
 
@@ -52,6 +61,8 @@ export function DataProvider(props: any) {
     const [queue, setQueue] = useState<string[]>([]);
     const [operation, setOperation] = useState<string>();
     const [activeTab, setActiveTab] = useState<string>();
+    const [errors, setErrors] = useState<LogEntry[]>([]);
+    const [warnings, setWarnings] = useState<LogEntry[]>([]);
 
     const clear = () => {
         setPlaylists([]);
@@ -62,6 +73,8 @@ export function DataProvider(props: any) {
         setQueue([]);
         setFormats({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 0}});
         setOperation(undefined);
+        setErrors([]);
+        setWarnings([]);
     };
 
     return (
@@ -76,7 +89,9 @@ export function DataProvider(props: any) {
             queue,
             operation,
             activeTab,
-            
+            errors,
+            warnings,
+
             setOperation,
             setPlaylists,
             setAutoDownload,
@@ -87,6 +102,8 @@ export function DataProvider(props: any) {
             setUrls,
             setQueue,
             setActiveTab,
+            setErrors,
+            setWarnings,
             clear
         }}>
             {props.children}

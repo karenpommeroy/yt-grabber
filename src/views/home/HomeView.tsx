@@ -11,11 +11,14 @@ import _isArray from "lodash/isArray";
 import _isEmpty from "lodash/isEmpty";
 import _isNaN from "lodash/isNaN";
 import _isNil from "lodash/isNil";
+import _join from "lodash/join";
 import _map from "lodash/map";
 import _min from "lodash/min";
 import _size from "lodash/size";
 import _some from "lodash/some";
+import _split from "lodash/split";
 import _times from "lodash/times";
+import _trim from "lodash/trim";
 import _uniq from "lodash/uniq";
 import path from "path";
 import {LaunchOptions} from "puppeteer";
@@ -49,7 +52,25 @@ const abortControllers: {[key: string]: AbortController} = {};
 
 export const HomeView: React.FC = () => {
     const [appOptions, setAppOptions] = useState<ApplicationOptions>(global.store.get("application"));
-    const {operation, playlists, tracks, trackStatus, trackCuts, formats, autoDownload, queue, setOperation, setPlaylists, setTracks, setTrackStatus, setAutoDownload, setQueue, clear} = useDataState();
+    const {
+        operation,
+        playlists,
+        tracks,
+        trackStatus,
+        trackCuts,
+        formats,
+        autoDownload,
+        queue,
+        setOperation,
+        setPlaylists,
+        setTracks,
+        setTrackStatus,
+        setAutoDownload,
+        setQueue,
+        setErrors,
+        setWarnings,
+        clear
+    } = useDataState();
     const {state, actions} = useAppContext();
     const [error, setError] = useState(false);
     const [abort, setAbort] = useState<string>();
@@ -134,11 +155,19 @@ export const HomeView: React.FC = () => {
         setAppOptions((prev) => ({...prev, urls}));
     };
 
-    const update = (item: YoutubeInfoResult) => {       
-        if (item.error) return;
+    const update = (item: YoutubeInfoResult) => {
+        if (!_isEmpty(item.warnings)) {
+            setWarnings((prev) => [...prev, {url: item.url, message: _join(item.warnings, "\n")}]);
+        }
 
-        setTracks((prev) => [...prev, ...item.value]);
-        setPlaylists((prev) => [...prev, {url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value}]);
+        if (!_isEmpty(item.errors)) {
+            setErrors((prev) => [...prev, {url: item.url, message: _join(item.errors, "\n")}]);
+        }
+
+        if (item.value) {
+            setTracks((prev) => [...prev, ...item.value]);
+            setPlaylists((prev) => [...prev, {url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value}]);
+        }
     };
 
     const loadInfo = (urls: string[]) => {        
@@ -197,18 +226,19 @@ export const HomeView: React.FC = () => {
             return resolveMockData(300);
         } else {
             return _map(urls, (url) => new Promise<YoutubeInfoResult>((resolve) => {
-                ytDlpWrap.getVideoInfo(url)
+                ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass"])
                     .then((result) => {
-                        resolve({url, value: _isArray(result) ? result : [result]});
+                        const parsed = _map(_split(_trim(result), "\n"), (item) => JSON.parse(item));
+                        
+                        resolve({url, value: _isArray(parsed) ? parsed : [parsed]});
                     })
                     .catch((e) => {
-                        const authErrRegex = /ERROR: \[youtube\].*Sign in to confirm your age/gm;
-
-                        if (authErrRegex.test(e.message)) {
-                            return resolve({url, error: "Age restriction detected. Sign in required."}); 
-                        }
+                        const warningRegex = /WARNING:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
+                        const errorRegex = /ERROR:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
+                        const warningMatches = e.message.match(warningRegex) ?? [];
+                        const errorMatches = e.message.match(errorRegex) ?? [];
                         
-                        resolve({url, error: e.message}); 
+                        resolve({url, errors: _uniq(errorMatches), warnings: _uniq(warningMatches)}); 
                     });
             }));
         }

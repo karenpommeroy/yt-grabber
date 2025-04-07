@@ -1,4 +1,6 @@
 
+import _toInteger from "lodash/toInteger";
+import _toString from "lodash/toString";
 import {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
@@ -11,6 +13,65 @@ const useHelp = () => {
     const [help, setHelp] = useState<{header: string, content: string | string[];}>({header: "", content: ""});
     const {t} = useTranslation();
     
+    const createBackdropElement = (background = "rgba(0, 0, 0, 0.5)", filter = "blur(2px)") => {
+        const backdrop = document.createElement("div");
+        
+        backdrop.style.position = "absolute";
+        backdrop.style.width = "100vw";
+        backdrop.style.height = "100vh";
+        backdrop.style.top = "0";
+        backdrop.style.left = "0";
+        backdrop.style.zIndex = "1";
+        backdrop.style.background = background;
+        backdrop.style.backdropFilter = filter;
+
+        document.body.appendChild(backdrop);
+
+        return backdrop;
+    };
+
+    const createAnchorElement = (original: HTMLElement, zIndex = 999) => {
+        const bbox = original.getBoundingClientRect();
+        const clone = original.cloneNode(true) as HTMLElement;
+
+        const copyComputedStyle = (src: HTMLElement, dest: HTMLElement) => {
+            const computedStyle = window.getComputedStyle(src);
+            
+            for (const key of computedStyle) {
+                try {
+                    dest.style[key as any] = computedStyle.getPropertyValue(key);
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        };
+      
+        const traverseAndCopy = (srcNode: HTMLElement, destNode: HTMLElement, disableEvents = true) => {
+            copyComputedStyle(srcNode, destNode);
+            
+            if (disableEvents) {
+                destNode.style.pointerEvents = "none";
+            }
+
+            const srcChildren = srcNode.children as HTMLCollectionOf<HTMLElement>;
+            const destChildren = destNode.children as HTMLCollectionOf<HTMLElement>;
+            
+            for (let i = 0; i < srcChildren.length; i++) {
+                traverseAndCopy(srcChildren[i], destChildren[i]);
+            }
+        };
+      
+        traverseAndCopy(original, clone);
+        document.body.appendChild(clone);
+
+        clone.style.position = "fixed";
+        clone.style.left = bbox.x - clone.offsetLeft + "px";
+        clone.style.top = bbox.y - clone.offsetTop + "px";
+        clone.style.zIndex = _toString(zIndex + 1);
+
+        return clone;
+    };
+
     const handleClick = (event: MouseEvent) => {            
         const element = event.target as HTMLElement;
         const elementHelp = element.closest<HTMLElement>("[data-help]");
@@ -25,11 +86,12 @@ const useHelp = () => {
 
         const header = t(helpId + "Header", {ns: "help"});
         const content: string | string[] = t(helpId + "Content", {ns: "help", returnObjects: true}) as string | string[]; 
-        const backdrop = document.createElement("div");
-
-        backdrop.id = "help-backdrop";
-        setBackdropEl(backdrop);
-        setAnchorEl(elementHelp);
+        
+        const backdropElement = createBackdropElement();
+        const anchorElement = createAnchorElement(elementHelp, _toInteger(backdropElement.style.zIndex));
+        
+        setBackdropEl(backdropElement);
+        setAnchorEl(anchorElement);
         setHelp({header, content});
 
         event.stopPropagation();
@@ -43,33 +105,21 @@ const useHelp = () => {
     
     const handleKeyUpEvent = (event: KeyboardEvent) => {
         if (event.key !== "Escape") return;
-            
+
         actions.setHelp(false);
         setBackdropEl(null);
         setAnchorEl(null);
     };
 
     useEffect(() => {
-        if (backdropEl) {
-            document.body.appendChild(backdropEl);
-        }
-
         return () => {
-            if (!backdropEl) return;
-
-            document.body.removeChild(backdropEl);
+            backdropEl?.remove();
         };
     }, [backdropEl]);
 
-    useEffect(() => {
-        if (anchorEl) {
-            anchorEl.style.zIndex = "99";
-        }
-
+    useEffect(() => {        
         return () => {
-            if (!anchorEl) return;
-
-            anchorEl.style.zIndex = "initial";
+            anchorEl?.remove();
         };
     }, [anchorEl]);
 
@@ -84,9 +134,6 @@ const useHelp = () => {
             document.removeEventListener("mouseup", handleMouseEvent, true);
             document.removeEventListener("mousedown", handleMouseEvent, true);
             document.removeEventListener("keyup", handleKeyUpEvent, true);
-            if (anchorEl) {
-                anchorEl.style.zIndex = "initial";
-            }
         }
 
         return () => {
@@ -94,9 +141,6 @@ const useHelp = () => {
             document.removeEventListener("mouseup", handleMouseEvent, true);
             document.removeEventListener("mousedown", handleMouseEvent, true);
             document.removeEventListener("keyup", handleKeyUpEvent, true);
-            if (anchorEl) {
-                anchorEl.style.zIndex = "initial";
-            }
         };
     }, [state]);
 

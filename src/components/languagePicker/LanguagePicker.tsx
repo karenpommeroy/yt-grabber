@@ -2,12 +2,12 @@ import classnames from "classnames";
 import $_ from "lodash";
 import moment from "moment";
 import path from "path";
-import React, {HTMLProps, useState} from "react";
+import React, {HTMLAttributes, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
-    Button, CircularProgress, ClickAwayListener, Menu, MenuItem, Theme, useMediaQuery
+    Box, BoxProps, Button, CircularProgress, ClickAwayListener, Menu, MenuItem, Theme, useMediaQuery
 } from "@mui/material";
 
 import {ComponentDisplayMode} from "../../common/ComponentDisplayMode";
@@ -17,13 +17,13 @@ const isMac = process.platform === "darwin";
 const isDev = process.env.NODE_ENV === "development";
 const prependPath = isMac && !isDev ? path.join(process.resourcesPath, "..") : ".";
 
-export type LanguagePickerProps = Omit<HTMLProps<HTMLDivElement>, "onClick"> & {
+export type LanguagePickerProps = Omit<HTMLAttributes<HTMLDivElement> & BoxProps, "onClick"> & {
     className?: string;
     mode?: ComponentDisplayMode;
     showArrow?: boolean;
 }
 
-export type LanguagePickerTriggerProps = Omit<HTMLProps<HTMLButtonElement>, "onClick"> & LanguagePickerProps & {
+export type LanguagePickerTriggerProps = Omit<HTMLAttributes<HTMLButtonElement>, "onClick"> & LanguagePickerProps & {
     loading?: boolean;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
@@ -69,7 +69,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
     };
 
     return (
-        <div className={classnames(Styles.languagePicker,className)} {...rest}>
+        <Box className={classnames(Styles.languagePicker,className)} {...rest}>
             <LanguagePickerTrigger showArrow={showArrow} mode={displayMode} loading={loading} onClick={onTriggerClick} />
             <ClickAwayListener onClickAway={onClickAway}>
                 <Menu
@@ -91,7 +91,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
                     ))}
                 </Menu>
             </ClickAwayListener>
-        </div>
+        </Box>
     );
 };
 

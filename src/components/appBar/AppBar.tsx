@@ -4,6 +4,7 @@ import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
 import HelpIcon from "@mui/icons-material/Help";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {Stack} from "@mui/material";
 import ApplicationBar from "@mui/material/AppBar";
@@ -56,15 +57,19 @@ const AppBar = (props: AppBarProps) => {
     const createSettingsButton = () => {
         if (state.location !== "/") {
             return (
-                <IconButton onClick={handleClose} color="inherit" className={Styles.icon}>
-                    <CloseIcon />
-                </IconButton>
+                <div>
+                    <IconButton onClick={handleClose} color="inherit" className={Styles.icon}>
+                        <CloseIcon />
+                    </IconButton>
+                </div>
             );
         } else {
             return (
-                <IconButton data-help="settings" disabled={disableNavigation} onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
-                    <SettingsIcon />
-                </IconButton>
+                <div>
+                    <IconButton data-help="settings" disabled={disableNavigation} onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
+                        <SettingsIcon />
+                    </IconButton>
+                </div>
             );
         }
     };
@@ -79,8 +84,8 @@ const AppBar = (props: AppBarProps) => {
                     </Typography>
                     <Box sx={{flexGrow: 1}}></Box>
                     <Stack direction="row" gap={1}>
-                        <LanguagePicker data-help="languagePicker" className={Styles.languagePicker} showArrow={false} mode={ComponentDisplayMode.Minimal} />
-                        <IconButton data-help="help-toggle" className={classnames(Styles.icon, Styles.help, {[Styles.active]: state.help})} onClick={onHelpClick}><HelpIcon/></IconButton>
+                        <LanguagePicker data-help="languagePicker" className={Styles.languagePicker} showArrow={false} mode={ComponentDisplayMode.Minimal} sx={{ marginRight: 1}} />
+                        <IconButton color="inherit" data-help="help-toggle" className={classnames(Styles.icon, Styles.help, {[Styles.active]: state.help})} onClick={onHelpClick}>{state.help ? <HelpIcon/> : <HelpOutlineIcon/>}</IconButton>
                         <Tooltip title={state.location === "/settings" ? t("closeSettings") : t("openSettings")}>
                             {createSettingsButton()}
                         </Tooltip>

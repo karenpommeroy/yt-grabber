@@ -146,9 +146,11 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                     </Button>
                                 </Tooltip>
                                 <Tooltip title={t("downloadPlaylist")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadPlaylist" className={Styles.download} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={downloadPlaylist}>
-                                        <DownloadIcon />
-                                    </Button>
+                                    <div>
+                                        <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadPlaylist" className={Styles.download} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={downloadPlaylist}>
+                                            <DownloadIcon />
+                                        </Button>
+                                    </div>
                                 </Tooltip>
                             </Box>
                         }

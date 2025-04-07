@@ -172,27 +172,35 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             <Grid>
                 <Stack direction="row" spacing={1} height={54}>
                     <Tooltip title={t("loadFromFile")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
-                        <Button data-help="loadFromFile" disabled={loading} variant="contained" disableElevation color="secondary" onClick={() => handleOpenFromFile()}>
-                            <FolderIcon/>
-                        </Button>
+                        <div>
+                            <Button data-help="loadFromFile" disabled={loading} variant="contained" disableElevation color="secondary" onClick={() => handleOpenFromFile()}>
+                                <FolderIcon/>
+                            </Button>
+                        </div>
                     </Tooltip>
                     <Tooltip title={t("loadInfo")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
-                        <Button data-help="loadInfo" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={() => onLoadInfo(urls)}>
-                            <SearchIcon />
-                        </Button>
+                        <div>
+                            <Button data-help="loadInfo" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={() => onLoadInfo(urls)}>
+                                <SearchIcon />
+                            </Button>
+                        </div>
                     </Tooltip>
                     {showDownloadFailed &&
                         <Tooltip title={t("downloadFailed")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
-                            <Button data-help="downloadFailed" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
-                                <ReplayIcon />
-                            </Button>
+                            <div>
+                                <Button data-help="downloadFailed" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
+                                    <ReplayIcon />
+                                </Button>
+                            </div>
                         </Tooltip>
                     }
                     {!loading &&
                         <Tooltip title={t("downloadAll")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
-                            <Button data-help="downloadAll" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
-                                <DownloadIcon />
-                            </Button>
+                            <div>
+                                <Button data-help="downloadAll" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
+                                    <DownloadIcon />
+                                </Button>
+                            </div>
                         </Tooltip>
                     }
                     {loading && !_isEmpty(playlists) &&

@@ -3,7 +3,8 @@ import {MediaFormat} from "./Media";
 export type YoutubeInfoResult = {
     url: string,
     value?: TrackInfo[];
-    error?: string,
+    errors?: string[],
+    warnings?: string[],
 };
 
 export type TrackInfo = {

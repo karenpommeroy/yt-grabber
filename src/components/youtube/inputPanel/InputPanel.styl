@@ -1,8 +1,15 @@
 .input-panel {
     display: flex;
 
-    > :global(.MuiGrid2-root) {
-        display: flex;
+    > :global(.MuiGrid-root) {
+
+        > :global(.MuiStack-root) {
+
+            > * {
+                display: flex;
+            }
+        }
+
     }
 
     .mode-buttons {

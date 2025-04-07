@@ -65,8 +65,8 @@
     "formatScopeHeader": "Zakres formatu",
     "formatScopeContent": [
         "Określ zakres formatu wybranego dla pobrań.",
-        "Jeśli zakres to `globalny`, wybrany format zostanie zastosowany do wszystkich pobieranych plików po rozpoczęciu pobierania.",
-        "Jeśli zakres to `per karta`, możesz określić inny format dla każdej karty, tak aby powiązane pobrania miały różne formaty wyjściowe."
+        "Jeśli zaznaczono `Globalny`, wybrany format zostanie zastosowany do wszystkich pobieranych plików po rozpoczęciu pobierania.",
+        "Jeśli zaznaczono `Oddzielny dla każdej zakładki`, możesz określić inny format dla każdej karty, tak aby powiązane pobrania miały różne formaty wyjściowe."
     ],
     "alwaysOverwriteHeader": "Nadpisywanie plików",
     "alwaysOverwriteContent": "Określa, czy istniejące pobrane pliki są nadpisywane.\nJeśli wyłączone, pobieranie nie zostanie wykonane, gdy powiązany plik już istnieje.",
@@ -116,5 +116,19 @@
     "allTracksHeader": "Utwory",
     "allTracksContent": "Liczba wszystkich wczytanych utworów.",
     "grabbedTracksHeader": "Pobrane utwory",
-    "grabbedTracksContent": "Liczba pobranych utworów."
+    "grabbedTracksContent": "Liczba pobranych utworów.",
+    "logMenuHeader": "Błędy i ostrzeżenia",
+    "logMenuContent": "Wyświetla błędy i ostrzeżenia związane z procesem pobierania.",
+    "downloadFailedHeader": "Pobierz niuedane",
+    "downloadFailedContent": "Próbuje ponownie pobrać nieudane elementy.",
+    "cancellAllHeader": "Anuluj wszystkie pobierania",
+    "cancellAllContent": "Anuluj wszystkie aktywne i oczekujące pobrania.",
+    "cancelDownloadPlaylistHeader": "Anuluj pobieranie playlisty",
+    "cancelDownloadPlaylistContent": "Anuluj wszystkie aktywne i oczekujące pobrania związane z tą playlistą.",
+    "cancelDownloadTrackHeader": "Anuluj pobieranie utworu",
+    "cancelDownloadTrackContent": "Anuluj pobieranie utworu.",
+    "findInFileSystemHeader": "Znajdź plik",
+    "findInFileSystemContent": "Znajdź powiązany plik w systemie plików.",
+    "openOutputDirectoryHeader": "Otwórz katalog wyjściowy",
+    "openOutputDirectoryContent": "Otwiera katalog wyjściowy w eksploratorze plików."
 }
