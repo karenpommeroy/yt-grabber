@@ -1,7 +1,7 @@
 import {Schema} from "electron-store";
 import _values from "lodash/values";
 
-import {FormatScope} from "./Media";
+import {FormatScope, InputMode} from "./Media";
 
 export type ApplicationOptions = {
     youtubeUrl?: string;
@@ -17,7 +17,8 @@ export type ApplicationOptions = {
     urls?: string[];
     language?: string;
     alwaysOverwrite?: boolean;
-    discographyDownload?: boolean;
+    enableInputMode?: boolean;
+    inputMode?: InputMode;
 };
 
 export interface IStore {
@@ -96,10 +97,15 @@ export const StoreSchema: Schema<IStore> = {
                 type: "boolean",
                 default: false
             },
-            discographyDownload: {
+            enableInputMode: {
                 type: "boolean",
-                default: true
-            }
+                default: true,
+            },
+            inputMode: {
+                type: "string",
+                default: InputMode.Auto,
+                enum: _values(InputMode),
+            },
         },
         default: {},
     },

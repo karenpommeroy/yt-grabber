@@ -32,7 +32,7 @@ import {Alert, Box, Grid} from "@mui/material";
 import {getBinPath} from "../../common/FileSystem";
 import {getAlbumInfo} from "../../common/Formatters";
 import {getUrlType, mapRange, resolveMockData} from "../../common/Helpers";
-import {FormatScope, MediaFormat} from "../../common/Media";
+import {FormatScope, InputMode, MediaFormat} from "../../common/Media";
 import {GetYoutubeUrlResult} from "../../common/Messaging";
 import {afterEach} from "../../common/Promise";
 import {ProgressInfo} from "../../common/Reporter";
@@ -126,9 +126,24 @@ export const HomeView: React.FC = () => {
 
     useEffect(() => {
         ipcRenderer.on("get-youtube-urls-progress", onGetYoutubeUrlsCompleted);
+        ipcRenderer.on("get-youtube-artists-progress", onGetYoutubeArtistsCompleted);
+        ipcRenderer.on("get-youtube-albums-progress", onGetYoutubeAlbumsCompleted);
+        ipcRenderer.on("get-youtube-songs-progress", onGetYoutubeSongsCompleted);
+
+        ipcRenderer.on("get-youtube-urls-cancelled", onGetYoutubeCancelled);
+        ipcRenderer.on("get-youtube-artists-cancelled", onGetYoutubeCancelled);
+        ipcRenderer.on("get-youtube-albums-cancelled", onGetYoutubeCancelled);
+        ipcRenderer.on("get-youtube-songs-cancelled", onGetYoutubeCancelled);
 
         return () => {
             ipcRenderer.off("get-youtube-urls-progress", onGetYoutubeUrlsCompleted);
+            ipcRenderer.off("get-youtube-artists-progress", onGetYoutubeArtistsCompleted);
+            ipcRenderer.off("get-youtube-albums-progress", onGetYoutubeAlbumsCompleted);
+            ipcRenderer.off("get-youtube-songs-progress", onGetYoutubeSongsCompleted);
+            
+            ipcRenderer.off("get-youtube-artists-cancelled", onGetYoutubeCancelled);
+            ipcRenderer.off("get-youtube-albums-cancelled", onGetYoutubeCancelled);
+            ipcRenderer.off("get-youtube-songs-cancelled", onGetYoutubeCancelled);
         };
     }, []);
 
@@ -149,6 +164,68 @@ export const HomeView: React.FC = () => {
         } catch {
             setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
         }
+    };
+    
+    const onGetYoutubeArtistsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
+        if (!data.result) return;
+
+        setPendingTabs(data.result.urls);
+        
+        try {
+            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
+                .then((result) => {
+                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+                    
+                    return result;
+                });
+
+            return promise;
+        } catch {
+            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+        }
+    };
+
+    const onGetYoutubeAlbumsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
+        if (!data.result) return;
+
+        setPendingTabs(data.result.urls);
+        
+        try {
+            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
+                .then((result) => {
+                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+                    
+                    return result;
+                });
+
+            return promise;
+        } catch {
+            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+        }
+    };
+    
+    const onGetYoutubeSongsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
+        if (!data.result) return;
+
+        setPendingTabs(data.result.urls);
+        
+        try {
+            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
+                .then((result) => {
+                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+                    
+                    return result;
+                });
+
+            return promise;
+        } catch {
+            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+        }
+    };
+
+    const onGetYoutubeCancelled = () => {
+        setPendingTabs([]);
+        setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
     };
 
     const handleUrlChange = (urls: string[]) => {
@@ -173,12 +250,30 @@ export const HomeView: React.FC = () => {
     const loadInfo = (urls: string[]) => {        
         clear();
         setPendingTabs(urls);
-
+        const enableInputMode = global.store.get("application.enableInputMode");
+        const inputMode = global.store.get("application.inputMode");
         const groups = _groupBy(urls, getUrlType);
         const artists = groups[UrlType.Artist] ?? [];
         const lists = groups[UrlType.Playlist] ?? []; 
         const vids = groups[UrlType.Track] ?? []; 
         const basic = [...lists, ...vids];
+
+        if (enableInputMode) {
+            if (inputMode === InputMode.Artists) {
+                loadArtists(urls);
+                return;
+            }
+
+            if (inputMode === InputMode.Albums) {
+                loadAlbums(urls);
+                return;
+            }
+        
+            if (inputMode === InputMode.Songs) {
+                loadSongs(urls);
+                return;
+            }
+        }
 
         if (appOptions.debugMode) {
             loadMedia(basic);
@@ -207,6 +302,42 @@ export const HomeView: React.FC = () => {
         } catch {
             setQueue((prev) => [...prev, "load-single"]);
         }
+    };
+
+    const loadArtists = (artists: string[]) => {
+        const options: LaunchOptions = global.store.get("options");
+        const params = {
+            artists: artists,
+            lang: i18n.language,
+            url: appOptions.youtubeUrl,
+        };
+        
+        setQueue((prev) => [...prev, "load-multi"]);
+        ipcRenderer.send("get-youtube-artists", params, options);
+    };
+
+    const loadAlbums = (albums: string[]) => {
+        const options: LaunchOptions = global.store.get("options");
+        const params = {
+            albums,
+            lang: i18n.language,
+            url: appOptions.youtubeUrl,
+        };
+        
+        setQueue((prev) => [...prev, "load-multi"]);
+        ipcRenderer.send("get-youtube-albums", params, options);
+    };
+
+    const loadSongs = (songs: string[]) => {
+        const options: LaunchOptions = global.store.get("options");
+        const params = {
+            songs,
+            lang: i18n.language,
+            url: appOptions.youtubeUrl,
+        };
+        
+        setQueue((prev) => [...prev, "load-multi"]);
+        ipcRenderer.send("get-youtube-songs", params, options);
     };
 
     const loadDiscographyInfo = (artists: string[]) => {
@@ -336,8 +467,12 @@ export const HomeView: React.FC = () => {
     const cancelAll = () => {       
         setAbort("all");
         _map(abortControllers, (v) => v.abort());
+        ipcRenderer.send("get-youtube-urls-cancel");
+        ipcRenderer.send("get-youtube-artists-albums-cancel");
+        ipcRenderer.send("get-youtube-albums-cancel");
+        ipcRenderer.send("get-youtube-songs-cancel");
     };
-    
+
     const cancelPlaylist = (id: string) => {       
         const playlist = _find(playlists, ["url", id]);
         const playlistTrackIds = _map(_get(playlist, "tracks"), "id");

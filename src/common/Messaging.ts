@@ -31,6 +31,24 @@ export type GetYoutubeUrlParams = {
     artistUrls?: string[];
 };
 
+export type GetYoutubeArtistsParams = {
+    artists: string[];
+    lang: string;
+    url: string;
+};
+
+export type GetYoutubeAlbumsParams = {
+    albums: string[];
+    lang: string;
+    url: string;
+};
+
+export type GetYoutubeSongsParams = {
+    songs: string[];
+    lang: string;
+    url: string;
+};
+
 export type GetYoutubeUrlResult = {
     errors?: LogMessage[];
     warnings?: LogMessage[];

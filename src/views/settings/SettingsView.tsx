@@ -114,8 +114,8 @@ export const SettingsView: React.FC = () => {
         setApplicationOptions((prev) => ({...prev, alwaysOverwrite: e.target.checked}));
     };
 
-    const onDiscographyDownloadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setApplicationOptions((prev) => ({...prev, discographyDownload: e.target.checked}));
+    const onEnableInputModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, enableInputMode: e.target.checked}));
     };
 
     const onConcurrencyChange = (value: number) => {
@@ -178,8 +178,8 @@ export const SettingsView: React.FC = () => {
                         <Grid size={12} data-help="alwaysOverwrite">
                             <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />
                         </Grid>
-                        <Grid size={12} data-help="discographyDownload">
-                            <FormControlLabel control={<Switch checked={applicationOptions.discographyDownload} onChange={onDiscographyDownloadChange} />} label={t("discographyDownload")} />
+                        <Grid size={12} data-help="enableInputMode">
+                            <FormControlLabel control={<Switch checked={applicationOptions.enableInputMode} onChange={onEnableInputModeChange} />} label={t("enableInputMode")} />
                         </Grid>
                     </Grid>
                     <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">

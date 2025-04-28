@@ -70,11 +70,6 @@
     ],
     "alwaysOverwriteHeader": "Nadpisywanie plików",
     "alwaysOverwriteContent": "Określa, czy istniejące pobrane pliki są nadpisywane.\nJeśli wyłączone, pobieranie nie zostanie wykonane, gdy powiązany plik już istnieje.",
-    "discographyDownloadHeader": "Pobieranie dyskografii",
-    "discographyDownloadContent": [
-        "Po włączeniu możesz wprowadzać adresy URL do kanałów YouTube Music.",
-        "YT Grabber automatycznie spróbuje znaleźć wszystkie albumy powiązane z określonymi kanałami."
-    ],
     "outputDirectoryHeader": "Katalog wyjściowy",
     "outputDirectoryContent": "Określa katalog wyjściowy dla wszystkich pobrań.",
     "albumOutputTemplateHeader": "Szablon wyjściowy albumu",
@@ -130,5 +125,16 @@
     "findInFileSystemHeader": "Znajdź plik",
     "findInFileSystemContent": "Znajdź powiązany plik w systemie plików.",
     "openOutputDirectoryHeader": "Otwórz katalog wyjściowy",
-    "openOutputDirectoryContent": "Otwiera katalog wyjściowy w eksploratorze plików."
+    "openOutputDirectoryContent": "Otwiera katalog wyjściowy w eksploratorze plików.",
+    "selectInputModeHeader": "Wybór trybu wprowadzania",
+    "selectInputModeContent": [
+        "Pozwala ustawić typ wprowadzanych wartości.",
+        "Poniższe tryby są dostępne:\n",
+        "Auto - typ wprowadzanych elementów zostanie automatycznie wykryty",
+        "Artyści - zakłada, że wprowadzone elementy to artyści i spróbuje znaleźć odpowiadające albumy",
+        "Albumy - zakłada, że wprowadzone elementy to albumy i spróbuje znaleźć odpowiadające utwory",
+        "Utwory - zakłada, że wprowadzone elementy to utwory i spróbuje je znaleźć"
+    ],
+    "enableInputModeHeader": "Włącz wybór trybu wprowadzania",
+    "enableInputModeContent": "Włącza lub wyłącza wybieranie typu wprowadzonych wartości (np. auto, utwór, album, artysta)."
 }

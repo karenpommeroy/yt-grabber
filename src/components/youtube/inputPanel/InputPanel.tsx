@@ -1,4 +1,5 @@
 import _compact from "lodash/compact";
+import _every from "lodash/every";
 import _filter from "lodash/filter";
 import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
@@ -7,7 +8,7 @@ import _replace from "lodash/replace";
 import _truncate from "lodash/truncate";
 import _uniq from "lodash/uniq";
 import _without from "lodash/without";
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
@@ -21,9 +22,11 @@ import {
 } from "@mui/material";
 
 import {getUrlType} from "../../../common/Helpers";
+import {InputMode} from "../../../common/Media";
 import {ApplicationOptions} from "../../../common/Store";
 import {UrlType} from "../../../common/Youtube";
 import {useDataState} from "../../../react/contexts/DataContext";
+import InputModePicker from "../inputModePicker/InputModePicker";
 import Styles from "./InputPanel.styl";
 
 export type InputPanelProps = {
@@ -39,36 +42,61 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const {loading, onDownload, onCancel, onDownloadFailed, onChange, onLoadInfo} = props;
     const [options] = useState<ApplicationOptions>(global.store.get("application"));
     const [debouncedOptions] = useDebounceValue(options, 500, {leading: true});
-    const {playlists, trackStatus, urls, setUrls} = useDataState();
+    const {trackStatus, urls, setUrls} = useDataState();
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const valueCount = urls.length;
-
+    const [inputMode, setInputMode] = useState<InputMode>(global.store.get("application.inputMode"));
+    const [enableInputMode, setEnableInputMode] = useState<boolean>(global.store.get("application.enableInputMode"));
+    
     const truncateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)/;
     const validateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)([\w-]{11})/;
-    const validateRegexNoDiscographyDownload = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)([\w-]{11})/;
 
     const isValid = (value: string) => {
-        const regexToUse = options.discographyDownload ? validateRegex : validateRegexNoDiscographyDownload;
-        return options.debugMode ? true : regexToUse.test(value);
+        const options = global.store.get("application");
+
+        if (options.enableInputMode && options.inputMode !== InputMode.Auto) {
+            return true;
+        }
+
+        return options.debugMode ? true : validateRegex.test(value);
     };
 
     useEffect(() => {
         global.store.set("application", debouncedOptions);
     }, [debouncedOptions]);
 
-    const handleDelete = (valueToDelete: string) => {
+    useEffect(() => {
+        const unsubscribeInputMode = global.store.onDidChange<any>("application.inputMode", (newInputMode: InputMode) => {
+            setInputMode(newInputMode);
+        });
+        const unsubscribeEnableInputMode = global.store.onDidChange<any>("application.enableInputMode", (newEnableInputMode: boolean) => {
+            setEnableInputMode(newEnableInputMode);
+        });
+
+        return () => {
+            unsubscribeInputMode();
+            unsubscribeEnableInputMode();
+        };
+    },  []);
+
+    const handleDelete = useCallback((valueToDelete: string) => {
         const newUrls = _without(urls, valueToDelete);
         
-        setUrls(newUrls);
+        setUrls((prev) => _without(prev, valueToDelete));
+        
         if (_isFunction(onChange)) {
             onChange(newUrls);
         }
-    };
+    }, [urls]);
     
     const handleOpenFromFile = () => {
         fileInputRef.current?.click();
     };
+
+    const containsInvalidValues = useMemo(() => {
+        return !_every(urls, isValid);
+    }, [urls, inputMode, enableInputMode]);
 
     const showDownloadFailed = useMemo(() => {
         return !_isEmpty(_filter(trackStatus, "error"));
@@ -113,18 +141,20 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         }
     };
 
-    const renderUrlTag = (option: string) => {
+    const renderUrlTag = useCallback((option: string) => {
         const colors: Record<UrlType, string> = {
             [UrlType.Artist]: "success",
-            [UrlType.Playlist]: "primary",
-            [UrlType.Track]: "default",
+            [UrlType.Playlist]: "warning",
+            [UrlType.Track]: "primary",
+            [UrlType.Other]: "default",
         };
-        
+        const color = enableInputMode && inputMode !== InputMode.Auto ? "default" : colors[getUrlType(option)];
+
         return (
             <Tooltip key={option} title={option} arrow disableHoverListener={false} enterDelay={500} leaveDelay={100} enterNextDelay={500} placement="bottom">
                 <Chip
                     variant="filled"
-                    color={colors[getUrlType(option)] as any}
+                    color={color as any}
                     label={_truncate(_replace(option, truncateRegex, ""), {length: valueCount === 2 ? 30 : 20})}
                     sx={{marginX: .5}}
                     onDelete={() => !loading && handleDelete(option)}
@@ -132,8 +162,8 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                 />
             </Tooltip>
         );
-    };
-
+    }, [inputMode, enableInputMode]);
+    
     return (
         <Grid className={Styles.inputPanel} container spacing={2} padding={2} paddingBottom={1}>
             <Grid size="grow">
@@ -156,6 +186,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                             fullWidth
                             variant="outlined"
                             label={t("youtubeUrl")}
+                            error={containsInvalidValues}
                             slotProps={{
                                 input: {
                                     ...params.InputProps,
@@ -171,6 +202,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             </Grid>
             <Grid>
                 <Stack direction="row" spacing={1} height={54}>
+                    {options.enableInputMode && <InputModePicker disabled={loading} />}
                     <Tooltip title={t("loadFromFile")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
                             <Button data-help="loadFromFile" disabled={loading} variant="contained" disableElevation color="secondary" onClick={() => handleOpenFromFile()}>
@@ -180,7 +212,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     </Tooltip>
                     <Tooltip title={t("loadInfo")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
-                            <Button data-help="loadInfo" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={() => onLoadInfo(urls)}>
+                            <Button data-help="loadInfo" disabled={loading || _isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={() => onLoadInfo(urls)}>
                                 <SearchIcon />
                             </Button>
                         </div>
@@ -197,13 +229,13 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     {!loading &&
                         <Tooltip title={t("downloadAll")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                             <div>
-                                <Button data-help="downloadAll" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
+                                <Button data-help="downloadAll" disabled={loading || _isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
                                     <DownloadIcon />
                                 </Button>
                             </div>
                         </Tooltip>
                     }
-                    {loading && !_isEmpty(playlists) &&
+                    {loading &&
                         <Tooltip title={t("cancelAll")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                             <Button data-help="cancellAll" variant="contained" disableElevation color="secondary" onClick={onCancel}>
                                 <ClearIcon />

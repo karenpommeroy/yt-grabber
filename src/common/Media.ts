@@ -26,3 +26,10 @@ export enum FormatScope {
     Global = "global",
     Tab =  "tab"
 }
+
+export enum InputMode {
+    Auto = "auto",
+    Artists = "artists",
+    Albums = "albums",
+    Songs = "songs",
+};

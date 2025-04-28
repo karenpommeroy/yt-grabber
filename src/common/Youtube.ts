@@ -107,4 +107,5 @@ export enum UrlType {
     Artist = "artist",
     Playlist = "playlist",
     Track = "track",
+    Other = "other",
 };

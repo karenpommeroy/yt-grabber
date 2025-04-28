@@ -7,10 +7,13 @@ import Store from "electron-store";
 import path from "path";
 import {LaunchOptions} from "puppeteer";
 
-import getYoutubeUrls, {cancel} from "./automations/Youtube";
+import getYoutubeUrls, {cancel as getYoutubeUrlsCancel} from "./automations/Youtube";
+import getYoutubeAlbums, {cancel as getYoutubeAlbumsCancel} from "./automations/YoutubeAlbums";
+import getYoutubeArtists, {cancel as getYoutubeArtistsCancel} from "./automations/YoutubeArtists";
+import getYoutubeSongs, {cancel as getYoutubeSongsCancel} from "./automations/YoutubeSongs";
 import {
-    GetYoutubeUrlParams, GetYoutubeUrlResult, OpenSelectPathDialogParams, OpenSystemPathParams,
-    OpenUrlInBrowserParams
+    GetYoutubeAlbumsParams, GetYoutubeArtistsParams, GetYoutubeSongsParams, GetYoutubeUrlParams,
+    GetYoutubeUrlResult, OpenSelectPathDialogParams, OpenSystemPathParams, OpenUrlInBrowserParams
 } from "./common/Messaging";
 import {ProgressInfo} from "./common/Reporter";
 import i18n from "./i18next";
@@ -151,8 +154,72 @@ ipcMain.on(
 );
 
 ipcMain.on(
+    "get-youtube-artists",
+    async (
+        event: IpcMainEvent,
+        params: GetYoutubeArtistsParams,
+        options: LaunchOptions,
+    ) => {
+        const onProgress = (data: ProgressInfo<GetYoutubeUrlResult>) => mainWindow.webContents.send("get-youtube-artists-progress", data);
+        
+        getYoutubeArtists(params, options, i18n, onProgress);
+    },
+);
+
+ipcMain.on(
+    "get-youtube-albums",
+    async (
+        event: IpcMainEvent,
+        params: GetYoutubeAlbumsParams,
+        options: LaunchOptions,
+    ) => {
+        const onProgress = (data: ProgressInfo<GetYoutubeUrlResult>) => mainWindow.webContents.send("get-youtube-albums-progress", data);
+        
+        getYoutubeAlbums(params, options, i18n, onProgress);
+    },
+);
+
+ipcMain.on(
+    "get-youtube-songs",
+    async (
+        event: IpcMainEvent,
+        params: GetYoutubeSongsParams,
+        options: LaunchOptions,
+    ) => {
+        const onProgress = (data: ProgressInfo<GetYoutubeUrlResult>) => mainWindow.webContents.send("get-youtube-songs-progress", data);
+        
+        getYoutubeSongs(params, options, i18n, onProgress);
+    },
+);
+
+ipcMain.on(
     "get-youtube-urls-cancel",
     async (event: IpcMainEvent, options: LaunchOptions) => {
-        cancel();
+        await getYoutubeUrlsCancel();
+        mainWindow.webContents.send("get-youtube-urls-cancelled");
+    },
+);
+
+ipcMain.on(
+    "get-youtube-artists-cancel",
+    async (event: IpcMainEvent, options: LaunchOptions) => {
+        await getYoutubeArtistsCancel();
+        mainWindow.webContents.send("get-youtube-artists-cancelled");
+    },
+);
+
+ipcMain.on(
+    "get-youtube-albums-cancel",
+    async (event: IpcMainEvent, options: LaunchOptions) => {
+        await getYoutubeAlbumsCancel();
+        mainWindow.webContents.send("get-youtube-albums-cancelled");
+    },
+);
+
+ipcMain.on(
+    "get-youtube-songs-cancel",
+    async (event: IpcMainEvent, options: LaunchOptions) => {
+        await getYoutubeSongsCancel();
+        mainWindow.webContents.send("get-youtube-songs-cancelled");
     },
 );

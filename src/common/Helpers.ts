@@ -42,15 +42,19 @@ export const waitFor = (miliseconds: number) => new Promise((resolve) => setTime
 export const getUrlType = (url: string) => {
     const artistRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/|youtu\.be\/)?(channel)/;
     const playlistRegex = /^(?:https?:\/\/)?(?:www\.)?(?:music\.)?youtube\.com\/(?:playlist\?list=|watch\?.*?\blist=)([a-zA-Z0-9_-]+)/;
+    const trackRegex = /^(?:https?:\/\/)?(?:www\.)?(?:music\.)?youtube\.com\/watch\?.*?\bv=([a-zA-Z0-9_-]+)/;
 
     const isArtist = artistRegex.test(url);
     const isPlaylist = playlistRegex.test(url);
+    const isTrack = trackRegex.test(url);
     
     if (isArtist) {
         return UrlType.Artist;
     } else if (isPlaylist) {
         return UrlType.Playlist;
+    } else if (isTrack) {
+        return UrlType.Track;
     }
 
-    return UrlType.Track;
+    return UrlType.Other;
 };

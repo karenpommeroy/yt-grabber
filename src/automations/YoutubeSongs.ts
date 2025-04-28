@@ -12,12 +12,12 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
 import {getProfilePath} from "../common/FileSystem";
 import {waitFor} from "../common/Helpers";
-import {GetYoutubeUrlParams, GetYoutubeUrlResult} from "../common/Messaging";
+import {GetYoutubeSongsParams, GetYoutubeUrlResult} from "../common/Messaging";
 import puppeteerOptions from "../common/PuppeteerOptions";
 import {IReporter, ProgressInfo, Reporter} from "../common/Reporter";
-import {navigateToPage} from "./Helpers";
+import {clearInput, navigateToPage} from "./Helpers";
 import {
-    AlbumFilterSelector, AlbumLinkSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector
+    YtMusicSearchInputSelector, YtMusicSearchResultsSelector, YtMusicSongsChipSelector
 } from "./Selectors";
 
 let page: Page;
@@ -26,10 +26,8 @@ let reporter: IReporter<GetYoutubeUrlResult>;
 
 puppeteer.use(StealthPlugin());
 
-
-
 export const execute = async (
-    params: GetYoutubeUrlParams,
+    params: GetYoutubeSongsParams,
     options: LaunchOptions,
     i18n: i18next,
     onProgress: (data: ProgressInfo<GetYoutubeUrlResult>) => void,
@@ -62,44 +60,38 @@ export const execute = async (
 
         await navigateToPage(params.url, page);
         
-        const process = async (urlToProcess: string) => {
+        const process = async (song: string) => {
             const results: string[] = [];
             
             try {                
-                await navigateToPage(urlToProcess, page);
-
-                const element = await page.waitForSelector(`::-p-xpath(${AlbumsHrefSelector})`, {timeout: 1000});
-                const albumsUrl = await element.evaluate((el) => el.getAttribute("href"));
-
-                await navigateToPage(`${params.url}/${albumsUrl}`, page);
-                const albumFilterButton = await page.waitForSelector(`::-p-xpath(${AlbumFilterSelector})`, {timeout: 1000});
-
-                albumFilterButton.click();
+                const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
+                await clearInput(searchInput, page);
+                await searchInput.type(song);
+                page.keyboard.press("Enter");
                 await page.waitForNetworkIdle();
-                
-                // await page.screenshot({path: './profile/debug.png', fullPage: true});
-                // fs.writeFileSync("./profile/debug.html", await page.content());
-                
-                const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
-                for (const item of items) {
-                    results.push(`${params.url}/${item}`);
-                }
+                const songsChip = await page.waitForSelector(`::-p-xpath(${YtMusicSongsChipSelector})`, {timeout: 1000});
+            
+                songsChip.click();
+                await page.waitForNetworkIdle();
+
+                await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsSelector})`, {timeout: 1000});
+                
+                const songsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
+                const songEl = songsElements[0];
+                const songUrl = await songEl.evaluate((el) => el.getAttribute("href"));
+
+                results.push(`${params.url}/${songUrl}`);
 
                 return results;
             } catch (error) {
-                const items = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
-
-                for (const item of items) {
-                    results.push(`${params.url}/${item}`);
-                }
 
                 return results;
             }
         };
 
-        for (const u of params.artistUrls) {
-            const data = await process(u);
+        for (const item of params.songs) {
+            const data = await process(item);
            
             result.urls.push(...data);
         }

@@ -70,11 +70,6 @@
     ],
     "alwaysOverwriteHeader": "Dateiüberschreibung",
     "alwaysOverwriteContent": "Legt fest, ob vorhandene heruntergeladene Dateien überschrieben werden.\nWenn deaktiviert, wird kein Download durchgeführt, wenn die entsprechende Datei bereits vorhanden ist.",
-    "discographyDownloadHeader": "Diskografie-Download",
-    "discographyDownloadContent": [
-        "Wenn aktiviert, können Sie URLs zu YouTube Music-Kanälen eingeben.",
-        "YT Grabber versucht automatisch, alle mit den angegebenen Kanälen verbundenen Alben zu ermitteln."
-    ],
     "outputDirectoryHeader": "Ausgabeverzeichnis",
     "outputDirectoryContent": "Legt das Ausgabeverzeichnis für alle Downloads fest.",
     "albumOutputTemplateHeader": "Album-Ausgabevorlage",
@@ -130,5 +125,16 @@
     "findInFileSystemHeader": "In Dateisystem suchen",
     "findInFileSystemContent": "Offnet die zugehörige Datei im Dateisystem.",
     "openOutputDirectoryHeader": "Ausgabeverzeichnis öffnen",
-    "openOutputDirectoryContent": "Offnet das Ausgabeverzeichnis im Datei-Explorer."
+    "openOutputDirectoryContent": "Offnet das Ausgabeverzeichnis im Datei-Explorer.",
+    "selectInputModeHeader": "Eingabemodus auswählen",
+    "selectInputModeContent": [
+        "Ermöglicht die Angabe des Eingabefeldmodus.",
+        "Folgende Modi sind verfügbar:\n",
+        "Auto - versucht, den Typ der eingegebenen Werte zu erkennen.",
+        "Künstler - geht davon aus, dass die eingegebenen Elemente Künstler sind und versucht, die entsprechenden Titel zu finden.",
+        "Alben - geht davon aus, dass die eingegebenen Elemente Alben sind und versucht, die entsprechenden Titel zu finden.",
+        "Lieder - geht davon aus, dass die eingegebenen Elemente Titel sind und versucht, die entsprechenden Titel zu finden."
+    ],
+    "enableInputModeHeader": "Eingabemodus aktivieren",
+    "enableInputModeContent": "Aktiviert oder deaktiviert die Angabe von Eingabewerttypen (Auto, Künstler, Alben, Songs)."
 }

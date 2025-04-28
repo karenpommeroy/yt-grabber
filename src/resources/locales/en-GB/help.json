@@ -70,11 +70,6 @@
     ],
     "alwaysOverwriteHeader": "File Overwriting",
     "alwaysOverwriteContent": "Specifies whether existing downloaded files are overwritten.\nIf disabled, no download is performed when related file is already present.",
-    "discographyDownloadHeader": "Discography Download",
-    "discographyDownloadContent": [
-        "When enabled you can input urls to Youtube Music channel's.",
-        "YT Grabber will automatically try to resolve all albums related specified channels."
-    ],
     "outputDirectoryHeader": "Outptut Directory",
     "outputDirectoryContent": "Specifies the output directory for all downloads.",
     "albumOutputTemplateHeader": "Album Output Template",
@@ -130,5 +125,16 @@
     "findInFileSystemHeader": "Find File",
     "findInFileSystemContent": "Finds related file in the file system.",
     "openOutputDirectoryHeader": "Open Output Directory",
-    "openOutputDirectoryContent": "Opens output directory in file explorer."
+    "openOutputDirectoryContent": "Opens output directory in file explorer.",
+    "selectInputModeHeader": "Select Input Mode",
+    "selectInputModeContent": [
+        "Allows to specify input field mode.",
+        "Following modes are available:\n",
+        "Auto - type of input item will be detected automatically",
+        "Artists - assumes input items are artists and will try to grab corresponding albums",
+        "Albums - assumes that input items are albums and will try to grab corresponding tracks",
+        "Songs - assumes that input items are song titles and will try to find and grab proper tracks"
+    ],
+    "enableInputModeHeader": "Enable input mode selection",
+    "enableInputModeContent": "Enables or disables specifying input value types (auto, artists, albums, songs)."
 }
