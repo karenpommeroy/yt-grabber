@@ -10,7 +10,7 @@
     "loadFromFileHeader": "Wczytaj z pliku",
     "loadFromFileContent": [
         "Wczytaj wpisy z pliku.",
-        "Plik powinien zawierać jeden adres URL na linię.",
+        "Jeśli wczytywany jest zwykły plik tekstowy powinien on zawierać jeden adres URL na linię.\n W przypadku pliku JSON powinien on zawierać tablicę z adresami URL.",
         "Nieprawidłowe wpisy są pomijane."
     ],
     "loadInfoHeader": "Wczytaj informacje",

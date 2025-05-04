@@ -10,7 +10,7 @@
     "loadFromFileHeader": "Load From File",
     "loadFromFileContent": [
         "Load entries from file.",
-        "File should contain one url per line.",
+        "If plain text file is used it should contain one url per line.\nIn case of JSON file it should contain an array of strings.",
         "Invalid entries are skipped."
     ],
     "loadInfoHeader": "Load Info",

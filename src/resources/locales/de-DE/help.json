@@ -10,7 +10,7 @@
     "loadFromFileHeader": "Aus Datei laden",
     "loadFromFileContent": [
         "Einträge aus einer Datei laden.",
-        "Die Datei sollte eine URL pro Zeile enthalten.",
+        "Wenn eine einfache Textdatei verwendet wird, sollte sie eine URL pro Zeile enthalten.\nIm Fall einer JSON-Datei sollte sie ein Array von Strings enthalten.",
         "Ungültige Einträge werden übersprungen."
     ],
     "loadInfoHeader": "Informationen laden",
