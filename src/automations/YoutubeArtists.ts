@@ -18,7 +18,8 @@ import {IReporter, ProgressInfo, Reporter} from "../common/Reporter";
 import {clearInput, navigateToPage} from "./Helpers";
 import {
     AlbumFilterSelector, AlbumLinkSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector,
-    YtMusicArtistsChipSelector, YtMusicSearchInputSelector, YtMusicSearchResultsSelector
+    YtMusicArtistBestResultLinkSelector, YtMusicArtistsChipSelector, YtMusicSearchInputSelector,
+    YtMusicSearchResultsSelector
 } from "./Selectors";
 
 let page: Page;
@@ -70,20 +71,26 @@ export const execute = async (
                 await searchInput.type(artist);
                 page.keyboard.press("Enter");
                 await page.waitForNetworkIdle();
-
-                const artistsChip = await page.waitForSelector(`::-p-xpath(${YtMusicArtistsChipSelector})`, {timeout: 1000});
+                
+                try {
+                    const artistsChip = await page.waitForSelector(`::-p-xpath(${YtMusicArtistsChipSelector})`, {visible: true, timeout: 1000});
             
-                artistsChip.click();
-                await page.waitForNetworkIdle();
-
-                await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsSelector})`, {timeout: 1000});
-                
-                const artistsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
-                const artistEl = artistsElements[0];
-                const artistChannelUrl = await artistEl.evaluate((el) => el.getAttribute("href"));
-                
-                await navigateToPage(`${params.url}/${artistChannelUrl}`, page);
-                await page.waitForNetworkIdle();
+                    artistsChip.click();
+                    await page.waitForNetworkIdle();
+                    await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsSelector})`, {timeout: 1000});
+                    
+                    const artistsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
+                    const artistEl = artistsElements[0];
+                    const artistChannelUrl = await artistEl.evaluate((el) => el.getAttribute("href"));
+                    
+                    await navigateToPage(`${params.url}/${artistChannelUrl}`, page);
+                    await page.waitForNetworkIdle();
+                } catch (error) {
+                    const artistThumbnail = await page.waitForSelector(`::-p-xpath(${YtMusicArtistBestResultLinkSelector})`, {visible: true, timeout: 1000});
+                    
+                    artistThumbnail.click();
+                    await page.waitForNetworkIdle();
+                }
 
                 const element = await page.waitForSelector(`::-p-xpath(${AlbumsHrefSelector})`, {timeout: 1000});
                 const albumsUrl = await element.evaluate((el) => el.getAttribute("href"));

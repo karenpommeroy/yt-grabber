@@ -10,6 +10,8 @@ export const YtMusicSearchInputSelector = "//ytmusic-app-layout//ytmusic-search-
 
 export const YtMusicArtistsChipSelector = "//ytmusic-app-layout//ytmusic-search-page//div[contains(@class, 'content')]//ytmusic-section-list-renderer//ytmusic-chip-cloud-renderer//iron-selector[@id='chips']//a[contains(@class, 'ytmusic-chip-cloud-chip-renderer')]//yt-formatted-string[contains(text(), 'Wykonawcy') or contains(text(), 'Artists')]//ancestor::a";
 
+export const YtMusicArtistBestResultLinkSelector = "//ytmusic-app-layout//div[@id='content']/ytmusic-search-page//ytmusic-section-list-renderer//div[@id='contents']//ytmusic-card-shelf-renderer//div[contains(@class, 'card-container')]//div[contains(@class, 'card-content-container')]//a[contains(@class, 'yt-simple-endpoint') and contains(@class, 'thumbnail-link')]";
+
 export const YtMusicAlbumsChipSelector = "//ytmusic-app-layout//ytmusic-search-page//div[contains(@class, 'content')]//ytmusic-section-list-renderer//ytmusic-chip-cloud-renderer//iron-selector[@id='chips']//a[contains(@class, 'ytmusic-chip-cloud-chip-renderer')]//yt-formatted-string[contains(text(), 'Albumy') or contains(text(), 'Albums')]//ancestor::a";
 
 export const YtMusicSongsChipSelector = "//ytmusic-app-layout//ytmusic-search-page//div[contains(@class, 'content')]//ytmusic-section-list-renderer//ytmusic-chip-cloud-renderer//iron-selector[@id='chips']//a[contains(@class, 'ytmusic-chip-cloud-chip-renderer')]//yt-formatted-string[contains(text(), 'Utwory') or contains(text(), 'Songs')]//ancestor::a";
