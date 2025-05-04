@@ -1,4 +1,5 @@
 import classnames from "classnames";
+import {ipcRenderer} from "electron";
 import _assign from "lodash/assign";
 import _includes from "lodash/includes";
 import _isFunction from "lodash/isFunction";
@@ -12,6 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import LaunchIcon from "@mui/icons-material/Launch";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 import {
     Box, Button, Card, CardContent, CardMedia, Grid, LinearProgress, Tooltip, Typography
 } from "@mui/material";
@@ -60,6 +62,10 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
         if (_isFunction(onOpenOutput)) {
             onOpenOutput();
         }
+    };
+
+    const onOpenInBrowser = () => {
+        ipcRenderer.send("open-url-in-browser", {url: item.url});
     };
 
     const editInfo = useCallback(() => {
@@ -117,6 +123,11 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                         </Button>
                                     </Tooltip>
                                 }
+                                <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                    <Button data-help="openInBrowser" className={Styles.openInBrowser} size="large" fullWidth disableElevation variant="contained" color="secondary" onClick={onOpenInBrowser}>
+                                        <YouTubeIcon />
+                                    </Button>
+                                </Tooltip>
                                 <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                     <Button data-help="editInfo" className={Styles.edit} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={editInfo}>
                                         <EditIcon />

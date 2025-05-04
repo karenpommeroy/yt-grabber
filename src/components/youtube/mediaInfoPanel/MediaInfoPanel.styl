@@ -1,90 +1,117 @@
-@import '../../../styles/mixins.styl'
+@import "../../../styles/mixins.styl";
 
-.media-info-panel
-    .header
-        display flex
-        vendor('transition', background-color 0.25s ease-in-out)
+.media-info-panel {
+    .header {
+        display: flex;
+        vendor('transition', background-color 0.25s ease-in-out);
 
-        &:hover
-            background-color var(--theme-palette-divider)
+        &:hover {
+            background-color: var(--theme-palette-divider);
+        }
 
+        .image-button {
+            cursor: pointer;
 
-        .image-button
-            cursor pointer
+            &:hover {
+                opacity: 0.5;
+            }
 
-            &:hover
-                opacity 0.5
-            .test
-                ad
+            .test {
+                ad;
+            }
+        }
 
-        .content
-            display flex
-            flex-direction row
-            flex-grow 1
-            position relative
-            // z-index 1
+        .content {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            position: relative;
+            // z-index: 1;
+        }
 
-        .info
-            flex 1 0 auto
-            padding 0.2rem 0.5rem
+        .info {
+            flex: 1 0 auto;
+            padding: 0.2rem 0.5rem;
+        }
 
-        .actions
-            display flex
-            align-items center
-            flex-direction row
-            opacity 0
-            vendor('transition', all 0.25s ease-in-out)
+        .actions {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            opacity: 0;
+            vendor('transition', all 0.25s ease-in-out);
 
-            .edit
-                min-width 12px
-                padding 12px
+            .edit {
+                min-width: 12px;
+                padding: 12px;
+            }
 
-            .remove
-                min-width 12px
-                padding 12px
+            .remove {
+                min-width: 12px;
+                padding: 12px;
+            }
 
-            .download
-                min-width 12px
-                padding 12px
+            .download {
+                min-width: 12px;
+                padding: 12px;
+            }
 
-            .open-output
-                min-width 12px
-                padding 12px
+            .open-output {
+                min-width: 12px;
+                padding: 12px;
+            }
 
-        .loading
-            z-index 1
-            align-items center
-            column-gap 2rem
+            .open-in-browser {
+                min-width: 12px;
+                padding: 12px;
+            }
+        }
 
-        .progress-indicator
-            display flex
-            align-items center
-            flex-direction row
+        .loading {
+            z-index: 1;
+            align-items: center;
+            column-gap: 2rem;
+        }
 
-        .progress
-            display flex
-            align-items center
-            flex-direction row
-            position absolute
-            width 100%
-            height 100%
-            z-index 0
-            opacity 0.25
+        .progress-indicator {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+        }
 
-            .progress-bar
-                width 100%
-                height 100%
+        .progress {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.25;
 
-        .row
-            display flex
+            .progress-bar {
+                width: 100%;
+                height: 100%;
+            }
+        }
 
-            .label
-                padding-right 0.3rem
-                capitalize()
+        .row {
+            display: flex;
 
-                & .bold
-                    font-weight bold
+            .label {
+                padding-right: 0.3rem;
+                capitalize();
 
-    &:hover
-        .actions
-            opacity 1
+                & .bold {
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+
+    &:hover {
+        .actions {
+            opacity: 1;
+        }
+    }
+}
