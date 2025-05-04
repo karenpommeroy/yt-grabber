@@ -1,7 +1,7 @@
 import classnames from "classnames";
 import _find from "lodash/find";
 import _map from "lodash/map";
-import React, {useEffect, useState} from "react";
+import React, {MouseEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
@@ -39,15 +39,31 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
         {id: InputMode.Albums, name: t("albums"), icon: AlbumIcon, color: "warning"},
         {id: InputMode.Songs, name: t("songs"), icon: AudiotrackIcon, color: "primary"},
     ];
-    const [selected, setSelected] = React.useState<InputModeOption>(_find(options, ["id", applicationOptions.inputMode]));
+    const [selected, setSelected] = React.useState<InputModeOption>(_find(options, ["id", applicationOptions.inputMode]) as InputModeOption);
 
+    
     useEffect(() => {
         global.store.set("application", debouncedApplicationOptions);
     }, [debouncedApplicationOptions]);
+    
+    useEffect(() => {
+        const unsubscribeInputMode = global.store.onDidChange<any>("application.inputMode", (value: InputMode) => {
+            const nextOption = _find(options, ["id", value]);
+            
+            setSelected(nextOption);
+            setApplicationOptions((prev) => ({...prev, inputMode: nextOption.id}));
+        });
 
-    const handleMenuItemClick = (value: InputModeOption) => {
-        setSelected(value);
-        setApplicationOptions((prev) => ({...prev, inputMode: value.id}));
+        return () => {
+            unsubscribeInputMode();
+        };
+    }, []);
+
+    const handleMenuItemClick = (event: MouseEvent<HTMLLIElement>) => {
+        const id = event.currentTarget.dataset.id;
+        const nextOption = _find(options, ["id", id]);
+        setSelected(nextOption);
+        setApplicationOptions((prev) => ({...prev, inputMode: nextOption.id}));
         setOpen(false);
     };
 
@@ -88,7 +104,8 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
                                             key={index}
                                             className={Styles.menuItem}
                                             selected={option.id === selected.id}
-                                            onClick={() => handleMenuItemClick(option)}
+                                            data-id={option.id}
+                                            onClick={handleMenuItemClick}
                                         >
                                             <option.icon />
                                             {option.name}
