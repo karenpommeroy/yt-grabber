@@ -12,12 +12,13 @@ import _reduce from "lodash/reduce";
 import _size from "lodash/size";
 import _some from "lodash/some";
 import path from "path";
-import React, {useEffect, useState} from "react";
+import React, {MouseEvent, useEffect, useState} from "react";
 
+import CloseIcon from "@mui/icons-material/Close";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import {Avatar, Box, Grid, Skeleton, Stack, Typography} from "@mui/material";
+import {Avatar, Badge, Box, Grid, IconButton, Skeleton, Stack, Typography} from "@mui/material";
 import Tab from "@mui/material/Tab";
 
 import {OpenSystemPathParams} from "../../../common/Messaging";
@@ -39,7 +40,7 @@ export type PlaylistTabsProps = {
 
 export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsProps) => {
     const {queue, pending, onDownloadTrack, onDownloadPlaylist, onCancelPlaylist, onCancelTrack} = props;
-    const {trackStatus, playlists, activeTab, setActiveTab} = useDataState();
+    const {trackStatus, playlists, activeTab, setActiveTab, setTrackStatus, setPlaylists, setTracks} = useDataState();
     const {state} = useAppContext();
     const [pendingTabs, setPendingTabs] = useState([]);
     const tabWidth = window.innerWidth / (pendingTabs.length + playlists.length) - 30; 
@@ -94,6 +95,16 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
         if (_isFunction(onCancelPlaylist)) {
             onCancelPlaylist(activeTab);
         }
+    };
+
+    const onRemove = (event: MouseEvent<HTMLButtonElement>) => {
+        event.stopPropagation();
+        const albumId = event.currentTarget.getAttribute("data-id");
+        const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
+        
+        setTrackStatus((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.trackId)));
+        setPlaylists((prev) => _filter(prev, (p) => p.album.id !== albumId));
+        setTracks((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.id)));
     };
 
     const onOpenFile = (trackId: string) => {
@@ -175,13 +186,25 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                                 key={playlist.album.id}
                                 className={Styles.tab}
                                 icon={
-                                    <div>
-                                        <Avatar className={classnames(Styles.tabIcon, {[Styles.loading]: loading})} src={playlist.album.thumbnail} />
-                                        {loading && <Progress variant="indeterminate" className={Styles.tabProgress} thickness={4} color="primary" value={progress} />}
-                                    </div>
+                                    <Badge
+                                        className={Styles.tabRemoveButton}
+                                        badgeContent={
+                                            <IconButton data-id={playlist.album.id} className={Styles.tabRemoveIcon} size="small" onClick={onRemove}>
+                                                <CloseIcon sx={{color: "text.secondary"}} />
+                                            </IconButton>
+                                        }
+                                    />
                                 }
-                                iconPosition="start"
-                                label={<Typography title={playlist.album.title} variant="button" className={Styles.tabTitle} sx={{maxWidth: tabWidth}}>{playlist.album.title}</Typography>}
+                                iconPosition="end"
+                                label={
+                                    <>
+                                        <div>
+                                            <Avatar className={classnames(Styles.tabIcon, {[Styles.loading]: loading})} src={playlist.album.thumbnail} />
+                                            {loading && <Progress variant="indeterminate" className={Styles.tabProgress} thickness={4} color="primary" value={progress} />}
+                                        </div>
+                                        <Typography title={playlist.album.title} variant="button" className={Styles.tabTitle} sx={{maxWidth: tabWidth}}>{playlist.album.title}</Typography>
+                                    </>
+                                }
                                 value={playlist.url}
                             />;
                         })}

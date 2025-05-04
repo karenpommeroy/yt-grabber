@@ -1,11 +1,7 @@
 import classnames from "classnames";
 import _assign from "lodash/assign";
-import _filter from "lodash/filter";
-import _find from "lodash/find";
-import _get from "lodash/get";
 import _includes from "lodash/includes";
 import _isFunction from "lodash/isFunction";
-import _map from "lodash/map";
 import _pick from "lodash/pick";
 import _some from "lodash/some";
 import moment from "moment";
@@ -13,7 +9,6 @@ import React, {useCallback, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
-import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import LaunchIcon from "@mui/icons-material/Launch";
@@ -35,13 +30,12 @@ export type MediaInfoPanelProps = {
     progress?: number;
     onCancel?: () => void;
     onDownload?: (albumId: string) => void;
-    onRemove?: (albumId: string) => void;
     onOpenOutput?: () => void;
 }
 
 export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPanelProps) => {
-    const {item, className, onCancel, onDownload, onOpenOutput, onRemove, loading, progress = 0} = props;
-    const {trackStatus, playlists, setPlaylists, setTracks, setTrackStatus, queue} = useDataState();
+    const {item, className, onCancel, onDownload, onOpenOutput, loading, progress = 0} = props;
+    const {trackStatus, queue} = useDataState();
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [imageModalOpen, setImageModalOpen] = useState(false);
     const {t} = useTranslation();
@@ -65,18 +59,6 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     const openOutputFolder = () => {
         if (_isFunction(onOpenOutput)) {
             onOpenOutput();
-        }
-    };
-
-    const remove = () => {
-        const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", value.id]), "tracks"), "id");
-
-        setTrackStatus((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.trackId)));
-        setPlaylists((prev) => _filter(prev, (p) => p.album.id !== value.id));
-        setTracks((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.id)));
-
-        if (_isFunction(onRemove)) {
-            onRemove(value.id);
         }
     };
 
@@ -128,11 +110,6 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                         </CardContent>
                         {!loading &&
                             <Box className={Styles.actions} padding={2} gap={2}>
-                                <Tooltip title={t("remove")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="removePlaylist" className={Styles.remove} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={remove}>
-                                        <DeleteIcon />
-                                    </Button>
-                                </Tooltip>
                                 {_some(trackStatus, (s) => s.completed) &&
                                     <Tooltip title={t("openOutputDirectory")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                         <Button data-help="openOutputDirectory" className={Styles.openOutput} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={openOutputFolder}>

@@ -112,17 +112,23 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         }
     };
 
+    const getEntriesFromFile = (content: string, fileType: string): string[] => {
+        if (fileType === "application/json") {
+            return JSON.parse(content);
+        }
+
+        return _compact(content.split("\n"));
+    };
+
     const onSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         
         if (!file) return;
-    
+        
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            const content = e.target?.result as string;
-            const lines = _compact(content.split("\n"));
-            const nextUrls = _uniq(_filter(lines, isValid));
+            const nextUrls = _uniq(_filter(getEntriesFromFile(e.target?.result as string, file.type), isValid));
 
             setUrls(nextUrls);
             if (_isFunction(onChange)) {
