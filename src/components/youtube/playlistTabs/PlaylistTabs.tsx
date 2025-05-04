@@ -18,7 +18,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import {Avatar, Badge, Box, Grid, IconButton, Skeleton, Stack, Typography} from "@mui/material";
+import {Avatar, Badge, Box, Grid, Skeleton, Stack, Typography} from "@mui/material";
 import Tab from "@mui/material/Tab";
 
 import {OpenSystemPathParams} from "../../../common/Messaging";
@@ -97,7 +97,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
         }
     };
 
-    const onRemove = (event: MouseEvent<HTMLButtonElement>) => {
+    const onRemove = (event: MouseEvent<SVGSVGElement>) => {
         event.stopPropagation();
         const albumId = event.currentTarget.getAttribute("data-id");
         const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
@@ -188,11 +188,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                                 icon={
                                     <Badge
                                         className={Styles.tabRemoveButton}
-                                        badgeContent={
-                                            <IconButton data-id={playlist.album.id} className={Styles.tabRemoveIcon} size="small" onClick={onRemove}>
-                                                <CloseIcon sx={{color: "text.secondary"}} />
-                                            </IconButton>
-                                        }
+                                        badgeContent={<CloseIcon data-id={playlist.album.id} className={Styles.tabRemoveIcon} onClick={onRemove}/>}
                                     />
                                 }
                                 iconPosition="end"
