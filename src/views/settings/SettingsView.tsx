@@ -113,6 +113,10 @@ export const SettingsView: React.FC = () => {
     const onOverwriteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, alwaysOverwrite: e.target.checked}));
     };
+    
+    const onMergePartsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, mergeParts: e.target.checked}));
+    };
 
     const onEnableInputModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, enableInputMode: e.target.checked}));
@@ -177,6 +181,9 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12} data-help="alwaysOverwrite">
                             <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />
+                        </Grid>
+                        <Grid size={12} data-help="mergeParts">
+                            <FormControlLabel control={<Switch checked={applicationOptions.mergeParts} onChange={onMergePartsChange} />} label={t("mergeParts")} />
                         </Grid>
                         <Grid size={12} data-help="enableInputMode">
                             <FormControlLabel control={<Switch checked={applicationOptions.enableInputMode} onChange={onEnableInputModeChange} />} label={t("enableInputMode")} />

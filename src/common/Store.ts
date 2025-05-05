@@ -17,6 +17,7 @@ export type ApplicationOptions = {
     urls?: string[];
     language?: string;
     alwaysOverwrite?: boolean;
+    mergeParts?: boolean;
     enableInputMode?: boolean;
     inputMode?: InputMode;
 };
@@ -97,14 +98,18 @@ export const StoreSchema: Schema<IStore> = {
                 type: "boolean",
                 default: false
             },
+            mergeParts: {
+                type: "boolean",
+                default: true
+            },
             enableInputMode: {
                 type: "boolean",
-                default: true,
+                default: true
             },
             inputMode: {
                 type: "string",
                 default: InputMode.Auto,
-                enum: _values(InputMode),
+                enum: _values(InputMode)
             },
         },
         default: {},

@@ -136,5 +136,7 @@
         "Songs - assumes that input items are song titles and will try to find and grab proper tracks"
     ],
     "enableInputModeHeader": "Enable input mode selection",
-    "enableInputModeContent": "Enables or disables specifying input value types (auto, artists, albums, songs)."
+    "enableInputModeContent": "Enables or disables specifying input value types (auto, artists, albums, songs).",
+    "mergePartsHeader": "Merge parts",
+    "mergePartsContent": "Merges all cut parts of the track into one file."
 }

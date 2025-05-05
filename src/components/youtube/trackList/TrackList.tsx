@@ -1,18 +1,25 @@
 import _filter from "lodash/filter";
 import _find from "lodash/find";
+import _forEach from "lodash/forEach";
 import _get from "lodash/get";
 import _includes from "lodash/includes";
 import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
+import _join from "lodash/join";
 import _map from "lodash/map";
 import _omit from "lodash/omit";
 import _omitBy from "lodash/omitBy";
+import _pullAt from "lodash/pullAt";
+import _split from "lodash/split";
+import _toInteger from "lodash/toInteger";
 import _toString from "lodash/toString";
+import _values from "lodash/values";
 import moment from "moment";
 import React, {useCallback, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {NumberFormatBase} from "react-number-format";
 
+import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
@@ -74,12 +81,18 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
         return moment.duration(`00:${value}`).asSeconds();
     };
 
-    const sanitizeTrackCuts = (source: {[key: string]: number[]}) => {
-        return _omitBy(source, (v, k) => {
+    const sanitizeTrackCuts = (source: {[key: string]: [number, number][]}) => {
+        _forEach(source, (v, k) => {
             const track = _find(value, ["id", k]);
             
-            return v[0] === 0 && v[1] === track.duration;
+            const sanitizedCuts = _values(_omitBy(v, (val) => {
+                return val[0] === 0 && val[1] === track.duration;
+            }));
+
+            source[k] = sanitizedCuts;
         });
+
+        return source;
     };
 
     const onDownloadTrackClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -111,18 +124,49 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     const onOpenTrackCut = (event: React.MouseEvent<HTMLButtonElement>) => {
         const trackId = event.currentTarget.getAttribute("data-id");
 
+        if (_isEmpty(trackCuts[trackId])) {
+            const track = _find(value, ["id", trackId]);
+
+            setTrackCuts((prev) => ({...prev, [trackId]: [[0, track.duration]]}));
+        }
+
         setCutAnchorEl(event.currentTarget);
         setCutOpen(trackId);
     };
     
     const onDeleteTrackCut = (event: React.MouseEvent<HTMLButtonElement>) => {
         const trackId = event.currentTarget.getAttribute("data-id");
+        const trackCutIndex = _toInteger(event.currentTarget.getAttribute("data-index"));
 
-        setTrackCuts((prev) => _omit(prev, [trackId]));
-        onCloseTrackCut();
+        setTrackCuts((prev) => {
+            const prevTrackCuts = prev[trackId];
+
+            _pullAt(prevTrackCuts, trackCutIndex);
+            
+            if (_isEmpty(prevTrackCuts)) {
+                return _omit(prev, [trackId]);
+            }
+
+            return {
+                ...prev,
+                [trackId]: prevTrackCuts,
+            };
+        });
+
+        if (trackCuts[trackId].length <= 0) {
+            onCloseTrackCut();
+        }
+    };
+    
+    const onAddTrackCut = (event: React.MouseEvent<HTMLButtonElement>) => {
+        const trackId = event.currentTarget.getAttribute("data-id");
+        const track = _find(value, ["id", cutOpen]);
+
+        setTrackCuts((prev) => ({...prev, [trackId]: [...prev[cutOpen], [0, track.duration]]}));;
     };
 
     const onCloseTrackCut = () => {
+        setTrackCuts((prev) => sanitizeTrackCuts(prev));
         setCutAnchorEl(null);
         setCutOpen(null);
     };
@@ -137,26 +181,75 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
 
     const onCutStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const track = _find(value, ["id", cutOpen]);
+        const index = _toInteger(e.currentTarget.getAttribute("data-index"));
 
-        setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [timeStringToNumber(e.target.value), _get(prev, `${cutOpen}.1`, track.duration) as number]}));
+        setTrackCuts((prev) => {
+            const cuts = prev[cutOpen];
+            const cut = cuts[index];
+            cuts[index] = [timeStringToNumber(e.target.value), _get(cut, "1", track.duration)];
+            
+            return {...prev, [cutOpen]: cuts};
+        });
     };
 
     const onCutEndTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [_get(prev, `${cutOpen}.0`, 0) as number, timeStringToNumber(e.target.value)]}));
+        const index = _toInteger(e.currentTarget.getAttribute("data-index"));
+        
+        setTrackCuts((prev) => {
+            const cuts = prev[cutOpen];
+            const cut = cuts[index];
+            cuts[index] = [_get(cut, "0", 0), timeStringToNumber(e.target.value)];
+            
+            return {...prev, [cutOpen]: cuts};
+        });
     };
     
     const onCutTimeChange = (event: Event, newValue: number | number[], activeThumb: number) => {
         if (!Array.isArray(newValue)) {
             return;
         }
-        
         const track = _find(value, ["id", cutOpen]);
+        const index = _toInteger((event.target as any).name);
 
         if (activeThumb === 0) {
-            setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [newValue[0], _get(prev, `${cutOpen}.1`, track.duration) as number]}));
+            setTrackCuts((prev) => {
+                const cuts = prev[cutOpen];
+                const cut = cuts[index];
+                cuts[index] = [newValue[0], _get(cut, "1", track.duration)];
+                
+                return {...prev, [cutOpen]: cuts};
+            });
         } else {
-            setTrackCuts((prev) => sanitizeTrackCuts({...prev, [cutOpen]: [_get(prev, `${cutOpen}.0`, 0) as number, newValue[1]]}));
+            setTrackCuts((prev) => {
+                const cuts = prev[cutOpen];
+                const cut = cuts[index];
+                cuts[index] = [_get(cut, "0", 0), newValue[1]];
+                
+                return {...prev, [cutOpen]: cuts};
+            });
         }
+    };
+
+    const renderLineBreaks = (value: string) => {
+        return _map(_split(value, "\n"), (v, k) => <React.Fragment key={k}>{v}<br /></React.Fragment>);
+    };
+
+    const resolveTrackCutsText = (track: TrackInfo) => {
+        const cuts = trackCuts[track.id];
+        
+        if (cuts.length === 0) {
+            return "";
+        } else if (cuts.length === 1) {
+            return `${formatTime(_toString(cuts[0][0]))} - ${formatTime(_toString(cuts[0][1]))}`;
+        } else {
+            return cuts.length;
+        }
+    };
+    
+    const resolveTrackCutsTooltipText = (track: TrackInfo) => {
+        return renderLineBreaks(_join(_map(trackCuts[track.id], (cut) =>
+            `${formatTime(_toString(cut[0]))} - ${formatTime(_toString(cut[1]))}`
+        ), "\n"));
     };
 
     const getTrackStatusInfo = useCallback((track: TrackInfo): TrackStatusInfo => {
@@ -175,6 +268,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                 {_map(value, (item) => {
                     const info = getTrackStatusInfo(item);
                     const open = Boolean(cutAnchorEl) && cutOpen === item.id;
+                    const cuts = _get(trackCuts, `${item.id}`, []);
 
                     return (<ListItem
                         divider
@@ -217,43 +311,64 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                 horizontal: "right",
                                             }}
                                         >
-                                            <Grid container padding={2} spacing={1} className={Styles.trackCutPopup}>
-                                                <Grid size={5}>
-                                                    <NumberFormatBase
-                                                        value={_get(trackCuts, `${item.id}.0`, 0) as number}
-                                                        onChange={onCutStartTimeChange}
-                                                        format={formatTime}
-                                                        removeFormatting={unformatTime}
-                                                        customInput={TextField}
-                                                        variant="outlined"
-                                                        label={t("from")}
-                                                    />
-                                                </Grid>
-                                                <Grid size={5}>
-                                                    <NumberFormatBase
-                                                        value={_get(trackCuts, `${item.id}.1`, item.duration) as number}
-                                                        onChange={onCutEndTimeChange}
-                                                        format={formatTime}
-                                                        removeFormatting={unformatTime}
-                                                        customInput={TextField}
-                                                        variant="outlined"
-                                                        label={t("to")}
-                                                    />
-                                                </Grid>
-                                                <Grid size={2} display="flex">
-                                                    <Button data-id={item.id} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
-                                                        <DeleteForeverIcon />
+                                            <Grid container padding={0} spacing={0} className={Styles.trackCutPopup}>
+                                                {_map(cuts, (cut, index) =>
+                                                    <Grid container padding={2} spacing={1} key={index}>
+                                                        <Grid size={5}>
+                                                            <NumberFormatBase
+                                                                slotProps={{
+                                                                    htmlInput: {
+                                                                        "data-index": index,
+                                                                    }
+                                                                }}
+                                                                value={cut[0] ?? 0}
+                                                                onChange={onCutStartTimeChange}
+                                                                format={formatTime}
+                                                                removeFormatting={unformatTime}
+                                                                customInput={TextField}
+                                                                variant="outlined"
+                                                                label={t("from")}
+                                                            />
+                                                        </Grid>
+                                                        <Grid size={5}>
+                                                            <NumberFormatBase
+                                                                slotProps={{
+                                                                    htmlInput: {
+                                                                        "data-index": index,
+                                                                    }
+                                                                }}
+                                                                value={cut[1] ?? item.duration}
+                                                                onChange={onCutEndTimeChange}
+                                                                format={formatTime}
+                                                                removeFormatting={unformatTime}
+                                                                customInput={TextField}
+                                                                variant="outlined"
+                                                                label={t("to")}
+                                                            />
+                                                        </Grid>
+                                                        <Grid size={2} display="flex">
+                                                            <Button data-id={item.id} data-index={index} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
+                                                                <DeleteForeverIcon />
+                                                            </Button>
+                                                        </Grid>
+                                                        <Grid size={12} display="flex" paddingX={2}>
+                                                            <Slider
+                                                                name={_toString(index)}
+                                                                data-index={index}
+                                                                value={!_isEmpty(cut) ? cut : [0, item.duration]}
+                                                                onChange={onCutTimeChange}
+                                                                valueLabelDisplay="off"
+                                                                min={0}
+                                                                max={item.duration}
+                                                                step={1}
+                                                            />
+                                                        </Grid>
+                                                    </Grid>
+                                                )}   
+                                                <Grid size={12} className={Styles.addTrackCutRow} padding={1}>
+                                                    <Button data-id={item.id} disableElevation variant="contained" color="secondary" onClick={onAddTrackCut}>
+                                                        <AddIcon />
                                                     </Button>
-                                                </Grid>
-                                                <Grid size={12} display="flex" paddingX={2}>
-                                                    <Slider
-                                                        value={trackCuts[item.id] ?? [0, item.duration]}
-                                                        onChange={onCutTimeChange}
-                                                        valueLabelDisplay="off"
-                                                        min={0}
-                                                        max={item.duration}
-                                                        step={1}
-                                                    />
                                                 </Grid>
                                             </Grid>
                                         </Popover>
@@ -297,12 +412,12 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                             </Grid>
                             <Grid size={2} className={Styles.column}>
                                 {!_isEmpty(trackCuts[item.id]) &&
-                                    <>
-                                        <ContentCutIcon className={Styles.cutIcon} color="action"/>
-                                        <Typography variant="caption">
-                                            {formatTime(_toString(trackCuts[item.id][0]))} - {formatTime(_toString(trackCuts[item.id][1]))}
-                                        </Typography>
-                                    </>
+                                    <Tooltip title={resolveTrackCutsTooltipText(item)} arrow enterDelay={1000} leaveDelay={100} enterNextDelay={250} placement="top">
+                                        <div className={Styles.column}>
+                                            <ContentCutIcon className={Styles.cutIcon} color="action" />
+                                            <Typography variant="caption">{resolveTrackCutsText(item)}</Typography>
+                                        </div>
+                                    </Tooltip>
                                 }
                             </Grid>
                             {info && !info.skipped && <>

@@ -1,7 +1,10 @@
+import _flatten from "lodash/flatten";
 import _get from "lodash/get";
 import _isEmpty from "lodash/isEmpty";
 import _map from "lodash/map";
+import _padStart from "lodash/padStart";
 import _template from "lodash/template";
+import _times from "lodash/times";
 import _toString from "lodash/toString";
 import moment from "moment";
 
@@ -11,7 +14,7 @@ import {Format, MediaFormat} from "./Media";
 import StoreSchema from "./Store";
 import {AlbumInfo, TrackInfo} from "./Youtube";
 
-export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackCuts: {[key: string]: number[]}, format: Format) => {
+export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackCuts: {[key: string]: [number, number][]}, format: Format) => {
     const paramRetrievers = {
         [MediaFormat.Audio]: getYtdplParamsForAudio,
         [MediaFormat.Video]: getYtdplParamsForVideo,
@@ -22,8 +25,8 @@ export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackC
         "--progress",
         ...getCutArgs(track, trackCuts),
         appOptions.alwaysOverwrite ? "--force-overwrite" : "",
-        "--postprocessor-args", getPostProcessorArgs(track, album, trackCuts),
-        "--output", getOutput(track, album, format)
+        "--postprocessor-args", getPostProcessorArgs(track, album),
+        "--output", getOutput(track, album, format, trackCuts)
     ];
 
     return [...paramRetriever(format), ...commonParams];
@@ -31,6 +34,10 @@ export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackC
 
 export const getOutputFilePath = (track: TrackInfo, album: AlbumInfo, format: Format) => {
     return getOutputFile(track, album, format) + "." + format.extension;
+};
+
+export const getOutputFileParts = (track: TrackInfo, album: AlbumInfo, format: Format, parts: number) => {
+    return _times(parts, (num) => getOutputFile(track, album, format) + " " + _padStart(_toString(num + 1), 3, "0") + "." + format.extension);
 };
 
 const getYtdplParamsForAudio = (format: Format) => {
@@ -53,47 +60,37 @@ const getYtdplParamsForVideo = (format: Format) => {
     ];
 };
 
-const getPostProcessorArgs = (track: TrackInfo, album: AlbumInfo, trackCuts: {[key: string]: number[]}) => {
+const getPostProcessorArgs = (track: TrackInfo, album: AlbumInfo) => {
     if (isAlbumTrack(track)) {
         const title = track.title.replace(/"/g, "\\\"");
         const artist = album.artist.replace(/"/g, "\\\"");
         const albumTitle = album.title.replace(/"/g, "\\\"");
-        return getCutsPostProcessorArgs(track, trackCuts) + `-metadata title="${title}" -metadata artist="${artist}" -metadata album="${albumTitle}" -metadata track="${track.playlist_autonumber}" -metadata date="${album.releaseYear}" -metadata release_year="${album.releaseYear}"`;
+        return getCutsPostProcessorArgs() + `-metadata title="${title}" -metadata artist="${artist}" -metadata album="${albumTitle}" -metadata track="${track.playlist_autonumber}" -metadata date="${album.releaseYear}" -metadata release_year="${album.releaseYear}"`;
     }
 
-    return getCutsPostProcessorArgs(track, trackCuts) + `-metadata title="${track.title}"`;
+    return getCutsPostProcessorArgs() + `-metadata title="${track.title}"`;
 };
 
-const getCutsPostProcessorArgs = (track: TrackInfo, trackCuts: {[key: string]: number[]}) => {
-    const cuts = trackCuts[track.id];
-    if (_isEmpty(cuts)) {
-        return "";
-    } else {
-        const start = moment.duration(cuts[0], "seconds");
-        const end = moment.duration(cuts[1], "seconds");
-        const length = end.subtract(start);
-
-        const t = length.format("H:m:s");
-
-        return `-ss 0:0:0 -to ${t} `;
-    }
+const getCutsPostProcessorArgs = () => {
+    return "";
 };
 
-const getCutArgs = (track: TrackInfo,  trackCuts: {[key: string]: number[]}): string[] => {
+const getCutArgs = (track: TrackInfo,  trackCuts: {[key: string]: [number, number][]}): string[] => {
     const cuts = trackCuts[track.id];
 
     if (_isEmpty(cuts)) {
         return [];
     } else {
-        return ["--download-sections", `*${moment.duration(cuts[0], "seconds").format("HH:mm:ss")}-${moment.duration(cuts[1], "seconds").format("HH:mm:ss")}`, "-S", "proto:https"];
+        return [..._flatten(_map(cuts, (cut) => ["--download-sections", `*${moment.duration(cut[0], "seconds").format("HH:mm:ss")}-${moment.duration(cut[1], "seconds").format("HH:mm:ss")}`])), "--force-keyframes-at-cuts", "-S", "proto:https"];
     }
 };
 
-const getOutput = (track: TrackInfo, album: AlbumInfo, format: Format) => {
-    return getOutputFile(track, album, format) + ".%(ext)s";
+const getOutput = (track: TrackInfo, album: AlbumInfo, format: Format, trackCuts: {[key: string]: [number, number][]}) => {
+    const cuts = trackCuts[track.id] ?? [];
+    return getOutputFile(track, album, format) + (cuts.length > 1 ? " %(autonumber)03d" : "") + ".%(ext)s";
 };
 
-const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format) => {
+export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format) => {
     const appOptions = global.store.get("application");
     const interpolate = /{{([\s\S]+?)}}/g;
     const data = {

@@ -150,21 +150,9 @@ export const getThemeColorSystem = (name: string, mode: PaletteMode): ColorSyste
                     disabled: colorScheme.primary[700]
                 }),
             },
-            // AppBar: {
-            //     darkBg: colorScheme.primary[300],
-            //     defaultBg: colorScheme.primary[300],
-            //     darkColor: colorScheme.primary[900],
-            //     ...(mode === "dark" && {
-            //         darkBg: colorScheme.primary[900],
-            //         defaultBg: colorScheme.primary[900],
-            //         darkColor: colorScheme.primary[100],
-            //     }),
-            // },
-
             action: {
                 hover: alpha(Gray[200], 0.2),
                 selected: alpha(Gray[200], 0.3),
-                // active: Gray.A200,
                 focus: Gray.A200,
                 ...(mode === "dark" && {
                     hover: alpha(Gray[600], 0.2),
@@ -184,7 +172,3 @@ export const ThemeColorSchemes: { [key: string]: ThemeColorScheme } = {
         secondary: Purple
     }
 };
-
-// export const ColorThemes: { [key: string]: ColorTheme } = {
-//     Sky: getTheme,
-// };

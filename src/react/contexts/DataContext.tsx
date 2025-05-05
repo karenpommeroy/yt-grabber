@@ -22,7 +22,7 @@ export type DataState = {
     playlists: PlaylistInfo[];
     tracks: TrackInfo[];
     trackStatus: TrackStatusInfo[];
-    trackCuts: {[key: string]: number[];};
+    trackCuts: {[key: string]: [number, number][]};
     formats: Record<string, Format>;
     urls: string[];
     autoDownload: boolean;
@@ -35,7 +35,7 @@ export type DataState = {
     setPlaylists: React.Dispatch<React.SetStateAction<PlaylistInfo[]>>;
     setTracks: React.Dispatch<React.SetStateAction<TrackInfo[]>>;
     setTrackStatus: React.Dispatch<React.SetStateAction<TrackStatusInfo[]>>;
-    setTrackCuts: React.Dispatch<React.SetStateAction<{[key: string]: number[];}>>;
+    setTrackCuts: React.Dispatch<React.SetStateAction<{[key: string]: [number, number][]}>>;
     setFormats: React.Dispatch<React.SetStateAction<Record<string, Format>>>;
     setUrls: React.Dispatch<React.SetStateAction<string[]>>;
     setAutoDownload: React.Dispatch<React.SetStateAction<boolean>>;
@@ -54,7 +54,7 @@ export function DataProvider(props: any) {
     const [playlists, setPlaylists] = useState<PlaylistInfo[]>([]);
     const [tracks, setTracks] = useState<TrackInfo[]>([]);
     const [trackStatus, setTrackStatus] = useState<TrackStatusInfo[]>([]);
-    const [trackCuts, setTrackCuts] = useState<{[key: string]: number[]}>({});
+    const [trackCuts, setTrackCuts] = useState<{[key: string]: [number, number][]}>({});
     const [formats, setFormats] = useState<Record<string, Format>>({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 0}});
     const [urls, setUrls] = useState<string[]>(appOptions.urls);
     const [autoDownload, setAutoDownload] = useState<boolean>(false);

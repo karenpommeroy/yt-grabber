@@ -153,8 +153,8 @@ const closeResources = async () => {
 };
 
 export const cancel = async () => {
-    await browser.close();
-    await browser.disconnect();
+    if (browser) await browser.close();
+    if (browser) await browser.disconnect();
 };
 
 export default execute;

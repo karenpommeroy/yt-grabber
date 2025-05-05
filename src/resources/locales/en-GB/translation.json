@@ -44,6 +44,7 @@
     "loadFromFile": "Load from file",
     "loadInfo": "Load Info",
     "mediaType": "Type",
+    "mergeParts": "Merge cut parts",
     "merging": "merging",
     "missingMediaInfoError": "Missing media info",
     "modeDark": "Dark",

@@ -136,5 +136,7 @@
         "Utwory - zakłada, że wprowadzone elementy to utwory i spróbuje je znaleźć"
     ],
     "enableInputModeHeader": "Włącz wybór trybu wprowadzania",
-    "enableInputModeContent": "Włącza lub wyłącza wybieranie typu wprowadzonych wartości (np. auto, utwór, album, artysta)."
+    "enableInputModeContent": "Włącza lub wyłącza wybieranie typu wprowadzonych wartości (np. auto, utwór, album, artysta).",
+    "mergePartsHeader": "Połącz wycięte części",
+    "mergePartsContent": "Łączy wszystkie wycięte części ścieżki w jeden plik."
 }

@@ -44,6 +44,7 @@
     "loadFromFile": "Aus Datei laden",
     "loadInfo": "Infos laden",
     "mediaType": "Typ",
+    "mergeParts": "Ausgeschnittene Teile zusammenfügen",
     "merging": "Zusammenführung",
     "missingMediaInfoError": "Fehlende Medieninformationen",
     "modeDark": "Dunkel",

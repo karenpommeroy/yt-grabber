@@ -44,6 +44,7 @@
     "loadFromFile": "Wczytaj z pliku",
     "loadInfo": "Wczytaj info",
     "mediaType": "Typ",
+    "mergeParts": "Połącz wycięte części",
     "merging": "Łączenie",
     "missingMediaInfoError": "Metadane są niekompletne",
     "modeDark": "Ciemny",

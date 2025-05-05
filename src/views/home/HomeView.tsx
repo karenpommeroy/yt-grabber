@@ -1,3 +1,4 @@
+import {exec} from "child_process";
 import {ipcRenderer, IpcRendererEvent} from "electron";
 import fs from "fs-extra";
 import _difference from "lodash/difference";
@@ -32,13 +33,17 @@ import {Alert, Box, Grid} from "@mui/material";
 import {getBinPath} from "../../common/FileSystem";
 import {getAlbumInfo} from "../../common/Formatters";
 import {getUrlType, mapRange, resolveMockData} from "../../common/Helpers";
-import {FormatScope, InputMode, MediaFormat} from "../../common/Media";
+import {Format, FormatScope, InputMode, MediaFormat} from "../../common/Media";
 import {GetYoutubeUrlResult} from "../../common/Messaging";
 import {afterEach} from "../../common/Promise";
 import {ProgressInfo} from "../../common/Reporter";
 import {ApplicationOptions} from "../../common/Store";
-import {PlaylistInfo, TrackStatusInfo, UrlType, YoutubeInfoResult} from "../../common/Youtube";
-import {getOutputFilePath, getYtdplRequestParams} from "../../common/YtdplUtils";
+import {
+    AlbumInfo, PlaylistInfo, TrackInfo, TrackStatusInfo, UrlType, YoutubeInfoResult
+} from "../../common/Youtube";
+import {
+    getOutputFile, getOutputFileParts, getOutputFilePath, getYtdplRequestParams
+} from "../../common/YtdplUtils";
 import FormatSelector from "../../components/youtube/formatSelector/FormatSelector";
 import InfoBar from "../../components/youtube/infoBar/InfoBar";
 import InputPanel from "../../components/youtube/inputPanel/InputPanel";
@@ -77,6 +82,7 @@ export const HomeView: React.FC = () => {
     const [pendingTabs, setPendingTabs] = useState<string[]>([]);
     const [debouncedAppOptions] = useDebounceValue(appOptions, 500, {leading: true});
     const {t, i18n} = useTranslation();
+
     const trackStatusRef = useRef<TrackStatusInfo[]>(trackStatus);
     const abortRef = useRef<string>(abort);
     
@@ -226,6 +232,20 @@ export const HomeView: React.FC = () => {
     const onGetYoutubeCancelled = () => {
         setPendingTabs([]);
         setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+    };
+
+    const mergeOutputFiles = (filename: string, extension: string, callback: (error: Error, result: string) => void) => {
+        const getCommand = (ext: string) => {
+            if (ext === "m4a") {
+                return `"${getBinPath()}/ffmpeg.exe" -f concat -safe 0 -i "./output/${filename}.txt" -i "./output/${filename} 001.${extension}" -map 0:a -map 1:v -c:a copy -c:v copy -disposition:v:0 attached_pic -map_metadata 1 "./output/${filename}.${extension}"`;
+            } else if (ext === "mp3" || ext === "flac") {
+                return `"${getBinPath()}/ffmpeg.exe" -f concat -safe 0 -i "./output/${filename}.txt" -i "./output/${filename} 001.${extension}" -map 0 -map 1:v -c copy -map_metadata 0 -disposition:v:1 attached_pic "./output/${filename}.${extension}"`;
+            }
+
+            return `"${getBinPath()}/ffmpeg.exe" -f concat -safe 0 -i "./output/${filename}.txt" -c copy "./output/${filename}.${extension}"`;
+        };
+        
+        exec(getCommand(extension), callback); 
     };
 
     const handleUrlChange = (urls: string[]) => {
@@ -414,6 +434,7 @@ export const HomeView: React.FC = () => {
 
     const downloadTrack = (trackId: string) => {
         const track = _find(tracks, ["id", trackId]);
+        const parts = trackCuts[track.id]?.length ?? 0;
         const controller = new AbortController();
         const album = getTrackAlbum(trackId);
         const playlist = getTrackPlaylist(trackId);
@@ -448,8 +469,8 @@ export const HomeView: React.FC = () => {
                 ytDlpWrap.exec([track.original_url, ...getYtdplRequestParams(track, album, trackCuts, format)], {shell: false, windowsHide: false, detached: false}, controller.signal)
                     .on("progress", (progress) => updateProgress(track.id, progress, format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
                     .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
-                    .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message}))
-                    .on("close", () => onProcessEnd({trackId: track.id}));
+                    .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message, parts}))
+                    .on("close", () => onProcessEnd({trackId: track.id, parts}));
             }
         });    
     };
@@ -528,6 +549,31 @@ export const HomeView: React.FC = () => {
         }));
     }, [trackStatus, setTrackStatus]);
     
+    const mergeFileParts = (track: TrackInfo, album: AlbumInfo, format: Format, parts: number) => {
+        const fileParts = getOutputFileParts(track, album, format, parts);
+        const lines = _map(fileParts, (file) => {
+            const parsed = path.parse(file);
+            
+            return `file '${parsed.name}${parsed.ext}'`;
+        });
+        const listFilePath = getOutputFile(track, album, format) + "." + "txt";
+
+        fs.writeFileSync(listFilePath, _join(lines, "\n"));
+        const fileInfo = path.parse(listFilePath);
+        
+        mergeOutputFiles(fileInfo.name, format.extension, (error) => {
+            if (error) {
+                setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);  
+            }
+
+            fs.removeSync(listFilePath);
+            
+            for (const part of fileParts) {
+                fs.removeSync(part);
+            }
+        });
+    };
+
     const updateProgress = useCallback((trackId: string, progress: YtDlpProgress, progressMapRange = [0, 100]) => {
         setProgressPercentage(trackId, mapRange(progress.percent, [0, 100], progressMapRange));
     }, [trackStatus, setTrackStatus]);
@@ -566,7 +612,7 @@ export const HomeView: React.FC = () => {
         }));
     }, [trackStatus, setTrackStatus]);
 
-    const onProcessEnd = useCallback((result: {trackId: string, error?: string;}) => {
+    const onProcessEnd = useCallback((result: {trackId: string, error?: string; parts?: number}) => {
         const controller = abortControllers[result.trackId];
         const aborted = controller?.signal.aborted;
         const track = _find(tracks, ["id", result.trackId]);
@@ -577,10 +623,12 @@ export const HomeView: React.FC = () => {
         const dirPath = path.dirname(outputPath);
         const parsedPath = path.parse(outputPath);
         const totalSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
-        
+
         if (result.error && _includes(result.error, "[generic] '' is not a valid URL")) {
             result.error = undefined;
         }
+
+        const completed = !result.error && !aborted;
 
         if (aborted) {
             const files = fs.existsSync(dirPath) ? fs.readdirSync(dirPath, {recursive: false, withFileTypes: true}) : [];
@@ -592,13 +640,18 @@ export const HomeView: React.FC = () => {
             }
         }
 
+        if (completed && result.parts > 1 && global.store.get("application.mergeParts")) {
+            console.log(format.extension);
+            mergeFileParts(track, album, format, result.parts);
+        }
+
         setTrackStatus((prev) => _map(prev, (item) => {
             if (item.trackId === result.trackId) {
                 return {
                     ...item,
                     status: aborted ? t("cancelled") : result.error ?? t("done"),
                     error: !!result.error || aborted,
-                    completed: !result.error && !aborted,
+                    completed,
                     percent: 100,
                     totalSize,
                 };
@@ -606,7 +659,6 @@ export const HomeView: React.FC = () => {
                 return item;
             }
         }));
-
         
         delete abortControllers[result.trackId];
 
@@ -635,7 +687,7 @@ export const HomeView: React.FC = () => {
         } else {
             downloadTrack(nextTrackToDownload);
         }
-    }, [abort, abortRef, tracks, trackStatus, trackStatusRef.current, queue, appOptions]);
+    }, [abort, abortRef, tracks, trackStatus, trackStatusRef.current, formats, queue, appOptions]);
 
     const getTrackAlbum = useCallback((trackId: string) => {
         return _get(_find(playlists, (item) => !!_find(item.tracks, ["id", trackId])), "album");
@@ -645,13 +697,13 @@ export const HomeView: React.FC = () => {
         return _find(playlists, (item) => !!_find(item.tracks, ["id", trackId]));
     }, [playlists]);
 
-    const getPlaylistFormat = (playlist: PlaylistInfo) => {
-        if (appOptions.formatScope === FormatScope.Tab) {
+    const getPlaylistFormat = useCallback((playlist: PlaylistInfo) => {
+        if (global.store.get("application.formatScope") === FormatScope.Tab) {
             return _get(formats, playlist.url, formats.global);
         }
     
         return formats.global;
-    };
+    }, [formats]);
 
     return (
         <Box className={Styles.home}>

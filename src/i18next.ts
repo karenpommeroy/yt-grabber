@@ -20,7 +20,7 @@ i18next.use(i18nextBackend).use(initReactI18next).init({
     },
     lng: "en-GB",
     preload: ["en-GB", "de-DE", "pl-PL"],
-    debug: false, // process.env.NODE_ENV === "development",
+    debug: false,
     saveMissing: process.env.NODE_ENV === "development",
     missingKeyHandler: (lngs, ns, key) => {
         _forEach(_without(i18next.options.supportedLngs as string[], "cimode"), (lng) => {

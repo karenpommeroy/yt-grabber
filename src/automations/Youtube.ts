@@ -77,9 +77,6 @@ export const execute = async (
                 albumFilterButton.click();
                 await page.waitForNetworkIdle();
                 
-                // await page.screenshot({path: './profile/debug.png', fullPage: true});
-                // fs.writeFileSync("./profile/debug.html", await page.content());
-                
                 const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
                 for (const item of items) {
@@ -131,8 +128,8 @@ const closeResources = async () => {
 };
 
 export const cancel = async () => {
-    await browser.close();
-    await browser.disconnect();
+    if (browser) await browser.close();
+    if (browser) await browser.disconnect();
 };
 
 export default execute;
