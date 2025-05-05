@@ -10,7 +10,8 @@ It provides support for downloading:
 
 -   videos
 -   audio tracks
--   complete playlists
+-   playlists
+-   music albums
 -   full discographies
 
 Various formats and quality options are available for both - audio and video.
@@ -32,13 +33,13 @@ Each download can be customized to your needs for easy workflow automation.
 
 ## Features
 
-* Download video, audio, playlists and complete artist discographies
+* Download video, audio, playlists, songs, albums and complete artist discographies
 
 * Multiple output formats (mp3, m4u, flac, wav, mp4, mkv)
 
 * Customizable audio and video quality
 
-* Trimming video and audio
+* Trimming video and audio (multiple parts)
 
 * Batch multimedia download
 
