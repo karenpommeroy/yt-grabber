@@ -1,4 +1,3 @@
-import {exec} from "child_process";
 import {ipcRenderer, IpcRendererEvent} from "electron";
 import fs from "fs-extra";
 import _difference from "lodash/difference";
@@ -25,35 +24,35 @@ import path from "path";
 import {LaunchOptions} from "puppeteer";
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
-import {useDebounceValue} from "usehooks-ts";
 import YTDlpWrap, {Progress as YtDlpProgress} from "yt-dlp-wrap";
 
 import {Alert, Box, Grid} from "@mui/material";
 
-import {getBinPath} from "../../common/FileSystem";
+import {getBinPath, removeIncompleteFiles} from "../../common/FileSystem";
 import {getAlbumInfo} from "../../common/Formatters";
 import {getUrlType, mapRange, resolveMockData} from "../../common/Helpers";
-import {Format, FormatScope, InputMode, MediaFormat} from "../../common/Media";
-import {GetYoutubeUrlResult} from "../../common/Messaging";
+import {Format, FormatScope, InputMode, MediaFormat, QueueKeys} from "../../common/Media";
+import {GetYoutubeParams, GetYoutubeResult} from "../../common/Messaging";
 import {afterEach} from "../../common/Promise";
 import {ProgressInfo} from "../../common/Reporter";
-import {ApplicationOptions} from "../../common/Store";
+import {ApplicationOptions, IStore} from "../../common/Store";
 import {
     AlbumInfo, PlaylistInfo, TrackInfo, TrackStatusInfo, UrlType, YoutubeInfoResult
 } from "../../common/Youtube";
 import {
-    getOutputFile, getOutputFileParts, getOutputFilePath, getYtdplRequestParams
+    getOutputFile, getOutputFileParts, getOutputFilePath, getYtdplRequestParams, mergeOutputFiles
 } from "../../common/YtdplUtils";
 import FormatSelector from "../../components/youtube/formatSelector/FormatSelector";
 import InfoBar from "../../components/youtube/infoBar/InfoBar";
 import InputPanel from "../../components/youtube/inputPanel/InputPanel";
 import PlaylistTabs from "../../components/youtube/playlistTabs/PlaylistTabs";
+import {Messages} from "../../messaging/Messages";
 import {useAppContext} from "../../react/contexts/AppContext";
 import {useDataState} from "../../react/contexts/DataContext";
 import Styles from "./HomeView.styl";
 
 const ytDlpWrap = new YTDlpWrap(getBinPath() + "/yt-dlp.exe");
-const abortControllers: {[key: string]: AbortController} = {};
+const abortControllers: {[key: string]: AbortController;} = {};
 
 export const HomeView: React.FC = () => {
     const [appOptions, setAppOptions] = useState<ApplicationOptions>(global.store.get("application"));
@@ -80,19 +79,41 @@ export const HomeView: React.FC = () => {
     const [error, setError] = useState(false);
     const [abort, setAbort] = useState<string>();
     const [pendingTabs, setPendingTabs] = useState<string[]>([]);
-    const [debouncedAppOptions] = useDebounceValue(appOptions, 500, {leading: true});
     const {t, i18n} = useTranslation();
-
     const trackStatusRef = useRef<TrackStatusInfo[]>(trackStatus);
     const abortRef = useRef<string>(abort);
-    
+
     useEffect(() => {
-        global.store.set("application", debouncedAppOptions);
-    }, [debouncedAppOptions]);
+        const unsubscribe = global.store.onDidAnyChange((store: IStore) => setAppOptions(store.application));
+
+        ipcRenderer.on(Messages.GetYoutubeUrlsCompleted, onGetYoutubeCompleted);
+        ipcRenderer.on(Messages.GetYoutubeArtistsCompleted, onGetYoutubeCompleted);
+        ipcRenderer.on(Messages.GetYoutubeAlbumsCompleted, onGetYoutubeCompleted);
+        ipcRenderer.on(Messages.GetYoutubeTracksCompleted, onGetYoutubeCompleted);
+
+        ipcRenderer.on(Messages.GetYoutubeUrlsCanceled, onGetYoutubeCancelled);
+        ipcRenderer.on(Messages.GetYoutubeArtistsCanceled, onGetYoutubeCancelled);
+        ipcRenderer.on(Messages.GetYoutubeAlbumsCanceled, onGetYoutubeCancelled);
+        ipcRenderer.on(Messages.GetYoutubeTracksCanceled, onGetYoutubeCancelled);
+
+        return () => {
+            unsubscribe();
+
+            ipcRenderer.off(Messages.GetYoutubeUrlsCompleted, onGetYoutubeCompleted);
+            ipcRenderer.off(Messages.GetYoutubeArtistsCompleted, onGetYoutubeCompleted);
+            ipcRenderer.off(Messages.GetYoutubeAlbumsCompleted, onGetYoutubeCompleted);
+            ipcRenderer.off(Messages.GetYoutubeTracksCompleted, onGetYoutubeCompleted);
+
+            ipcRenderer.off(Messages.GetYoutubeUrlsCanceled, onGetYoutubeCancelled);
+            ipcRenderer.off(Messages.GetYoutubeArtistsCanceled, onGetYoutubeCancelled);
+            ipcRenderer.off(Messages.GetYoutubeAlbumsCanceled, onGetYoutubeCancelled);
+            ipcRenderer.off(Messages.GetYoutubeTracksCanceled, onGetYoutubeCancelled);
+        };
+    },  []);
 
     useEffect(() => {
         if (!autoDownload || _isEmpty(formats) || _isEmpty(tracks) || _isEmpty(playlists) || state.loading) return;
-  
+
         downloadAll();
     }, [formats, autoDownload, tracks, playlists, state.loading]);
 
@@ -115,7 +136,7 @@ export const HomeView: React.FC = () => {
                 return;
             }
 
-            _times(_min([appOptions.concurrency - currentlyRunning, _size(unallocated)]), (num) => {                
+            _times(_min([appOptions.concurrency - currentlyRunning, _size(unallocated)]), (num) => {
                 downloadTrack(unallocated[num]);
             });
         }
@@ -129,127 +150,32 @@ export const HomeView: React.FC = () => {
         actions.setLoading(queue.length > 0);
     }, [queue]);
 
-
-    useEffect(() => {
-        ipcRenderer.on("get-youtube-urls-progress", onGetYoutubeUrlsCompleted);
-        ipcRenderer.on("get-youtube-artists-progress", onGetYoutubeArtistsCompleted);
-        ipcRenderer.on("get-youtube-albums-progress", onGetYoutubeAlbumsCompleted);
-        ipcRenderer.on("get-youtube-songs-progress", onGetYoutubeSongsCompleted);
-
-        ipcRenderer.on("get-youtube-urls-cancelled", onGetYoutubeCancelled);
-        ipcRenderer.on("get-youtube-artists-cancelled", onGetYoutubeCancelled);
-        ipcRenderer.on("get-youtube-albums-cancelled", onGetYoutubeCancelled);
-        ipcRenderer.on("get-youtube-songs-cancelled", onGetYoutubeCancelled);
-
-        return () => {
-            ipcRenderer.off("get-youtube-urls-progress", onGetYoutubeUrlsCompleted);
-            ipcRenderer.off("get-youtube-artists-progress", onGetYoutubeArtistsCompleted);
-            ipcRenderer.off("get-youtube-albums-progress", onGetYoutubeAlbumsCompleted);
-            ipcRenderer.off("get-youtube-songs-progress", onGetYoutubeSongsCompleted);
-            
-            ipcRenderer.off("get-youtube-artists-cancelled", onGetYoutubeCancelled);
-            ipcRenderer.off("get-youtube-albums-cancelled", onGetYoutubeCancelled);
-            ipcRenderer.off("get-youtube-songs-cancelled", onGetYoutubeCancelled);
-        };
-    }, []);
-
-    const onGetYoutubeUrlsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
-        if (!data.result) return;
-
-        setPendingTabs((prev) => [...prev, ...data.result.urls]);
-        
-        try {
-            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
-                .then((result) => {
-                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-                    
-                    return result;
-                });
-
-            return promise;
-        } catch {
-            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-        }
-    };
-    
-    const onGetYoutubeArtistsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
-        if (!data.result) return;
-
-        setPendingTabs(data.result.urls);
-        
-        try {
-            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
-                .then((result) => {
-                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-                    
-                    return result;
-                });
-
-            return promise;
-        } catch {
-            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-        }
+    const handleUrlChange = (urls: string[]) => {
+        global.store.set("application.urls", urls);
     };
 
-    const onGetYoutubeAlbumsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
+    const onGetYoutubeCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeResult>) => {
         if (!data.result) return;
 
-        setPendingTabs(data.result.urls);
-        
+        setPendingTabs(data.result.values);
+
         try {
-            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
+            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.values), update))
                 .then((result) => {
-                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-                    
+                    setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadMulti));
+
                     return result;
                 });
 
             return promise;
         } catch {
-            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-        }
-    };
-    
-    const onGetYoutubeSongsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeUrlResult>) => {
-        if (!data.result) return;
-
-        setPendingTabs(data.result.urls);
-        
-        try {
-            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.urls), update))
-                .then((result) => {
-                    setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-                    
-                    return result;
-                });
-
-            return promise;
-        } catch {
-            setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
+            setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadMulti));
         }
     };
 
     const onGetYoutubeCancelled = () => {
         setPendingTabs([]);
-        setQueue((prev) => _filter(prev, (p) => p !== "load-multi"));
-    };
-
-    const mergeOutputFiles = (filename: string, extension: string, callback: (error: Error, result: string) => void) => {
-        const getCommand = (ext: string) => {
-            if (ext === "m4a") {
-                return `"${getBinPath()}/ffmpeg.exe" -f concat -safe 0 -i "./output/${filename}.txt" -i "./output/${filename} 001.${extension}" -map 0:a -map 1:v -c:a copy -c:v copy -disposition:v:0 attached_pic -map_metadata 1 "./output/${filename}.${extension}"`;
-            } else if (ext === "mp3" || ext === "flac") {
-                return `"${getBinPath()}/ffmpeg.exe" -f concat -safe 0 -i "./output/${filename}.txt" -i "./output/${filename} 001.${extension}" -map 0 -map 1:v -c copy -map_metadata 0 -disposition:v:1 attached_pic "./output/${filename}.${extension}"`;
-            }
-
-            return `"${getBinPath()}/ffmpeg.exe" -f concat -safe 0 -i "./output/${filename}.txt" -c copy "./output/${filename}.${extension}"`;
-        };
-        
-        exec(getCommand(extension), callback); 
-    };
-
-    const handleUrlChange = (urls: string[]) => {
-        setAppOptions((prev) => ({...prev, urls}));
+        setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadMulti));
     };
 
     const update = (item: YoutubeInfoResult) => {
@@ -267,32 +193,30 @@ export const HomeView: React.FC = () => {
         }
     };
 
-    const loadInfo = (urls: string[]) => {        
+    const loadInfo = (urls: string[]) => {
         clear();
         setPendingTabs(urls);
-        const enableInputMode = global.store.get("application.enableInputMode");
+        
         const inputMode = global.store.get("application.inputMode");
         const groups = _groupBy(urls, getUrlType);
         const artists = groups[UrlType.Artist] ?? [];
-        const lists = groups[UrlType.Playlist] ?? []; 
-        const vids = groups[UrlType.Track] ?? []; 
+        const lists = groups[UrlType.Playlist] ?? [];
+        const vids = groups[UrlType.Track] ?? [];
         const basic = [...lists, ...vids];
 
-        if (enableInputMode) {
-            if (inputMode === InputMode.Artists) {
-                loadArtists(urls);
-                return;
-            }
+        if (inputMode === InputMode.Artists) {
+            loadArtists(urls);
+            return;
+        }
 
-            if (inputMode === InputMode.Albums) {
-                loadAlbums(urls);
-                return;
-            }
-        
-            if (inputMode === InputMode.Songs) {
-                loadSongs(urls);
-                return;
-            }
+        if (inputMode === InputMode.Albums) {
+            loadAlbums(urls);
+            return;
+        }
+
+        if (inputMode === InputMode.Songs) {
+            loadSongs(urls);
+            return;
         }
 
         if (appOptions.debugMode) {
@@ -309,89 +233,97 @@ export const HomeView: React.FC = () => {
         }
     };
 
-    const loadMedia = (urls: string[]) => {        
+    const loadMedia = (urls: string[]) => {
         try {
             Promise.all(afterEach(getResolveDataPromise(urls), update))
                 .then((result) => {
-                    setQueue((prev) => _filter(prev, (p) => p !== "load-single"));
-                    
+                    setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadSingle));
+
                     return result;
                 });
 
-            setQueue((prev) => [...prev, "load-single"]);
+            setQueue((prev) => [...prev, QueueKeys.LoadSingle]);
         } catch {
-            setQueue((prev) => [...prev, "load-single"]);
+            setQueue((prev) => [...prev, QueueKeys.LoadSingle]);
         }
     };
 
     const loadArtists = (artists: string[]) => {
         const options: LaunchOptions = global.store.get("options");
-        const params = {
-            artists: artists,
+        const params: GetYoutubeParams = {
+            values: artists,
             lang: i18n.language,
             url: appOptions.youtubeUrl,
         };
-        
-        setQueue((prev) => [...prev, "load-multi"]);
-        ipcRenderer.send("get-youtube-artists", params, options);
+
+        setQueue((prev) => [...prev, QueueKeys.LoadMulti]);
+        ipcRenderer.send(Messages.GetYoutubeArtists, params, options);
     };
 
     const loadAlbums = (albums: string[]) => {
         const options: LaunchOptions = global.store.get("options");
-        const params = {
-            albums,
+        const params: GetYoutubeParams = {
+            values: albums,
             lang: i18n.language,
             url: appOptions.youtubeUrl,
         };
-        
-        setQueue((prev) => [...prev, "load-multi"]);
-        ipcRenderer.send("get-youtube-albums", params, options);
+
+        setQueue((prev) => [...prev, QueueKeys.LoadMulti]);
+        ipcRenderer.send(Messages.GetYoutubeAlbums, params, options);
     };
 
     const loadSongs = (songs: string[]) => {
         const options: LaunchOptions = global.store.get("options");
-        const params = {
-            songs,
+        const params: GetYoutubeParams = {
+            values: songs,
             lang: i18n.language,
             url: appOptions.youtubeUrl,
         };
-        
-        setQueue((prev) => [...prev, "load-multi"]);
-        ipcRenderer.send("get-youtube-songs", params, options);
+
+        setQueue((prev) => [...prev, QueueKeys.LoadMulti]);
+        ipcRenderer.send(Messages.GetYoutubeTracks, params, options);
     };
 
     const loadDiscographyInfo = (artists: string[]) => {
         const options: LaunchOptions = global.store.get("options");
-        const params = {
+        const params: GetYoutubeParams = {
+            values: artists,
             lang: i18n.language,
             url: appOptions.youtubeUrl,
-            artistUrls: artists,
         };
-        
-        setQueue((prev) => [...prev, "load-multi"]);
-        ipcRenderer.send("get-youtube-urls", params, options);
+
+        setQueue((prev) => [...prev, QueueKeys.LoadMulti]);
+        ipcRenderer.send(Messages.GetYoutubeUrls, params, options);
     };
 
     const getResolveDataPromise = (urls: string[]) => {
         if (appOptions.debugMode) {
             return resolveMockData(300);
         } else {
-            return _map(urls, (url) => new Promise<YoutubeInfoResult>((resolve) => {
-                ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass"])
-                    .then((result) => {
-                        const parsed = _map(_split(_trim(result), "\n"), (item) => JSON.parse(item));
-                        
-                        resolve({url, value: _isArray(parsed) ? parsed : [parsed]});
-                    })
-                    .catch((e) => {
-                        const warningRegex = /WARNING:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
-                        const errorRegex = /ERROR:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
-                        const warningMatches = e.message.match(warningRegex) ?? [];
-                        const errorMatches = e.message.match(errorRegex) ?? [];
-                        
-                        resolve({url, errors: _uniq(errorMatches), warnings: _uniq(warningMatches)}); 
-                    });
-            }));
+            return _map(urls, (url) => {
+                const controller = new AbortController();
+                abortControllers[url] = controller;
+
+                return new Promise<YoutubeInfoResult>((resolve) => {
+                    ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass"], undefined, controller.signal)
+                        .then((result) => {
+                            const parsed = _map(_split(_trim(result), "\n"), (item) => JSON.parse(item));
+
+                            resolve({url, value: _isArray(parsed) ? parsed : [parsed]});
+                        })
+                        .catch((e) => {
+                            const warningRegex = /WARNING:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
+                            const errorRegex = /ERROR:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
+                            const warningMatches = e.message.match(warningRegex) ?? [];
+                            const errorMatches = e.message.match(errorRegex) ?? [];
+                            
+                            resolve({url, errors: _uniq(errorMatches), warnings: _uniq(warningMatches)});
+                        })
+                        .finally(() => {
+                            delete abortControllers[url];
+                        });
+                });
+            });
         }
     };
 
@@ -401,9 +333,8 @@ export const HomeView: React.FC = () => {
 
         if (_isEmpty(playlists) || !_difference(albumUrls, urls)) {
             loadInfo(urls);
-           
             setAutoDownload(true);
-        } else if (_some(albums, (album) =>_some(album, v => _isNil(v)))) {
+        } else if (_some(albums, (album) => _some(album, v => _isNil(v)))) {
             setError(true);
         } else {
             setError(false);
@@ -421,10 +352,10 @@ export const HomeView: React.FC = () => {
     };
 
     const downloadAlbum = (id: string) => {
-        setPendingTabs([]);
         const playlist = _find(playlists, ["album.id", id]);
         const playlistTrackIds = _map(_get(playlist, "tracks"), "id");
         
+        setPendingTabs([]);
         setTrackStatus((prev) => _filter(prev, (p) => !_includes(playlistTrackIds, p.trackId)));
         trackStatusRef.current = _filter(trackStatusRef.current, (p) => !_includes(playlistTrackIds, p.trackId));
         setAutoDownload(false);
@@ -449,19 +380,15 @@ export const HomeView: React.FC = () => {
 
         setTrackStatus((prev) => [...prev, newTrackProgressInfo]);
         trackStatusRef.current = [...trackStatusRef.current, newTrackProgressInfo];
-        
+
         if (!_includes(queue, trackId)) {
             setQueue((prev) => [...prev, trackId]);
         }
-        
-        abortControllers[trackId] = controller;
-        
-        new Promise<boolean>((resolve) => {
-            if (!appOptions.alwaysOverwrite && fs.existsSync(trackPath)) {
-                resolve(true);
-            }
 
-            resolve(false);
+        abortControllers[trackId] = controller;
+
+        new Promise<boolean>((resolve) => {
+            resolve(!appOptions.alwaysOverwrite && fs.existsSync(trackPath));
         }).then((result) => {
             if (result) {
                 onProcessEnd({trackId});
@@ -472,7 +399,7 @@ export const HomeView: React.FC = () => {
                     .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message, parts}))
                     .on("close", () => onProcessEnd({trackId: track.id, parts}));
             }
-        });    
+        });
     };
 
     const downloadFailed = () => {
@@ -481,23 +408,22 @@ export const HomeView: React.FC = () => {
         setQueue(() => _map(failedTracks, "trackId"));
         setTrackStatus((prev) => _filter(prev, (p) => !p.error));
         trackStatusRef.current = _filter(trackStatusRef.current, (p) => !p.error);
-
         setOperation("download");
     };
 
-    const cancelAll = () => {       
+    const cancelAll = () => {
         setAbort("all");
         _map(abortControllers, (v) => v.abort());
-        ipcRenderer.send("get-youtube-urls-cancel");
-        ipcRenderer.send("get-youtube-artists-albums-cancel");
-        ipcRenderer.send("get-youtube-albums-cancel");
-        ipcRenderer.send("get-youtube-songs-cancel");
+        ipcRenderer.send(Messages.GetYoutubeUrlsCancel);
+        ipcRenderer.send(Messages.GetYoutubeArtistsCancel);
+        ipcRenderer.send(Messages.GetYoutubeAlbumsCancel);
+        ipcRenderer.send(Messages.GetYoutubeTracksCancel);
     };
 
-    const cancelPlaylist = (id: string) => {       
+    const cancelPlaylist = (id: string) => {
         const playlist = _find(playlists, ["url", id]);
         const playlistTrackIds = _map(_get(playlist, "tracks"), "id");
-        
+
         setAbort(id);
         _forEach(playlistTrackIds, (trackId) => {
             if (!_find(trackStatusRef.current, ["trackId", trackId])) {
@@ -515,7 +441,7 @@ export const HomeView: React.FC = () => {
         });
         const f = _filter(queue, (item) => !_includes(playlistTrackIds, item));
         setQueue((prev) => _filter(prev, (item) => !_includes(playlistTrackIds, item)));
-        
+
         if (!_isEmpty(f)) {
             setOperation("download");
         }
@@ -538,7 +464,7 @@ export const HomeView: React.FC = () => {
         }
         abortControllers[id]?.abort();
     };
-    
+
     const setProgressPercentage = useCallback((trackId: string, value?: number) => {
         setTrackStatus((prev) => _map(prev, (item) => {
             if (item.trackId === trackId) {
@@ -548,36 +474,33 @@ export const HomeView: React.FC = () => {
             }
         }));
     }, [trackStatus, setTrackStatus]);
-    
-    const mergeFileParts = (track: TrackInfo, album: AlbumInfo, format: Format, parts: number) => {
-        const fileParts = getOutputFileParts(track, album, format, parts);
-        const lines = _map(fileParts, (file) => {
-            const parsed = path.parse(file);
-            
-            return `file '${parsed.name}${parsed.ext}'`;
-        });
-        const listFilePath = getOutputFile(track, album, format) + "." + "txt";
 
-        fs.writeFileSync(listFilePath, _join(lines, "\n"));
-        const fileInfo = path.parse(listFilePath);
-        
-        mergeOutputFiles(fileInfo.name, format.extension, (error) => {
+    const mergeFileParts = (track: TrackInfo, album: AlbumInfo, format: Format, parts: number, callback: (filepath: string) => void) => {
+        const fileParts = getOutputFileParts(track, album, format, parts);
+        const listFile = _join(_map(fileParts, (p) => `file '${path.basename(p)}'`), "\n");
+        const listFilePath = getOutputFile(track, album, format) + "." + "txt";
+        const listFileInfo = path.parse(listFilePath);
+
+        fs.writeFileSync(listFilePath, listFile);
+
+        mergeOutputFiles(listFileInfo.dir, listFileInfo.name, format.extension, (error) => {
             if (error) {
-                setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);  
+                setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
             }
 
             fs.removeSync(listFilePath);
-            
             for (const part of fileParts) {
                 fs.removeSync(part);
             }
+
+            callback(`${listFileInfo.dir}/${listFileInfo.name}.${format.extension}`);
         });
     };
 
     const updateProgress = useCallback((trackId: string, progress: YtDlpProgress, progressMapRange = [0, 100]) => {
         setProgressPercentage(trackId, mapRange(progress.percent, [0, 100], progressMapRange));
     }, [trackStatus, setTrackStatus]);
-    
+
     const updateProgressStatus = useCallback((trackId: string, eventType: string) => {
         let status = "";
 
@@ -622,7 +545,7 @@ export const HomeView: React.FC = () => {
         const outputPath = getOutputFilePath(track, album, format);
         const dirPath = path.dirname(outputPath);
         const parsedPath = path.parse(outputPath);
-        const totalSize = fs.existsSync(outputPath) ? fs.statSync(outputPath).size : 0;
+        const totalSize = fs.existsSync(outputPath) && fs.statSync(outputPath).size;
 
         if (result.error && _includes(result.error, "[generic] '' is not a valid URL")) {
             result.error = undefined;
@@ -631,18 +554,15 @@ export const HomeView: React.FC = () => {
         const completed = !result.error && !aborted;
 
         if (aborted) {
-            const files = fs.existsSync(dirPath) ? fs.readdirSync(dirPath, {recursive: false, withFileTypes: true}) : [];
-            
-            for (const file of files) {
-                if (file.name.startsWith(parsedPath.name) && file.isFile()) {
-                    fs.removeSync(path.join(file.parentPath, file.name));
-                }
-            }
+            removeIncompleteFiles({dir: dirPath, name: parsedPath.name, ext: format.extension}, result.parts > 1);
         }
 
         if (completed && result.parts > 1 && global.store.get("application.mergeParts")) {
-            console.log(format.extension);
-            mergeFileParts(track, album, format, result.parts);
+            mergeFileParts(track, album, format, result.parts, (filepath) => {
+                const totalSize = fs.statSync(filepath).size;
+
+                setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, totalSize} : item));
+            });
         }
 
         setTrackStatus((prev) => _map(prev, (item) => {
@@ -653,13 +573,13 @@ export const HomeView: React.FC = () => {
                     error: !!result.error || aborted,
                     completed,
                     percent: 100,
-                    totalSize,
+                    totalSize: totalSize ? totalSize : item.totalSize,
                 };
             } else {
                 return item;
             }
         }));
-        
+
         delete abortControllers[result.trackId];
 
         setQueue((prev) => _filter(prev, (item) => item !== result.trackId));
@@ -674,7 +594,7 @@ export const HomeView: React.FC = () => {
         if (abortRef.current) {
             setAutoDownload(false);
             setAbort(undefined);
-            
+
             if (_find(playlists, ["url", abortRef.current])) {
                 return;
             }
@@ -692,7 +612,7 @@ export const HomeView: React.FC = () => {
     const getTrackAlbum = useCallback((trackId: string) => {
         return _get(_find(playlists, (item) => !!_find(item.tracks, ["id", trackId])), "album");
     }, [playlists]);
-    
+
     const getTrackPlaylist = useCallback((trackId: string) => {
         return _find(playlists, (item) => !!_find(item.tracks, ["id", trackId]));
     }, [playlists]);
@@ -701,7 +621,7 @@ export const HomeView: React.FC = () => {
         if (global.store.get("application.formatScope") === FormatScope.Tab) {
             return _get(formats, playlist.url, formats.global);
         }
-    
+
         return formats.global;
     }, [formats]);
 
@@ -716,7 +636,7 @@ export const HomeView: React.FC = () => {
                     onDownloadFailed={downloadFailed}
                     onLoadInfo={loadInfo}
                 />
-                <FormatSelector disabled={_isEmpty(playlists) || _isEmpty(tracks)}/>
+                <FormatSelector disabled={_isEmpty(playlists) || _isEmpty(tracks)} />
             </div>
             <Grid className={Styles.content} container spacing={2} padding={2}>
                 {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}

@@ -17,7 +17,7 @@ import {IReporter, Reporter} from "../common/Reporter";
 import {MessageHandlerParams} from "../messaging/MessageChannel";
 import {clearInput, navigateToPage} from "./Helpers";
 import {
-    YtMusicAlbumsChipSelector, YtMusicSearchInputSelector, YtMusicSearchResultsSelector
+    YtMusicSearchInputSelector, YtMusicSearchResultsSelector, YtMusicSongsChipSelector
 } from "./Selectors";
 
 let page: Page;
@@ -37,7 +37,8 @@ export const execute = async (parameters: MessageHandlerParams) => {
             (async () => {
                 const result: GetYoutubeResult = {warnings: [], errors: [], values: []};
                 const userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
-                
+                await i18n.changeLanguage(params.lang);
+
                 reporter = new Reporter(onUpdate);
                 reporter.start(i18n.t("starting"));
                 browser = await puppeteer.launch(_merge(puppeteerOptions, options));
@@ -60,36 +61,38 @@ export const execute = async (parameters: MessageHandlerParams) => {
 
                 await navigateToPage(params.url, page);
 
-                const process = async (album: string) => {
+                const process = async (song: string) => {
                     const results: string[] = [];
 
                     try {
                         const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
                         await clearInput(searchInput, page);
-                        await searchInput.type(album);
+                        await searchInput.type(song);
                         page.keyboard.press("Enter");
                         await page.waitForNetworkIdle();
 
-                        const albumsChip = await page.waitForSelector(`::-p-xpath(${YtMusicAlbumsChipSelector})`, {timeout: 1000});
+                        const songsChip = await page.waitForSelector(`::-p-xpath(${YtMusicSongsChipSelector})`, {timeout: 1000});
 
-                        albumsChip.click();
+                        songsChip.click();
                         await page.waitForNetworkIdle();
+
                         await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsSelector})`, {timeout: 1000});
 
-                        const albumsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
-                        const albumEl = albumsElements[0];
-                        const albumUrl = await albumEl.evaluate((el) => el.getAttribute("href"));
+                        const songsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
+                        const songEl = songsElements[0];
+                        const songUrl = await songEl.evaluate((el) => el.getAttribute("href"));
 
-                        results.push(`${params.url}/${albumUrl}`);
+                        results.push(`${params.url}/${songUrl}`);
 
                         return results;
                     } catch (error) {
+
                         return results;
                     }
                 };
 
-                for (const a of params.values) {
-                    const data = await process(a);
+                for (const item of params.values) {
+                    const data = await process(item);
 
                     result.values.push(...data);
                 }

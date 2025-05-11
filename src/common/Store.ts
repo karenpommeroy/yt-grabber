@@ -18,7 +18,6 @@ export type ApplicationOptions = {
     language?: string;
     alwaysOverwrite?: boolean;
     mergeParts?: boolean;
-    enableInputMode?: boolean;
     inputMode?: InputMode;
 };
 
@@ -99,10 +98,6 @@ export const StoreSchema: Schema<IStore> = {
                 default: false
             },
             mergeParts: {
-                type: "boolean",
-                default: true
-            },
-            enableInputMode: {
                 type: "boolean",
                 default: true
             },

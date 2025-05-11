@@ -1,5 +1,5 @@
 import _map from "lodash/map";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Stack, TextField} from "@mui/material";
@@ -12,7 +12,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Styles from "./DetailsModal.styl";
 
 export type Details = {
-    [key: string]: string | number;
+    [key: string]: string | number | any;
 }
 
 export type DetailsModalProps = {
@@ -38,6 +38,10 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
             onClose(value);
         }
     };
+
+    useEffect(() => {
+        setValue(details);
+    }, [details]);
 
     return (
         <Dialog

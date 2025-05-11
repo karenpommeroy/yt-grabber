@@ -9,6 +9,7 @@ import moment from "moment";
 import React, {useCallback, useState} from "react";
 import {useTranslation} from "react-i18next";
 
+import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
@@ -19,6 +20,7 @@ import {
 } from "@mui/material";
 
 import {AlbumInfo} from "../../../common/Youtube";
+import {Messages} from "../../../messaging/Messages";
 import {useDataState} from "../../../react/contexts/DataContext";
 import DetailsModal from "../../modals/detailsModal/DetailsModal";
 import ImageModal from "../../modals/imageModal/ImageModal";
@@ -65,7 +67,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     };
 
     const onOpenInBrowser = () => {
-        ipcRenderer.send("open-url-in-browser", {url: item.url});
+        ipcRenderer.send(Messages.OpenUrlInBrowser, {url: item.url});
     };
 
     const editInfo = useCallback(() => {
@@ -86,15 +88,17 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
         <>
             <Grid className={classnames(className, Styles.mediaInfoPanel)} size={12} data-help="mediaInfo">
                 <Card variant="outlined" className={Styles.header}>
-                    <CardMedia
-                        component="img"
-                        className={Styles.imageButton}
-                        sx={{width: 100, height: "auto", marginRight: 1}}
-                        image={value.thumbnail}
-                        alt={value.title}
-                        onClick={showCoverImage}
-                        data-help="showThumbnail"
-                    />
+                    <div className={Styles.imageWrapper} style={{marginRight: 1}}>
+                        <CardMedia
+                            component="img"
+                            className={Styles.imageButton}
+                            image={value.thumbnail}
+                            alt={value.title}
+                            onClick={showCoverImage}
+                            data-help="showThumbnail"
+                        />
+                        <AspectRatioIcon className={Styles.imageViewIcon} />
+                    </div>
                     <Box className={Styles.content}>
                         <CardContent className={Styles.info}>
                             <div className={classnames(Styles.row, Styles, Styles.title)}>

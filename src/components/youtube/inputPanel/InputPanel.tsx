@@ -47,7 +47,6 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const fileInputRef = useRef<HTMLInputElement>(null);
     const valueCount = urls.length;
     const [inputMode, setInputMode] = useState<InputMode>(global.store.get("application.inputMode"));
-    const [enableInputMode, setEnableInputMode] = useState<boolean>(global.store.get("application.enableInputMode"));
     
     const truncateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)/;
     const validateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)([\w-]{11})/;
@@ -55,7 +54,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const isValid = (value: string) => {
         const options = global.store.get("application");
 
-        if (options.enableInputMode && options.inputMode !== InputMode.Auto) {
+        if (options.inputMode !== InputMode.Auto) {
             return true;
         }
 
@@ -70,19 +69,15 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         const unsubscribeInputMode = global.store.onDidChange<any>("application.inputMode", (newInputMode: InputMode) => {
             setInputMode(newInputMode);
         });
-        const unsubscribeEnableInputMode = global.store.onDidChange<any>("application.enableInputMode", (newEnableInputMode: boolean) => {
-            setEnableInputMode(newEnableInputMode);
-        });
 
         return () => {
             unsubscribeInputMode();
-            unsubscribeEnableInputMode();
         };
     },  []);
 
     const handleDelete = useCallback((valueToDelete: string) => {
         const newUrls = _without(urls, valueToDelete);
-        
+
         setUrls((prev) => _without(prev, valueToDelete));
         
         if (_isFunction(onChange)) {
@@ -94,9 +89,13 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         fileInputRef.current?.click();
     };
 
+    const handleLoadInfo = () => {
+        onLoadInfo(urls);
+    };
+
     const containsInvalidValues = useMemo(() => {
         return !_every(urls, isValid);
-    }, [urls, inputMode, enableInputMode]);
+    }, [urls, inputMode]);
 
     const showDownloadFailed = useMemo(() => {
         return !_isEmpty(_filter(trackStatus, "error"));
@@ -104,7 +103,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
 
     const onMultiValueChange = (value: React.ChangeEvent<HTMLInputElement>, newValue: []) => {
         const newUrls = _uniq(_filter(newValue, isValid)); 
-        
+
         setUrls(newUrls);
         
         if (_isFunction(onChange)) {
@@ -154,7 +153,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             [UrlType.Track]: "primary",
             [UrlType.Other]: "default",
         };
-        const color = enableInputMode && inputMode !== InputMode.Auto ? "default" : colors[getUrlType(option)];
+        const color = inputMode !== InputMode.Auto ? "default" : colors[getUrlType(option)];
 
         return (
             <Tooltip key={option} title={option} arrow disableHoverListener={false} enterDelay={500} leaveDelay={100} enterNextDelay={500} placement="bottom">
@@ -168,7 +167,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                 />
             </Tooltip>
         );
-    }, [inputMode, enableInputMode]);
+    }, [inputMode]);
     
     return (
         <Grid className={Styles.inputPanel} container spacing={2} padding={2} paddingBottom={1}>
@@ -208,7 +207,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             </Grid>
             <Grid>
                 <Stack direction="row" spacing={1} height={54}>
-                    {options.enableInputMode && <InputModePicker disabled={loading} />}
+                    <InputModePicker disabled={loading} />
                     <Tooltip title={t("loadFromFile")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
                             <Button data-help="loadFromFile" disabled={loading} variant="contained" disableElevation color="secondary" onClick={() => handleOpenFromFile()}>
@@ -218,7 +217,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     </Tooltip>
                     <Tooltip title={t("loadInfo")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
-                            <Button data-help="loadInfo" disabled={loading || _isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={() => onLoadInfo(urls)}>
+                            <Button data-help="loadInfo" disabled={loading || _isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={handleLoadInfo}>
                                 <SearchIcon />
                             </Button>
                         </div>

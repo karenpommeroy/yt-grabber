@@ -12,9 +12,10 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
 import {getProfilePath} from "../common/FileSystem";
 import {waitFor} from "../common/Helpers";
-import {GetYoutubeArtistsParams, GetYoutubeUrlResult} from "../common/Messaging";
+import {GetYoutubeParams, GetYoutubeResult} from "../common/Messaging";
 import puppeteerOptions from "../common/PuppeteerOptions";
 import {IReporter, ProgressInfo, Reporter} from "../common/Reporter";
+import {MessageHandlerParams} from "../messaging/MessageChannel";
 import {clearInput, navigateToPage} from "./Helpers";
 import {
     AlbumFilterSelector, AlbumLinkSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector,
@@ -24,113 +25,27 @@ import {
 
 let page: Page;
 let browser: Browser;
-let reporter: IReporter<GetYoutubeUrlResult>;
+let reporter: IReporter<GetYoutubeResult>;
 
 puppeteer.use(StealthPlugin());
 
-export const execute = async (
-    params: GetYoutubeArtistsParams,
-    options: LaunchOptions,
-    i18n: i18next,
-    onProgress: (data: ProgressInfo<GetYoutubeUrlResult>) => void,
-) => {
+export const execute = async (parameters: MessageHandlerParams) => {
+    const {params, options, i18n, onUpdate, signal} = parameters;
+    const abortPromise = new Promise((_, reject) => {
+        signal.addEventListener("abort", () => reject(new Error("aborted")));
+    });
+
     try {
-        const result: GetYoutubeUrlResult = {warnings: [], errors: [], urls: []};
-        const userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
-        
-        await i18n.changeLanguage(params.lang);
-        
-        reporter = new Reporter(onProgress);
-        reporter.start(i18n.t("starting"));
-        browser = await puppeteer.launch(_merge(puppeteerOptions, options));
-        [page] = await browser.pages();
-        
-        await page.setUserAgent(userAgent);
-        
-        const cachedCookies = fs.readJSONSync(getProfilePath() + "/cookies.json", {throws: false});
-
-        if (_isEmpty(cachedCookies)) {
-            await waitFor(3000);
-            const pageCookies = await page.cookies();
-            
-            fs.writeJSONSync(getProfilePath() + "/cookies.json", pageCookies, {spaces: 2});
-
-            await page.setCookie(...pageCookies);
-        } else {
-            await page.setCookie(...cachedCookies);
-        }
-
-        await navigateToPage(params.url, page);
-        
-        const process = async (artist: string) => {
-            const results: string[] = [];
-            
-            try {                
-                const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
-                await clearInput(searchInput, page);
-                await searchInput.type(artist);
-                page.keyboard.press("Enter");
-                await page.waitForNetworkIdle();
-                
-                try {
-                    const artistsChip = await page.waitForSelector(`::-p-xpath(${YtMusicArtistsChipSelector})`, {visible: true, timeout: 1000});
-            
-                    artistsChip.click();
-                    await page.waitForNetworkIdle();
-                    await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsSelector})`, {timeout: 1000});
-                    
-                    const artistsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
-                    const artistEl = artistsElements[0];
-                    const artistChannelUrl = await artistEl.evaluate((el) => el.getAttribute("href"));
-                    
-                    await navigateToPage(`${params.url}/${artistChannelUrl}`, page);
-                    await page.waitForNetworkIdle();
-                } catch (error) {
-                    const artistThumbnail = await page.waitForSelector(`::-p-xpath(${YtMusicArtistBestResultLinkSelector})`, {visible: true, timeout: 1000});
-                    
-                    artistThumbnail.click();
-                    await page.waitForNetworkIdle();
-                }
-
-                const element = await page.waitForSelector(`::-p-xpath(${AlbumsHrefSelector})`, {timeout: 1000});
-                const albumsUrl = await element.evaluate((el) => el.getAttribute("href"));
-
-                await navigateToPage(`${params.url}/${albumsUrl}`, page);
-                
-                const albumFilterButton = await page.waitForSelector(`::-p-xpath(${AlbumFilterSelector})`, {timeout: 1000});
-                
-                albumFilterButton.click();
-                await page.waitForNetworkIdle();
-
-                const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
-
-                for (const item of items) {
-                    results.push(`${params.url}/${item}`);
-                }
-
-                return results;
-            } catch (error) {
-                const items = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
-
-                for (const item of items) {
-                    results.push(`${params.url}/${item}`);
-                }
-
-                return results;
-            }
-        };
-
-        for (const a of params.artists) {
-            const data = await process(a);
-           
-            result.urls.push(...data);
-        }
-
-        reporter.finish("done", result);
+        await Promise.race([
+            run(params, options, i18n, onUpdate),
+            abortPromise,
+        ]);
     } catch (error: any) {
-        const result: GetYoutubeUrlResult = {errors: []};
+        const result: GetYoutubeResult = {errors: []};
         
-        if (error instanceof TimeoutError) {
+        if (error.message === "aborted") {
+            throw error;
+        } else if (error instanceof TimeoutError) {
             result.errors.push({title: i18n.t("exceptionTimeout"), description: i18n.t("exceptionTimeoutText")});
         } else {
             if (error.message === "Navigating frame was detached") {
@@ -147,14 +62,101 @@ export const execute = async (
     }
 };
 
+const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18next, onProgress: (data: ProgressInfo<GetYoutubeResult>) => void) => {
+    const result: GetYoutubeResult = {warnings: [], errors: [], values: []};
+    const userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
+    await i18n.changeLanguage(params.lang);
+    
+    reporter = new Reporter(onProgress);
+    reporter.start(i18n.t("starting"));
+    browser = await puppeteer.launch(_merge(puppeteerOptions, options));
+    [page] = await browser.pages();
+    
+    await page.setUserAgent(userAgent);
+    
+    const cachedCookies = fs.readJSONSync(getProfilePath() + "/cookies.json", {throws: false});
+
+    if (_isEmpty(cachedCookies)) {
+        await waitFor(3000);
+        const pageCookies = await page.cookies();
+        
+        fs.writeJSONSync(getProfilePath() + "/cookies.json", pageCookies, {spaces: 2});
+
+        await page.setCookie(...pageCookies);
+    } else {
+        await page.setCookie(...cachedCookies);
+    }
+
+    await navigateToPage(params.url, page);
+    
+    const process = async (artist: string) => {
+        const results: string[] = [];
+        
+        try {
+            const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
+            await clearInput(searchInput, page);
+            await searchInput.type(artist);
+            page.keyboard.press("Enter");
+            await page.waitForNetworkIdle();
+            
+            try {
+                const artistsChip = await page.waitForSelector(`::-p-xpath(${YtMusicArtistsChipSelector})`, {visible: true, timeout: 1000});
+        
+                artistsChip.click();
+                await page.waitForNetworkIdle();
+                await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsSelector})`, {timeout: 1000});
+                
+                const artistsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
+                const artistEl = artistsElements[0];
+                const artistChannelUrl = await artistEl.evaluate((el) => el.getAttribute("href"));
+                
+                await navigateToPage(`${params.url}/${artistChannelUrl}`, page);
+                await page.waitForNetworkIdle();
+            } catch (error) {
+                const artistThumbnail = await page.waitForSelector(`::-p-xpath(${YtMusicArtistBestResultLinkSelector})`, {visible: true, timeout: 1000});
+                
+                artistThumbnail.click();
+                await page.waitForNetworkIdle();
+            }
+
+            const element = await page.waitForSelector(`::-p-xpath(${AlbumsHrefSelector})`, {timeout: 1000});
+            const albumsUrl = await element.evaluate((el) => el.getAttribute("href"));
+
+            await navigateToPage(`${params.url}/${albumsUrl}`, page);
+            
+            const albumFilterButton = await page.waitForSelector(`::-p-xpath(${AlbumFilterSelector})`, {timeout: 1000});
+            
+            albumFilterButton.click();
+            await page.waitForNetworkIdle();
+
+            const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+
+            for (const item of items) {
+                results.push(`${params.url}/${item}`);
+            }
+
+            return results;
+        } catch (error) {
+            const items = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+
+            for (const item of items) {
+                results.push(`${params.url}/${item}`);
+            }
+
+            return results;
+        }
+    };
+
+    for (const a of params.values) {
+        result.values.push(...await process(a));
+    }
+
+    reporter.finish("done", result);
+};
+
 const closeResources = async () => {
     if (page) await page.close();
     if (browser) await browser.close();
-};
-
-export const cancel = async () => {
-    if (browser) await browser.close();
-    if (browser) await browser.disconnect();
 };
 
 export default execute;

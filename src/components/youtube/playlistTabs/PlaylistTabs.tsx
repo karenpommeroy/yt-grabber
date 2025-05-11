@@ -2,6 +2,7 @@ import classnames from "classnames";
 import {ipcRenderer, IpcRendererEvent} from "electron";
 import _filter from "lodash/filter";
 import _find from "lodash/find";
+import _findIndex from "lodash/findIndex";
 import _first from "lodash/first";
 import _get from "lodash/get";
 import _includes from "lodash/includes";
@@ -22,6 +23,7 @@ import {Avatar, Badge, Box, Grid, Skeleton, Stack, Typography} from "@mui/materi
 import Tab from "@mui/material/Tab";
 
 import {OpenSystemPathParams} from "../../../common/Messaging";
+import {Messages} from "../../../messaging/Messages";
 import {useAppContext} from "../../../react/contexts/AppContext";
 import {useDataState} from "../../../react/contexts/DataContext";
 import Progress from "../../progress/Progress";
@@ -64,7 +66,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     useEffect(() => {
         if (activeTab) return;
         
-        setActiveTab(_get(playlists, "0.url", _first(pendingTabs)));
+        setActiveTab(_get(playlists, "0.url", _first(pendingTabs) ?? 0));
     }, []);
 
 
@@ -99,9 +101,12 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
 
     const onRemove = (event: MouseEvent<SVGSVGElement>) => {
         event.stopPropagation();
+        const currentIndex = _findIndex(playlists, (p) => p.url === activeTab);
+        const nextIndex = currentIndex === 0 ? 1 : currentIndex - 1;
         const albumId = event.currentTarget.getAttribute("data-id");
         const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
         
+        setActiveTab(playlists[nextIndex]?.url);
         setTrackStatus((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.trackId)));
         setPlaylists((prev) => _filter(prev, (p) => p.album.id !== albumId));
         setTracks((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.id)));
@@ -110,17 +115,17 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     const onOpenFile = (trackId: string) => {
         const found = _find(trackStatus, ["trackId", trackId]);
 
-        ipcRenderer.send("open-system-path", {filepath: found.path});
+        ipcRenderer.send(Messages.OpenSystemPath, {filepath: found.path});
     };
 
     const onOpenDirectory = () => {
         const found = _find(trackStatus, "completed");
 
-        ipcRenderer.send("open-system-path", {dirpath: path.dirname(found.path)});
+        ipcRenderer.send(Messages.OpenSystemPath, {dirpath: path.dirname(found.path)});
     };
 
     const openInBrowser = (url: string) => {
-        ipcRenderer.send("open-url-in-browser", {url});
+        ipcRenderer.send(Messages.OpenUrlInBrowser, {url});
     };
 
     const getTotalProgress = (albumId: string) => {
@@ -160,12 +165,12 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     };
 
     useEffect(() => {
-        ipcRenderer.on("open-system-path-completed", onOpenSystemDirectoryCompleted);
-        ipcRenderer.on("open-url-in-browser-completed", onOpenUrlInBrowserCompleted);
+        ipcRenderer.on(Messages.OpenSystemPathCompleted, onOpenSystemDirectoryCompleted);
+        ipcRenderer.on(Messages.OpenUrlInBrowserCompleted, onOpenUrlInBrowserCompleted);
 
         return () => {
-            ipcRenderer.off("open-system-path-completed", onOpenSystemDirectoryCompleted);
-            ipcRenderer.off("open-url-in-browser-completed", onOpenUrlInBrowserCompleted);
+            ipcRenderer.off(Messages.OpenSystemPathCompleted, onOpenSystemDirectoryCompleted);
+            ipcRenderer.off(Messages.OpenUrlInBrowserCompleted, onOpenUrlInBrowserCompleted);
         };
     }, []);
     
@@ -175,7 +180,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
 
     return (
         <Grid className={Styles.playlistTabs} size={12}>
-            <TabContext value={activeTab ?? _get(playlists, "0.url", _first(pendingTabs))}>
+            <TabContext value={activeTab ?? _get(playlists, "0.url", _first(pendingTabs) ?? 0)}>
                 <Box borderBottom={1} borderColor="divider">
                     <TabList variant="scrollable" scrollButtons="auto" onChange={handleTabChange} textColor="primary" indicatorColor="secondary" className={Styles.tablist}>
                         {_map(playlists, (playlist) => {

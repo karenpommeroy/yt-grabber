@@ -1,3 +1,4 @@
+import {spawn} from "child_process";
 import _flatten from "lodash/flatten";
 import _get from "lodash/get";
 import _isEmpty from "lodash/isEmpty";
@@ -8,6 +9,7 @@ import _times from "lodash/times";
 import _toString from "lodash/toString";
 import moment from "moment";
 
+import {getBinPath} from "./FileSystem";
 import {isAlbumTrack} from "./Formatters";
 import {escapePathString} from "./Helpers";
 import {Format, MediaFormat} from "./Media";
@@ -152,4 +154,66 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
             }
         }
     }
+};
+
+export const mergeOutputFiles = (directory: string, filename: string, extension: string, callback: (error?: Error) => void) => {
+    const getCommandArgs = (ext: string) => {
+        if (ext === "m4a") {
+            return [
+                "-y",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", `${directory}/${filename}.txt`,
+                "-i", `${directory}/${filename} 001.${extension}`,
+                "-map", "0:a",
+                "-map", "1:v",
+                "-c:a", "copy",
+                "-c:v", "copy",
+                "-disposition:v:0", "attached_pic",
+                "-map_metadata", "1",
+                `${directory}/${filename}.${extension}`,
+            ];
+        } else if (ext === "mp3" || ext === "flac") {
+            return [
+                "-y",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", `${directory}/${filename}.txt`,
+                "-i", `${directory}/${filename} 001.${extension}`,
+                "-map", "0:a",
+                "-map", "1:v",
+                "-c", "copy",
+                "-map_metadata", "0",
+                "-disposition:v:1", "attached_pic",
+                `${directory}/${filename}.${extension}`,
+            ];
+        }
+
+        return [
+            "-y",
+            "-f", "concat",
+            "-safe", "0",
+            "-i", `${directory}/${filename}.txt`,
+            "-c", "copy",
+            `${directory}/${filename}.${extension}`,
+        ];
+    };
+    const errors: string[] = [];
+    const proc = spawn(`${getBinPath()}/ffmpeg.exe`, getCommandArgs(extension));
+
+    proc.stderr.on("data", (data) => {
+        errors.push(`FFmpeg error: ${data}`);
+    });
+
+    proc.on("error", (err) => {
+        errors.push(`Error: ${err.message}`);
+    });
+
+    proc.on("close", (code: number) => {
+        if (code === 0) {
+            callback();
+        } else {
+            callback(new Error(`FFmpeg exited with code ${code}. Errors: ${errors.join(", ")}`));
+        }
+    });
 };

@@ -1,3 +1,4 @@
+import _assign from "lodash/assign";
 import _filter from "lodash/filter";
 import _find from "lodash/find";
 import _forEach from "lodash/forEach";
@@ -9,8 +10,10 @@ import _join from "lodash/join";
 import _map from "lodash/map";
 import _omit from "lodash/omit";
 import _omitBy from "lodash/omitBy";
+import _pick from "lodash/pick";
 import _pullAt from "lodash/pullAt";
 import _split from "lodash/split";
+import _sumBy from "lodash/sumBy";
 import _toInteger from "lodash/toInteger";
 import _toString from "lodash/toString";
 import _values from "lodash/values";
@@ -25,6 +28,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DownloadIcon from "@mui/icons-material/Download";
+import EditIcon from "@mui/icons-material/Edit";
 import LaunchIcon from "@mui/icons-material/Launch";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import {
@@ -35,6 +39,7 @@ import {
 import {formatFileSize} from "../../../common/Helpers";
 import {TrackInfo, TrackStatusInfo} from "../../../common/Youtube";
 import {useDataState} from "../../../react/contexts/DataContext";
+import DetailsModal from "../../modals/detailsModal/DetailsModal";
 import Progress from "../../progress/Progress";
 import Styles from "./TrackList.styl";
 
@@ -49,10 +54,11 @@ export type TrackListProps = {
 
 export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     const {items, onDownloadTrack, onCancelTrack, onOpenFile, onOpenUrl, queue} = props;
-    const {tracks, trackStatus, trackCuts, setTrackStatus, setTrackCuts} = useDataState();
+    const {tracks, trackStatus, trackCuts, setTracks, setTrackStatus, setTrackCuts} = useDataState();
     const [cutAnchorEl, setCutAnchorEl] = React.useState<HTMLButtonElement | null>(null);
     const [cutOpen, setCutOpen] = useState<string>();
     const [value, setValue] = useState(items ?? tracks);
+    const [currentTrack, setCurrentTrack] = useState<TrackInfo>();
     const {t} = useTranslation();
 
     useEffect(() => {
@@ -119,6 +125,24 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
         if (_isFunction(onOpenFile)) {
             onOpenFile(trackId);
         }
+    };
+    
+    const onEditTrack = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+        const trackId = event.currentTarget.getAttribute("data-id");
+        const track = _find(tracks, ["id", trackId]);
+
+        setCurrentTrack(track);
+    }, [currentTrack, setCurrentTrack]);
+    
+    const onTrackDetailsModalClose = (data: TrackInfo) => {
+        setTracks((prev) => _map(prev, (item) => {
+            if (item.id === currentTrack.id) {
+                return _assign(item, data);
+            }
+            
+            return item;
+        }));
+        setCurrentTrack(null);
     };
 
     const onOpenTrackCut = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -242,7 +266,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
         } else if (cuts.length === 1) {
             return `${formatTime(_toString(cuts[0][0]))} - ${formatTime(_toString(cuts[0][1]))}`;
         } else {
-            return cuts.length;
+            return `${moment.duration(_sumBy(cuts, (cut) => cut[1] - cut[0]), "seconds").format("hh:mm:ss", {trim: "left", stopTrim: "m"})} (${cuts.length})`;
         }
     };
     
@@ -263,185 +287,200 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     }, [trackStatus]);
 
     return (
-        <Grid size={12} className={Styles.trackList}>
-            <List className={Styles.trackList} dense>
-                {_map(value, (item) => {
-                    const info = getTrackStatusInfo(item);
-                    const open = Boolean(cutAnchorEl) && cutOpen === item.id;
-                    const cuts = _get(trackCuts, `${item.id}`, []);
+        <>
+            <Grid size={12} className={Styles.trackList}>
+                <List className={Styles.trackList} dense>
+                    {_map(value, (item) => {
+                        const info = getTrackStatusInfo(item);
+                        const open = Boolean(cutAnchorEl) && cutOpen === item.id;
+                        const cuts = _get(trackCuts, `${item.id}`, []);
 
-                    return (<ListItem
-                        divider
-                        dense
-                        key={item.id}
-                        className={Styles.track}
-                        data-help="trackInfo"
-                        secondaryAction={
-                            <Stack direction="row" spacing={1.5} className={Styles.actions}>
-                                {info?.completed &&
-                                    <Tooltip title={t("findFileInSystem")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button data-help="findInFileSystem" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onFindFileInSystem}>
-                                            <LaunchIcon />
+                        return (<ListItem
+                            divider
+                            dense
+                            key={item.id}
+                            className={Styles.track}
+                            data-help="trackInfo"
+                            secondaryAction={
+                                <Stack direction="row" spacing={1.25} className={Styles.actions}>
+                                    <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                        <Button data-help="editTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onEditTrack}>
+                                            <EditIcon />
                                         </Button>
                                     </Tooltip>
-                                }
-                                {!_includes(queue, item.id) &&
-                                    <div>
-                                        <Tooltip title={t("cut")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                            <Button data-help="cut" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenTrackCut}>
-                                                <ContentCutIcon />
+                                    {info?.completed &&
+                                        <Tooltip title={t("findFileInSystem")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                            <Button data-help="findInFileSystem" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onFindFileInSystem}>
+                                                <LaunchIcon />
                                             </Button>
                                         </Tooltip>
-                                        <Popover
-                                            id={item.id}
-                                            open={open}
-                                            TransitionComponent={Fade}
-                                            TransitionProps={{
-                                                unmountOnExit: true,
-                                                mountOnEnter: true,
-                                            }}
-                                            anchorEl={cutAnchorEl}
-                                            onClose={onCloseTrackCut}
-                                            anchorOrigin={{
-                                                vertical: "center",
-                                                horizontal: "left",
-                                            }}
-                                            transformOrigin={{
-                                                vertical: "center",
-                                                horizontal: "right",
-                                            }}
-                                        >
-                                            <Grid container padding={0} spacing={0} className={Styles.trackCutPopup}>
-                                                {_map(cuts, (cut, index) =>
-                                                    <Grid container padding={2} spacing={1} key={index}>
-                                                        <Grid size={5}>
-                                                            <NumberFormatBase
-                                                                slotProps={{
-                                                                    htmlInput: {
-                                                                        "data-index": index,
-                                                                    }
-                                                                }}
-                                                                value={cut[0] ?? 0}
-                                                                onChange={onCutStartTimeChange}
-                                                                format={formatTime}
-                                                                removeFormatting={unformatTime}
-                                                                customInput={TextField}
-                                                                variant="outlined"
-                                                                label={t("from")}
-                                                            />
-                                                        </Grid>
-                                                        <Grid size={5}>
-                                                            <NumberFormatBase
-                                                                slotProps={{
-                                                                    htmlInput: {
-                                                                        "data-index": index,
-                                                                    }
-                                                                }}
-                                                                value={cut[1] ?? item.duration}
-                                                                onChange={onCutEndTimeChange}
-                                                                format={formatTime}
-                                                                removeFormatting={unformatTime}
-                                                                customInput={TextField}
-                                                                variant="outlined"
-                                                                label={t("to")}
-                                                            />
-                                                        </Grid>
-                                                        <Grid size={2} display="flex">
-                                                            <Button data-id={item.id} data-index={index} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
-                                                                <DeleteForeverIcon />
-                                                            </Button>
-                                                        </Grid>
-                                                        <Grid size={12} display="flex" paddingX={2}>
-                                                            <Slider
-                                                                name={_toString(index)}
-                                                                data-index={index}
-                                                                value={!_isEmpty(cut) ? cut : [0, item.duration]}
-                                                                onChange={onCutTimeChange}
-                                                                valueLabelDisplay="off"
-                                                                min={0}
-                                                                max={item.duration}
-                                                                step={1}
-                                                            />
-                                                        </Grid>
-                                                    </Grid>
-                                                )}   
-                                                <Grid size={12} className={Styles.addTrackCutRow} padding={1}>
-                                                    <Button data-id={item.id} disableElevation variant="contained" color="secondary" onClick={onAddTrackCut}>
-                                                        <AddIcon />
-                                                    </Button>
-                                                </Grid>
-                                            </Grid>
-                                        </Popover>
-                                    </div>
-                                }
-                                <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="openInBrowser" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenInBrowser}>
-                                        <YouTubeIcon />
-                                    </Button>
-                                </Tooltip>
-                                {!_includes(queue, item.id) &&
-                                    <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                    }
+                                    {!_includes(queue, item.id) &&
                                         <div>
-                                            <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
-                                                <DownloadIcon />
-                                            </Button>
+                                            <Tooltip title={t("cut")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                                <Button data-help="cut" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenTrackCut}>
+                                                    <ContentCutIcon />
+                                                </Button>
+                                            </Tooltip>
+                                            <Popover
+                                                id={item.id}
+                                                open={open}
+                                                TransitionComponent={Fade}
+                                                TransitionProps={{
+                                                    unmountOnExit: true,
+                                                    mountOnEnter: true,
+                                                }}
+                                                anchorEl={cutAnchorEl}
+                                                onClose={onCloseTrackCut}
+                                                anchorOrigin={{
+                                                    vertical: "center",
+                                                    horizontal: "left",
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: "center",
+                                                    horizontal: "right",
+                                                }}
+                                            >
+                                                <Grid container padding={0} spacing={0} className={Styles.trackCutPopup}>
+                                                    {_map(cuts, (cut, index) =>
+                                                        <Grid container padding={2} paddingBottom={0} spacing={1} key={index}>
+                                                            <Grid size={5}>
+                                                                <NumberFormatBase
+                                                                    size="small"
+                                                                    slotProps={{
+                                                                        htmlInput: {
+                                                                            "data-index": index,
+                                                                        }
+                                                                    }}
+                                                                    value={cut[0] ?? 0}
+                                                                    onChange={onCutStartTimeChange}
+                                                                    format={formatTime}
+                                                                    removeFormatting={unformatTime}
+                                                                    customInput={TextField}
+                                                                    variant="outlined"
+                                                                    label={t("from")}
+                                                                />
+                                                            </Grid>
+                                                            <Grid size={5}>
+                                                                <NumberFormatBase
+                                                                    size="small"
+                                                                    slotProps={{
+                                                                        htmlInput: {
+                                                                            "data-index": index,
+                                                                        }
+                                                                    }}
+                                                                    value={cut[1] ?? item.duration}
+                                                                    onChange={onCutEndTimeChange}
+                                                                    format={formatTime}
+                                                                    removeFormatting={unformatTime}
+                                                                    customInput={TextField}
+                                                                    variant="outlined"
+                                                                    label={t("to")}
+                                                                />
+                                                            </Grid>
+                                                            <Grid size={2} display="flex">
+                                                                <Button className={Styles.deleteCutButton} data-id={item.id} data-index={index} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
+                                                                    <DeleteForeverIcon />
+                                                                </Button>
+                                                            </Grid>
+                                                            <Grid size={12} display="flex" paddingX={2}>
+                                                                <Slider
+                                                                    name={_toString(index)}
+                                                                    data-index={index}
+                                                                    value={!_isEmpty(cut) ? cut : [0, item.duration]}
+                                                                    onChange={onCutTimeChange}
+                                                                    valueLabelDisplay="off"
+                                                                    min={0}
+                                                                    max={item.duration}
+                                                                    step={1}
+                                                                />
+                                                            </Grid>
+                                                        </Grid>
+                                                    )}   
+                                                    <Grid size={12} className={Styles.addTrackCutRow} padding={1}>
+                                                        <Button data-id={item.id} disableElevation variant="contained" color="primary" onClick={onAddTrackCut}>
+                                                            <AddIcon />
+                                                        </Button>
+                                                    </Grid>
+                                                </Grid>
+                                            </Popover>
                                         </div>
-                                    </Tooltip>
-                                }
-                                {_includes(queue, item.id) &&
-                                    <Tooltip title={t("cancel")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button data-help="cancelDownloadTrack" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
-                                            <CloseIcon />
+                                    }
+                                    <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                        <Button data-help="openInBrowser" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenInBrowser}>
+                                            <YouTubeIcon />
                                         </Button>
                                     </Tooltip>
-                                }
-                            </Stack>
-                        }
-                    >
-                        <Grid container direction="row" flexGrow={1}>
-                            {item.playlist_autonumber &&
-                                <Grid size={1} className={Styles.numberColumn}>
-                                    <Typography className={Styles.number} variant="body1" color="primary.main">{item.playlist_autonumber}</Typography>
-                                </Grid>
+                                    {!_includes(queue, item.id) &&
+                                        <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                            <div>
+                                                <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
+                                                    <DownloadIcon />
+                                                </Button>
+                                            </div>
+                                        </Tooltip>
+                                    }
+                                    {_includes(queue, item.id) &&
+                                        <Tooltip title={t("cancel")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                            <Button data-help="cancelDownloadTrack" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
+                                                <CloseIcon />
+                                            </Button>
+                                        </Tooltip>
+                                    }
+                                </Stack>
                             }
-                            <Grid size={1} className={Styles.imageColumn}>
-                                <Avatar className={Styles.image} src={item.thumbnail}>{item.playlist_autonumber}</Avatar>
-                            </Grid>
-                            <Grid size={3.5}>
-                                <ListItemText primary={item.title} secondary={moment.duration(item.duration, "seconds").format("mm:ss", { trim: false})} />
-                            </Grid>
-                            <Grid size={2} className={Styles.column}>
-                                {!_isEmpty(trackCuts[item.id]) &&
-                                    <Tooltip title={resolveTrackCutsTooltipText(item)} arrow enterDelay={1000} leaveDelay={100} enterNextDelay={250} placement="top">
-                                        <div className={Styles.column}>
-                                            <ContentCutIcon className={Styles.cutIcon} color="action" />
-                                            <Typography variant="caption">{resolveTrackCutsText(item)}</Typography>
-                                        </div>
-                                    </Tooltip>
+                        >
+                            <Grid container direction="row" flexGrow={1}>
+                                {item.playlist_autonumber &&
+                                    <Grid size={1} className={Styles.numberColumn}>
+                                        <Typography className={Styles.number} variant="body1" color="primary.main">{item.playlist_autonumber}</Typography>
+                                    </Grid>
                                 }
-                            </Grid>
-                            {info && !info.skipped && <>
-                                <Grid size={1} className={Styles.column}>
-                                    {!info.error && <Typography variant="body1">{formatFileSize(info.totalSize)}</Typography>}
+                                <Grid size={1} className={Styles.imageColumn}>
+                                    <Avatar className={Styles.image} src={item.thumbnail}>{item.playlist_autonumber}</Avatar>
                                 </Grid>
-                                <Grid size={.75} className={Styles.column}>
-                                    {info.completed ?
-                                        <CheckIcon className={Styles.completedIcon} color="success" />
-                                        : info.error ?
-                                            <CloseIcon className={Styles.completedIcon} color="error" />
-                                            : <Progress color="primary" value={info.percent} />
+                                <Grid size={3.25}>
+                                    <ListItemText primary={item.title} secondary={moment.duration(item.duration, "seconds").format("mm:ss", { trim: false})} />
+                                </Grid>
+                                <Grid size={2} className={Styles.column}>
+                                    {!_isEmpty(trackCuts[item.id]) &&
+                                        <Tooltip title={resolveTrackCutsTooltipText(item)} arrow enterDelay={1000} leaveDelay={100} enterNextDelay={250} placement="top">
+                                            <div className={Styles.column}>
+                                                <ContentCutIcon className={Styles.cutIcon} color="action" />
+                                                <Typography variant="caption">{resolveTrackCutsText(item)}</Typography>
+                                            </div>
+                                        </Tooltip>
                                     }
                                 </Grid>
-                                <Grid size={2.75} className={Styles.column}>
-                                    <Typography variant="body1">{info.status}</Typography>
-                                </Grid>
-                            </>
-                            }
-                        </Grid>
-                    </ListItem>);
-                })}
-            </List>
-        </Grid>
+                                {info && !info.skipped && <>
+                                    <Grid size={1} className={Styles.column}>
+                                        {!info.error && <Typography variant="body1">{formatFileSize(info.totalSize)}</Typography>}
+                                    </Grid>
+                                    <Grid size={.75} className={Styles.column}>
+                                        {info.completed ?
+                                            <CheckIcon className={Styles.completedIcon} color="success" />
+                                            : info.error ?
+                                                <CloseIcon className={Styles.completedIcon} color="error" />
+                                                : <Progress color="primary" value={info.percent} />
+                                        }
+                                    </Grid>
+                                    <Grid size={2.75} className={Styles.column}>
+                                        <Typography variant="body1">{info.status}</Typography>
+                                    </Grid>
+                                </>
+                                }
+                            </Grid>
+                        </ListItem>);
+                    })}
+                </List>
+            </Grid>
+            <DetailsModal
+                id="track-details-modal"
+                details={_pick(currentTrack, ["title"])}
+                open={!!currentTrack}
+                onClose={onTrackDetailsModalClose}
+            />
+        </>
     );
 };
 

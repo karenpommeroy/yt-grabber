@@ -9,15 +9,35 @@
             background-color: var(--theme-palette-divider);
         }
 
-        .image-button {
+        .image-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
             cursor: pointer;
 
             &:hover {
-                opacity: 0.5;
+                .image-button {
+                    opacity: 0.25;
+                }
+
+                .image-view-icon {
+                    opacity: 1;
+                }
             }
 
-            .test {
-                ad;
+            .image-button {
+                width: 90px;
+                height: 100%;
+                vendor("transition", all 0.25s ease-in-out);
+            }
+
+            .image-view-icon {
+                position: absolute;
+                width: 25%;
+                height: 100%;
+                pointer-events: none;
+                opacity: 0;
+                vendor("transition", all 0.25s ease-in-out);
             }
         }
 
@@ -99,7 +119,6 @@
 
             .label {
                 padding-right: 0.3rem;
-                capitalize();
 
                 & .bold {
                     font-weight: bold;

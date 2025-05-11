@@ -33,3 +33,8 @@ export enum InputMode {
     Albums = "albums",
     Songs = "songs",
 };
+
+export enum QueueKeys {
+    LoadSingle = "load-single",
+    LoadMulti = "load-multi",
+};

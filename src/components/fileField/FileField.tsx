@@ -7,7 +7,7 @@ import React, {useEffect, useRef} from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import {IconButton, InputAdornment, TextField, TextFieldProps} from "@mui/material";
 
-import {OpenSelectPathDialogCompletedParams} from "../../common/Messaging";
+import {Messages} from "../../messaging/Messages";
 import Styles from "./FileField.styl";
 
 export type FileFieldProps = Omit<TextFieldProps, "onChange" | "onBlur"> & {
@@ -25,15 +25,15 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        ipcRenderer.on("open-select-path-dialog-completed", onOpenSelectPathDialogCompleted);
+        ipcRenderer.on(Messages.OpenSelectPathDialogCompleted, onOpenSelectPathDialogCompleted);
 
         return () => {
-            ipcRenderer.off("open-select-path-dialog-completed", onOpenSelectPathDialogCompleted);
+            ipcRenderer.off(Messages.OpenSelectPathDialogCompleted, onOpenSelectPathDialogCompleted);
         };
     }, []);
 
     const onOpenSelectPathDialogCompleted = (event: IpcRendererEvent, data: string) => {
-        const parsed: OpenSelectPathDialogCompletedParams = JSON.parse(data);
+        const parsed = JSON.parse(data);
         
         if (parsed.paths && _isFunction(onChange)) {
             onChange([parsed.paths]);
@@ -41,7 +41,7 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     };
 
     const onOpenSelectPathDialog = () => {
-        ipcRenderer.send("open-select-path-dialog", {directory: mode === "directory", multiple, defaultPath: value});
+        ipcRenderer.send(Messages.OpenSelectPathDialog, {directory: mode === "directory", multiple, defaultPath: value});
     };
 
     const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {

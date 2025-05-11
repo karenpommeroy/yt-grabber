@@ -9,9 +9,11 @@
   "scripts": {
     "clean": "rimraf dist",
     "start": "concurrently \"cross-env NODE_ENV=development yarn run watch\" \"yarn run electron\"",
+    "start:debug": "concurrently \"cross-env NODE_ENV=development yarn run watch\" \"yarn run electron-debug\"",
     "build": "yarn clean && \"cross-env NODE_ENV=development webpack\" --config webpack.config.ts",
     "build:prod": "yarn clean && \"cross-env NODE_ENV=production webpack\" --config webpack.config.ts",
     "electron": "wait-on dist/index.js && ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
+    "electron-debug": "wait-on dist/index.js && ELECTRON_DISABLE_SECURITY_WARNINGS=true electron --inspect-brk=9229 .",
     "watch": "webpack --watch --config webpack.config.ts",
     "pack": "yarn build:prod && electron-builder --dir",
     "dist": "yarn build:prod && electron-builder"
@@ -28,7 +30,7 @@
     "win": {
       "target": "nsis",
       "icon": "dist/resources/icons/logo.ico",
-      "artifactName": "${productName}-setup-${version}.${ext}"
+      "artifactName": "${name}-${version}-setup.${ext}"
     },
     "nsis": {
       "oneClick": false,
