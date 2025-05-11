@@ -122,18 +122,18 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                             <Box className={Styles.actions} padding={2} gap={2}>
                                 {_some(trackStatus, (s) => s.completed) &&
                                     <Tooltip title={t("openOutputDirectory")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button data-help="openOutputDirectory" className={Styles.openOutput} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={openOutputFolder}>
+                                        <Button data-help="openOutputDirectory" className={Styles.openOutput} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={openOutputFolder}>
                                             <LaunchIcon />
                                         </Button>
                                     </Tooltip>
                                 }
                                 <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="openInBrowser" className={Styles.openInBrowser} size="large" fullWidth disableElevation variant="contained" color="secondary" onClick={onOpenInBrowser}>
+                                    <Button data-help="openInBrowser" className={Styles.openInBrowser} size="large" fullWidth disableElevation variant="contained" color="primary" onClick={onOpenInBrowser}>
                                         <YouTubeIcon />
                                     </Button>
                                 </Tooltip>
                                 <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="editInfo" className={Styles.edit} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={editInfo}>
+                                    <Button data-help="editInfo" className={Styles.edit} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={editInfo}>
                                         <EditIcon />
                                     </Button>
                                 </Tooltip>

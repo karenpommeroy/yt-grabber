@@ -414,7 +414,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                     {!_includes(queue, item.id) &&
                                         <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                             <div>
-                                                <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
+                                                <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="secondary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
                                                     <DownloadIcon />
                                                 </Button>
                                             </div>
@@ -422,7 +422,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                     }
                                     {_includes(queue, item.id) &&
                                         <Tooltip title={t("cancel")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                            <Button data-help="cancelDownloadTrack" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
+                                            <Button data-help="cancelDownloadTrack" size="small" className={Styles.trackAction} color="secondary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
                                                 <CloseIcon />
                                             </Button>
                                         </Tooltip>
