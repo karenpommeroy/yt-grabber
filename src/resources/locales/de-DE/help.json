@@ -136,5 +136,7 @@
         "Lieder - geht davon aus, dass die eingegebenen Elemente Titel sind und versucht, die entsprechenden Titel zu finden."
     ],
     "mergePartsHeader": "Ausgeschnittene Teile zusammenfügen",
-    "mergePartsContent": "Fügt alle ausgeschnittenen Teile des Titels in einer Datei zusammen."
+    "mergePartsContent": "Fügt alle ausgeschnittenen Teile des Titels in einer Datei zusammen.",
+    "tabsOrderHeader": "Reihenfolge der Tabs",
+    "tabsOrderContent": "Bestimmt die Reihenfolge, in der Registerkarten angezeigt werden."
 }

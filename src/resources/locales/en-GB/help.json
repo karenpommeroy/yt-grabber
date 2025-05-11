@@ -136,5 +136,7 @@
         "Songs - assumes that input items are song titles and will try to find and grab proper tracks"
     ],
     "mergePartsHeader": "Merge parts",
-    "mergePartsContent": "Merges all cut parts of the track into one file."
+    "mergePartsContent": "Merges all cut parts of the track into one file.",
+    "tabsOrderHeader": "Order of tabs",
+    "tabsOrderContent": "Specifies order in which tabs are displayed."
 }

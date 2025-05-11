@@ -12,12 +12,14 @@ import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
+import NorthIcon from "@mui/icons-material/North";
+import SouthIcon from "@mui/icons-material/South";
 import {
-    Box, Button, FormControl, FormControlLabel, FormLabel, Grid, Paper, Radio, RadioGroup, Switch,
-    TextField
+    Box, Button, FormControl, FormControlLabel, FormLabel, Grid, InputLabel, MenuItem, Paper, Radio,
+    RadioGroup, Select, SelectChangeEvent, Switch, TextField
 } from "@mui/material";
 
-import {FormatScope} from "../../common/Media";
+import {FormatScope, SortOrder, TabsOrderKey} from "../../common/Media";
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
 import FileField from "../../components/fileField/FileField";
 import NumberField from "../../components/numberField/NumberField";
@@ -31,7 +33,13 @@ export const SettingsView: React.FC = () => {
     const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
     const [applicationOptions, setApplicationOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const [debouncedApplicationOptions] = useDebounceValue(applicationOptions, 500, {leading: true});
-
+    const tabsOrderKeyOptions = [
+        {value: "default", text: t("default")},
+        {value: "artist", text: t("artist")},
+        {value: "title", text: t("title")},
+        {value: "releaseYear", text: t("year")},
+        {value: "duration", text: t("duration")},
+    ];
     const validateTemplateString = (input: HTMLInputElement) => {
         const allowedKeys = ["artist", "albumTitle", "trackTitle", "trackNo", "releaseYear"];
         const regex = /{{(.*?)}}/g;
@@ -126,6 +134,14 @@ export const SettingsView: React.FC = () => {
         setApplicationOptions((prev) => ({...prev, quality: value}));
     };
 
+    const onTabsOrderKeyChange = (event: SelectChangeEvent<TabsOrderKey>) => {       
+        setApplicationOptions((prev) => ({...prev, tabsOrder: [event.target.value as TabsOrderKey, prev.tabsOrder[1]]}));
+    };
+
+    const onTabsOrderOrderChange = (event: React.MouseEvent<HTMLButtonElement>) => {       
+        setApplicationOptions((prev) => ({...prev, tabsOrder: [prev.tabsOrder[0], event.currentTarget.value as SortOrder]}));
+    };
+
     useEffect(() => {
         global.store.set("application", debouncedApplicationOptions);
     }, [debouncedApplicationOptions]);
@@ -174,6 +190,30 @@ export const SettingsView: React.FC = () => {
                                     <FormControlLabel value={FormatScope.Tab} control={<Radio />} label={t("formatScopeTab")}/>
                                 </RadioGroup>
                             </FormControl>
+                        </Grid>
+                        <Grid size={12} spacing={1} container data-help="tabsOrder">
+                            <Grid size="grow">
+                                <FormControl fullWidth>
+                                    <InputLabel>{t("tabsOrder")}</InputLabel>
+                                    <Select
+                                        value={applicationOptions.tabsOrder[0]}
+                                        label={t("tabsOrder")}
+                                        onChange={onTabsOrderKeyChange}
+                                        className={Styles.select}
+                                        MenuProps={{
+                                            disablePortal: true
+                                        }}
+                                    >
+                                        {_map(tabsOrderKeyOptions, (item) => <MenuItem key={item.value} value={item.value} className={Styles.menuItem}>{item.text}</MenuItem>)}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            {applicationOptions.tabsOrder[0] !== TabsOrderKey.Default &&
+                                <Grid size={2} className={Styles.column}>
+                                    {applicationOptions.tabsOrder[1] === SortOrder.Asc && <Button variant="outlined" fullWidth value={SortOrder.Desc} onClick={onTabsOrderOrderChange}><NorthIcon /></Button>}
+                                    {applicationOptions.tabsOrder[1] === SortOrder.Desc && <Button variant="outlined" fullWidth value={SortOrder.Asc} onClick={onTabsOrderOrderChange}><SouthIcon /></Button>}
+                                </Grid>
+                            }
                         </Grid>
                         <Grid size={12} data-help="alwaysOverwrite">
                             <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />

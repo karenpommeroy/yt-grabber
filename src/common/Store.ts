@@ -1,7 +1,7 @@
 import {Schema} from "electron-store";
 import _values from "lodash/values";
 
-import {FormatScope, InputMode} from "./Media";
+import {FormatScope, InputMode, SortOrder, TabsOrderKey} from "./Media";
 
 export type ApplicationOptions = {
     youtubeUrl?: string;
@@ -19,6 +19,7 @@ export type ApplicationOptions = {
     alwaysOverwrite?: boolean;
     mergeParts?: boolean;
     inputMode?: InputMode;
+    tabsOrder?: [TabsOrderKey, SortOrder];
 };
 
 export interface IStore {
@@ -105,6 +106,10 @@ export const StoreSchema: Schema<IStore> = {
                 type: "string",
                 default: InputMode.Auto,
                 enum: _values(InputMode)
+            },
+            tabsOrder: {
+                type: "array",
+                default: [TabsOrderKey.Default, SortOrder.Asc],
             },
         },
         default: {},

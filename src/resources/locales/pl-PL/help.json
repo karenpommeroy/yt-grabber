@@ -136,5 +136,7 @@
         "Utwory - zakłada, że wprowadzone elementy to utwory i spróbuje je znaleźć"
     ],
     "mergePartsHeader": "Połącz wycięte części",
-    "mergePartsContent": "Łączy wszystkie wycięte części ścieżki w jeden plik."
+    "mergePartsContent": "Łączy wszystkie wycięte części ścieżki w jeden plik.",
+    "tabsOrderHeader": "Kolejność zakładek",
+    "tabsOrderContent": "Określa kolejność w jakiej wyświetlane są zakładki."
 }

@@ -15,6 +15,7 @@
     "concurrency": "Concurrent downloads",
     "cut": "Cut",
     "debugMode": "Debug Mode",
+    "default": "Default",
     "detailsModalTitle": "Edit media details",
     "done": "Done",
     "download": "Download",
@@ -64,6 +65,7 @@
     "songs": "Songs",
     "starting": "Starting",
     "startingDownload": "Starting download...",
+    "tabsOrder": "Tabs order",
     "themeMode": "Theme Mode",
     "title": "Title",
     "to": "to",
@@ -73,5 +75,6 @@
     "tracks": "Tracks",
     "videoOutputTemplate": "Output template (videos)",
     "warnings": "Warnings",
+    "year": "Year",
     "youtubeUrl": "YouTube URL"
 }

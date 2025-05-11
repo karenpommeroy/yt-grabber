@@ -15,6 +15,7 @@
     "concurrency": "Parallelität",
     "cut": "Schneiden",
     "debugMode": "Debug-Modus",
+    "default": "Default",
     "detailsModalTitle": "Mediendetails bearbeiten",
     "done": "Fertig",
     "download": "Herunterladen",
@@ -64,6 +65,7 @@
     "songs": "Lieder",
     "starting": "Starten",
     "startingDownload": "Der Download wird gestartet...",
+    "tabsOrder": "Reihenfolge der Tabs",
     "themeMode": "Designmodus",
     "title": "Titel",
     "to": "bis",
@@ -73,5 +75,6 @@
     "tracks": "Spuren",
     "videoOutputTemplate": "Ausgabevorlage (videos)",
     "warnings": "Warnungen",
+    "year": "Jahr",
     "youtubeUrl": "YouTube-URL"
 }

@@ -15,6 +15,7 @@
     "concurrency": "Liczba równocześnie pobieranych plików",
     "cut": "Przytnij",
     "debugMode": "Tryb debugowania",
+    "default": "Domyślna",
     "detailsModalTitle": "Edycja danych",
     "done": "Gotowe",
     "download": "Pobierz",
@@ -64,6 +65,7 @@
     "songs": "Utwory",
     "starting": "Rozpoczynanie",
     "startingDownload": "Rozpoczynanie pobierania...",
+    "tabsOrder": "Kolejność zakładek",
     "themeMode": "Tryb motywu",
     "title": "Tytuł",
     "to": "koniec",
@@ -73,5 +75,6 @@
     "tracks": "Ścieżki",
     "videoOutputTemplate": "Szablon wyjściowy (pliki wideo)",
     "warnings": "Ostrzeżenia",
+    "year": "Rok",
     "youtubeUrl": "YouTube URL"
 }

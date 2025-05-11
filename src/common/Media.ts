@@ -38,3 +38,16 @@ export enum QueueKeys {
     LoadSingle = "load-single",
     LoadMulti = "load-multi",
 };
+
+export enum TabsOrderKey {
+    Default = "default",
+    Title = "title",
+    Artist = "artist",
+    Year = "releaseYear",
+    Duration = "duration",
+};
+
+export enum SortOrder {
+    Asc = "asc",
+    Desc = "desc",
+};
