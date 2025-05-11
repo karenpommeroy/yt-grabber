@@ -1,9 +1,11 @@
 import _groupBy from "lodash/groupBy";
+import _includes from "lodash/includes";
 import _indexOf from "lodash/indexOf";
 import _keys from "lodash/keys";
 import _map from "lodash/map";
 import _replace from "lodash/replace";
 
+import {VideoType} from "./Media";
 import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
 
 export const isDev = () => process.env.NODE_ENV === "development";
@@ -57,4 +59,8 @@ export const getUrlType = (url: string) => {
     }
 
     return UrlType.Other;
+};
+
+export const getRealFileExtension = (ext: string) => {
+    return _includes([VideoType.Avi, VideoType.Mov, VideoType.Mpeg], ext) ? VideoType.Mkv : ext;
 };

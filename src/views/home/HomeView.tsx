@@ -17,6 +17,7 @@ import _min from "lodash/min";
 import _size from "lodash/size";
 import _some from "lodash/some";
 import _split from "lodash/split";
+import _sum from "lodash/sum";
 import _times from "lodash/times";
 import _trim from "lodash/trim";
 import _uniq from "lodash/uniq";
@@ -30,8 +31,10 @@ import {Alert, Box, Grid} from "@mui/material";
 
 import {getBinPath, removeIncompleteFiles} from "../../common/FileSystem";
 import {getAlbumInfo} from "../../common/Formatters";
-import {getUrlType, mapRange, resolveMockData} from "../../common/Helpers";
-import {Format, FormatScope, InputMode, MediaFormat, QueueKeys} from "../../common/Media";
+import {getRealFileExtension, getUrlType, mapRange, resolveMockData} from "../../common/Helpers";
+import {
+    Format, FormatScope, InputMode, MediaFormat, QueueKeys, VideoType
+} from "../../common/Media";
 import {GetYoutubeParams, GetYoutubeResult} from "../../common/Messaging";
 import {afterEach} from "../../common/Promise";
 import {ProgressInfo} from "../../common/Reporter";
@@ -40,7 +43,8 @@ import {
     AlbumInfo, PlaylistInfo, TrackInfo, TrackStatusInfo, UrlType, YoutubeInfoResult
 } from "../../common/Youtube";
 import {
-    getOutputFile, getOutputFileParts, getOutputFilePath, getYtdplRequestParams, mergeOutputFiles
+    convertOutputToFormat, getOutputFile, getOutputFileParts, getOutputFilePath,
+    getYtdplRequestParams, mergeOutputFiles
 } from "../../common/YtdplUtils";
 import FormatSelector from "../../components/youtube/formatSelector/FormatSelector";
 import InfoBar from "../../components/youtube/infoBar/InfoBar";
@@ -396,8 +400,22 @@ export const HomeView: React.FC = () => {
                 ytDlpWrap.exec([track.original_url, ...getYtdplRequestParams(track, album, trackCuts, format)], {shell: false, windowsHide: false, detached: false}, controller.signal)
                     .on("progress", (progress) => updateProgress(track.id, progress, format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
                     .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
-                    .on("error", (error) => onProcessEnd({trackId: track.id, error: error.message, parts}))
-                    .on("close", () => onProcessEnd({trackId: track.id, parts}));
+                    .on("error", (error) => {
+                        let errorMsg: string = undefined;
+
+                        if (error.message && !_includes(error.message, "[generic] '' is not a valid URL")) {
+                            errorMsg = error.message;
+                        }
+
+                        onMerge({trackId: track.id, error: errorMsg, parts})
+                            .then(onConvert)
+                            .then(onProcessEnd);
+                    })
+                    .on("close", () => {
+                        onMerge({trackId: track.id, parts})
+                            .then(onConvert)
+                            .then(onProcessEnd);
+                    });
             }
         });
     };
@@ -475,7 +493,7 @@ export const HomeView: React.FC = () => {
         }));
     }, [trackStatus, setTrackStatus]);
 
-    const mergeFileParts = (track: TrackInfo, album: AlbumInfo, format: Format, parts: number, callback: (filepath: string) => void) => {
+    const mergeFileParts = async (track: TrackInfo, album: AlbumInfo, format: Format, parts: number, callback: (filepath: string) => void) => {
         const fileParts = getOutputFileParts(track, album, format, parts);
         const listFile = _join(_map(fileParts, (p) => `file '${path.basename(p)}'`), "\n");
         const listFilePath = getOutputFile(track, album, format) + "." + "txt";
@@ -483,26 +501,55 @@ export const HomeView: React.FC = () => {
 
         fs.writeFileSync(listFilePath, listFile);
 
-        mergeOutputFiles(listFileInfo.dir, listFileInfo.name, format.extension, (error) => {
-            if (error) {
-                setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
-            }
+        await new Promise<void>((resolve) => {
+            mergeOutputFiles(listFileInfo.dir, listFileInfo.name, format.extension, (error) => {
+                if (error) {
+                    setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                }
 
-            fs.removeSync(listFilePath);
-            for (const part of fileParts) {
-                fs.removeSync(part);
-            }
+                fs.removeSync(listFilePath);
+                for (const part of fileParts) {
+                    fs.removeSync(part);
+                }
 
-            callback(`${listFileInfo.dir}/${listFileInfo.name}.${format.extension}`);
+                resolve();
+            });
         });
+
+        callback(`${listFileInfo.dir}/${listFileInfo.name}.${getRealFileExtension(format.extension)}`);
     };
+
+    const convertFiles = async (track: TrackInfo, album: AlbumInfo, format: Format, parts: number, callback: (filepaths: string[]) => void) => {
+        const filePaths: string[] = [];
+
+        if (parts <= 1 || global.store.get("application.mergeParts")) {
+            filePaths.push(getOutputFile(track, album, format) + "." + getRealFileExtension(format.extension));
+        } else {
+            filePaths.push(...getOutputFileParts(track, album, format, parts));
+        }
+
+        const results = await Promise.all(_map(filePaths, (fp) => new Promise<string>((resolve) => {
+            const fileInfo = path.parse(fp);
+            convertOutputToFormat(fileInfo.dir, fileInfo.name, format.extension, (error) => {
+                if (error) {
+                    setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                }
+
+                fs.removeSync(fp);
+                resolve(`${fileInfo.dir}/${fileInfo.name}.${format.extension}`);
+            });
+        })));
+
+        callback(results);
+    };
+
 
     const updateProgress = useCallback((trackId: string, progress: YtDlpProgress, progressMapRange = [0, 100]) => {
         setProgressPercentage(trackId, mapRange(progress.percent, [0, 100], progressMapRange));
     }, [trackStatus, setTrackStatus]);
 
     const updateProgressStatus = useCallback((trackId: string, eventType: string) => {
-        let status = "";
+        let status: string = undefined;
 
         if (eventType === "youtube") {
             status = t("reading");
@@ -523,17 +570,97 @@ export const HomeView: React.FC = () => {
         } else if (eventType === "embeddingThumbnail") {
             setProgressPercentage(trackId, 95);
         } else {
-            status = "";
+            status = undefined;
         }
 
         setTrackStatus((prev) => _map(prev, (item) => {
             if (item.trackId === trackId) {
-                return {...item, status};
+                return {...item, status: status ?? item.status};
             } else {
                 return item;
             }
         }));
     }, [trackStatus, setTrackStatus]);
+
+    const onMerge = useCallback((result: {trackId: string, error?: string; parts?: number}) => {
+        const controller = abortControllers[result.trackId];
+        const aborted = controller?.signal.aborted;
+        const track = _find(tracks, ["id", result.trackId]);
+        const album = getTrackAlbum(track.id);
+        const playlist = getTrackPlaylist(result.trackId);
+        const format = getPlaylistFormat(playlist);
+        const completed = !result.error && !aborted;
+        const shouldMerge = result.parts > 1 && global.store.get("application.mergeParts");
+
+        return new Promise((resolve) => {
+            if (!completed) {
+                return resolve(result);
+            }
+            if (!shouldMerge) {
+                setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, percent: 90} : item));
+                return resolve(result);
+            }
+
+            setTrackStatus((prev) => _map(prev, (item) => {
+                if (item.trackId === result.trackId) {
+                    return {
+                        ...item,
+                        status: t("mergingParts"),
+                        percent: 85,
+                    };
+                } else {
+                    return item;
+                }
+            }));
+
+            mergeFileParts(track, album, format, result.parts, (filepath) => {
+                const totalSize = fs.statSync(filepath).size;
+
+                setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, totalSize, percent: 90} : item));
+                resolve(result);
+            });
+        });
+    }, [abort, abortRef, tracks, trackStatus, trackStatusRef.current, formats, queue, appOptions]);
+
+    const onConvert = useCallback((result: {trackId: string, error?: string; parts?: number}) => {
+        const controller = abortControllers[result.trackId];
+        const aborted = controller?.signal.aborted;
+        const track = _find(tracks, ["id", result.trackId]);
+        const album = getTrackAlbum(track.id);
+        const playlist = getTrackPlaylist(result.trackId);
+        const format = getPlaylistFormat(playlist);
+        const completed = !result.error && !aborted;
+        const shouldConvert = _includes([VideoType.Mov, VideoType.Avi, VideoType.Mpeg], format.extension);
+
+        return new Promise((resolve) => {
+            if (!completed) {
+                return resolve(result);
+            }
+            if (!shouldConvert) {
+                setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, percent: 95} : item));
+                return resolve(result);
+            }
+
+            setTrackStatus((prev) => _map(prev, (item) => {
+                if (item.trackId === result.trackId) {
+                    return {
+                        ...item,
+                        status: t("convertingOutput"),
+                        percent: 90,
+                    };
+                } else {
+                    return item;
+                }
+            }));
+            
+            convertFiles(track, album, format, result.parts, (filepaths) => {
+                const totalSize = _sum(_map(filepaths, (fp) => fs.statSync(fp).size));
+
+                setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, totalSize, percent: 95} : item));
+                resolve(result);
+            });
+        });
+    }, [abort, abortRef, tracks, trackStatus, trackStatusRef.current, formats, queue, appOptions]);
 
     const onProcessEnd = useCallback((result: {trackId: string, error?: string; parts?: number}) => {
         const controller = abortControllers[result.trackId];
@@ -546,23 +673,10 @@ export const HomeView: React.FC = () => {
         const dirPath = path.dirname(outputPath);
         const parsedPath = path.parse(outputPath);
         const totalSize = fs.existsSync(outputPath) && fs.statSync(outputPath).size;
-
-        if (result.error && _includes(result.error, "[generic] '' is not a valid URL")) {
-            result.error = undefined;
-        }
-
         const completed = !result.error && !aborted;
 
         if (aborted) {
             removeIncompleteFiles({dir: dirPath, name: parsedPath.name, ext: format.extension}, result.parts > 1);
-        }
-
-        if (completed && result.parts > 1 && global.store.get("application.mergeParts")) {
-            mergeFileParts(track, album, format, result.parts, (filepath) => {
-                const totalSize = fs.statSync(filepath).size;
-
-                setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, totalSize} : item));
-            });
         }
 
         setTrackStatus((prev) => _map(prev, (item) => {

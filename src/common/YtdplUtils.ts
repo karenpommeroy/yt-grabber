@@ -11,8 +11,8 @@ import moment from "moment";
 
 import {getBinPath} from "./FileSystem";
 import {isAlbumTrack} from "./Formatters";
-import {escapePathString} from "./Helpers";
-import {Format, MediaFormat} from "./Media";
+import {escapePathString, getRealFileExtension} from "./Helpers";
+import {Format, MediaFormat, VideoType} from "./Media";
 import StoreSchema from "./Store";
 import {AlbumInfo, TrackInfo} from "./Youtube";
 
@@ -39,7 +39,7 @@ export const getOutputFilePath = (track: TrackInfo, album: AlbumInfo, format: Fo
 };
 
 export const getOutputFileParts = (track: TrackInfo, album: AlbumInfo, format: Format, parts: number) => {
-    return _times(parts, (num) => getOutputFile(track, album, format) + " " + _padStart(_toString(num + 1), 3, "0") + "." + format.extension);
+    return _times(parts, (num) => getOutputFile(track, album, format) + " " + _padStart(_toString(num + 1), 3, "0") + "." + getRealFileExtension(format.extension));
 };
 
 const getYtdplParamsForAudio = (format: Format) => {
@@ -52,13 +52,19 @@ const getYtdplParamsForAudio = (format: Format) => {
 };
 
 const getYtdplParamsForVideo = (format: Format) => {
+    const extensionsMapping: {[key: string]: string;} = {
+        [VideoType.Mkv]: "webm",
+        [VideoType.Mp4]: VideoType.Mp4,
+        [VideoType.Mov]: "webm",
+        [VideoType.Avi]: "webm",
+        [VideoType.Mpeg]: "webm",
+    };
     const selected = format.videoQuality;
     const [, height] = _map(selected.match(/\d+/g), Number);
-    const ext = format.extension === "mkv" ? "webm" : format.extension;
+    const ext = extensionsMapping[format.extension];
 
     return [
         "-f", `bv*[height<=${height}][ext=${ext}]+ba[ext=m4a]/b[height<=${height}][ext=${ext}] / bv*+ba/b`,
-        "--embed-thumbnail",
     ];
 };
 
@@ -164,14 +170,14 @@ export const mergeOutputFiles = (directory: string, filename: string, extension:
                 "-f", "concat",
                 "-safe", "0",
                 "-i", `${directory}/${filename}.txt`,
-                "-i", `${directory}/${filename} 001.${extension}`,
+                "-i", `${directory}/${filename} 001.${ext}`,
                 "-map", "0:a",
                 "-map", "1:v",
                 "-c:a", "copy",
                 "-c:v", "copy",
                 "-disposition:v:0", "attached_pic",
                 "-map_metadata", "1",
-                `${directory}/${filename}.${extension}`,
+                `${directory}/${filename}.${ext}`,
             ];
         } else if (ext === "mp3" || ext === "flac") {
             return [
@@ -179,13 +185,13 @@ export const mergeOutputFiles = (directory: string, filename: string, extension:
                 "-f", "concat",
                 "-safe", "0",
                 "-i", `${directory}/${filename}.txt`,
-                "-i", `${directory}/${filename} 001.${extension}`,
+                "-i", `${directory}/${filename} 001.${ext}`,
                 "-map", "0:a",
                 "-map", "1:v",
                 "-c", "copy",
                 "-map_metadata", "0",
                 "-disposition:v:1", "attached_pic",
-                `${directory}/${filename}.${extension}`,
+                `${directory}/${filename}.${ext}`,
             ];
         }
 
@@ -195,11 +201,78 @@ export const mergeOutputFiles = (directory: string, filename: string, extension:
             "-safe", "0",
             "-i", `${directory}/${filename}.txt`,
             "-c", "copy",
-            `${directory}/${filename}.${extension}`,
+            `${directory}/${filename}.${ext}`,
         ];
     };
     const errors: string[] = [];
-    const proc = spawn(`${getBinPath()}/ffmpeg.exe`, getCommandArgs(extension));
+    const proc = spawn(`${getBinPath()}/ffmpeg.exe`, getCommandArgs(getRealFileExtension(extension)));
+
+    proc.stderr.on("data", (data) => {
+        errors.push(`FFmpeg error: ${data}`);
+    });
+
+    proc.on("error", (err) => {
+        errors.push(`Error: ${err.message}`);
+    });
+
+    proc.on("close", (code: number) => {
+        if (code === 0) {
+            callback();
+        } else {
+            callback(new Error(`FFmpeg exited with code ${code}. Errors: ${errors.join(", ")}`));
+        }
+    });
+};
+
+export const convertOutputToFormat = (directory: string, filename: string, extension: string, callback: (error?: Error) => void) => {
+    const getCommandArgs = (ext: string) => {
+        if (ext === "mov") {
+            return [
+                "-y",
+                "-i", `${directory}/${filename}.mkv`,
+                "-c:v", "libx264",
+                "-c:a", "aac",
+                `${directory}/${filename}.${extension}`,
+            ];
+        } else if (ext === "avi") {
+            return [
+                "-y",
+                "-i", `${directory}/${filename}.mkv`,
+                "-c:v", "mpeg4",
+                "-vtag", "xvid",
+                "-qscale:v", "1",
+                "-c:a", "mp3",
+                `${directory}/${filename}.${extension}`,
+            ];
+        } else if (ext === "mpeg") {
+            return [
+                "-y",
+                "-i", `${directory}/${filename}.mkv`,
+                "-f", "mpeg",
+                "-c:v", "mpeg2video",
+                "-q:v", "1",
+                "-c:a", "mp2",
+                "-b:a", "192k",
+                `${directory}/${filename}.${extension}`,
+            ];
+        } else if (ext === "mp4") {
+            return [
+                "-y",
+                "-i", `${directory}/${filename}.mkv`,
+                "-c", "copy",
+                `${directory}/${filename}.${extension}`,
+            ];
+        }
+    };
+
+    const errors: string[] = [];
+    const cmdArgs = getCommandArgs(extension);
+
+    if (!cmdArgs) {
+        return callback();
+    }
+
+    const proc = spawn(`${getBinPath()}/ffmpeg.exe`, cmdArgs);
 
     proc.stderr.on("data", (data) => {
         errors.push(`FFmpeg error: ${data}`);

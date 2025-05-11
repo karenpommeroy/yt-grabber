@@ -12,7 +12,10 @@ export enum AudioType {
 
 export enum VideoType {
     Mp4 = "mp4",
-    Mkv = "mkv"
+    Mkv = "mkv",
+    Mov = "mov",
+    Avi = "avi",
+    Mpeg = "mpeg",
 };
 
 export type Format = {
