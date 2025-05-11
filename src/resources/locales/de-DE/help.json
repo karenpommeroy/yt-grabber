@@ -138,5 +138,7 @@
     "mergePartsHeader": "Ausgeschnittene Teile zusammenfügen",
     "mergePartsContent": "Fügt alle ausgeschnittenen Teile des Titels in einer Datei zusammen.",
     "tabsOrderHeader": "Reihenfolge der Tabs",
-    "tabsOrderContent": "Bestimmt die Reihenfolge, in der Registerkarten angezeigt werden."
+    "tabsOrderContent": "Bestimmt die Reihenfolge, in der Registerkarten angezeigt werden.",
+    "editTrackHeader": "Trackdaten bearbeiten",
+    "editTrackContent": "Ermöglicht das Bearbeiten von Trackdaten wie dem Titel."
 }

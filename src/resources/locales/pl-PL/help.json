@@ -138,5 +138,7 @@
     "mergePartsHeader": "Połącz wycięte części",
     "mergePartsContent": "Łączy wszystkie wycięte części ścieżki w jeden plik.",
     "tabsOrderHeader": "Kolejność zakładek",
-    "tabsOrderContent": "Określa kolejność w jakiej wyświetlane są zakładki."
+    "tabsOrderContent": "Określa kolejność w jakiej wyświetlane są zakładki.",
+    "editTrackHeader": "Edycja danych ścieżki",
+    "editTrackContent": "Pozwala na edycję danych ścieżki takich jak tytuł."
 }

@@ -138,5 +138,7 @@
     "mergePartsHeader": "Merge parts",
     "mergePartsContent": "Merges all cut parts of the track into one file.",
     "tabsOrderHeader": "Order of tabs",
-    "tabsOrderContent": "Specifies order in which tabs are displayed."
+    "tabsOrderContent": "Specifies order in which tabs are displayed.",
+    "editTrackHeader": "Edit track info",
+    "editTrackContent": "Allows to edit track details such as title."
 }
