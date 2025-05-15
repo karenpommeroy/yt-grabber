@@ -105,7 +105,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
         const nextResolutions = _uniq(_map(_filter(formats, (f) => f.vcodec !== "none" && !!f.resolution), resolveResolutionText));
 
         setResolutions(nextResolutions);
-    }, [playlists, activeTab]);
+    }, [JSON.stringify(playlists), activeTab]);
 
     useEffect(() => {
         setSelectedResolution(format.videoQuality && _includes(resolutions, format.videoQuality) ? format.videoQuality : _last(resolutions));

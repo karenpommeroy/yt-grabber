@@ -28,4 +28,5 @@ export type GetYoutubeResult = {
     errors?: LogMessage[];
     warnings?: LogMessage[];
     values?: string[];
+    sources: string[];
 };

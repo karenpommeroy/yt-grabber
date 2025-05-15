@@ -82,7 +82,6 @@ export const HomeView: React.FC = () => {
     const {state, actions} = useAppContext();
     const [error, setError] = useState(false);
     const [abort, setAbort] = useState<string>();
-    const [pendingTabs, setPendingTabs] = useState<string[]>([]);
     const {t, i18n} = useTranslation();
     const trackStatusRef = useRef<TrackStatusInfo[]>(trackStatus);
     const abortRef = useRef<string>(abort);
@@ -161,8 +160,7 @@ export const HomeView: React.FC = () => {
     const onGetYoutubeCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeResult>) => {
         if (!data.result) return;
 
-        setPendingTabs(data.result.values);
-
+        setPlaylists((prev) => [..._filter(prev, (p) => !_includes(data.result.sources, p.url)), ..._map(data.result.values, (v) => ({url: v, album: {}, tracks: []} as PlaylistInfo))]);
         try {
             const promise = Promise.all(afterEach(getResolveDataPromise(data.result.values), update))
                 .then((result) => {
@@ -177,10 +175,10 @@ export const HomeView: React.FC = () => {
         }
     };
 
-    const onGetYoutubeCancelled = () => {
-        setPendingTabs([]);
+    const onGetYoutubeCancelled = useCallback(() => {
+        setPlaylists((prev) => _filter(prev, (p) => !_isEmpty(p.album)));
         setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadMulti));
-    };
+    }, [playlists]);
 
     const update = (item: YoutubeInfoResult) => {
         if (!_isEmpty(item.warnings)) {
@@ -193,13 +191,25 @@ export const HomeView: React.FC = () => {
 
         if (item.value) {
             setTracks((prev) => [...prev, ...item.value]);
-            setPlaylists((prev) => [...prev, {url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value}]);
+            setPlaylists((prev) => {
+                const toMap = _find(prev, ["url", item.url]) ? prev : [...prev, {url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value}];
+                
+                return _map(toMap, (p) => {
+                    if ((p.url === item.url)) {
+                        return {
+                            url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value
+                        };
+                    } else {
+                        return p;
+                    }
+                });
+            });
         }
     };
 
     const loadInfo = (urls: string[]) => {
         clear();
-        setPendingTabs(urls);
+        setPlaylists(_map(urls, (v) => ({url: v, album: {}, tracks: []} as PlaylistInfo)));
         
         const inputMode = global.store.get("application.inputMode");
         const groups = _groupBy(urls, getUrlType);
@@ -320,8 +330,11 @@ export const HomeView: React.FC = () => {
                             const errorRegex = /ERROR:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
                             const warningMatches = e.message.match(warningRegex) ?? [];
                             const errorMatches = e.message.match(errorRegex) ?? [];
-                            
-                            resolve({url, errors: _uniq(errorMatches), warnings: _uniq(warningMatches)});
+                            if (controller.signal.aborted) {
+                                return resolve({url, errors: [], warnings: []});
+                            }
+
+                            return resolve({url, errors: _uniq(errorMatches), warnings: _uniq(warningMatches)});
                         })
                         .finally(() => {
                             delete abortControllers[url];
@@ -347,7 +360,6 @@ export const HomeView: React.FC = () => {
     };
 
     const downloadAll = () => {
-        setPendingTabs([]);
         setTrackStatus([]);
         trackStatusRef.current = [];
         setAutoDownload(false);
@@ -359,7 +371,6 @@ export const HomeView: React.FC = () => {
         const playlist = _find(playlists, ["album.id", id]);
         const playlistTrackIds = _map(_get(playlist, "tracks"), "id");
         
-        setPendingTabs([]);
         setTrackStatus((prev) => _filter(prev, (p) => !_includes(playlistTrackIds, p.trackId)));
         trackStatusRef.current = _filter(trackStatusRef.current, (p) => !_includes(playlistTrackIds, p.trackId));
         setAutoDownload(false);
@@ -432,10 +443,15 @@ export const HomeView: React.FC = () => {
     const cancelAll = () => {
         setAbort("all");
         _map(abortControllers, (v) => v.abort());
+        cancelPendingPlaylists();
         ipcRenderer.send(Messages.GetYoutubeUrlsCancel);
         ipcRenderer.send(Messages.GetYoutubeArtistsCancel);
         ipcRenderer.send(Messages.GetYoutubeAlbumsCancel);
         ipcRenderer.send(Messages.GetYoutubeTracksCancel);
+    };
+
+    const cancelPendingPlaylists = () => {
+        setPlaylists(_filter(playlists, (p) => !_isEmpty(p.album)));
     };
 
     const cancelPlaylist = (id: string) => {
@@ -755,7 +771,6 @@ export const HomeView: React.FC = () => {
             <Grid className={Styles.content} container spacing={2} padding={2}>
                 {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}
                 <PlaylistTabs
-                    pending={pendingTabs}
                     queue={queue}
                     onDownloadTrack={downloadTrack}
                     onDownloadPlaylist={downloadAlbum}

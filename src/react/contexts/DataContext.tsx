@@ -27,7 +27,7 @@ export type DataState = {
     urls: string[];
     autoDownload: boolean;
     operation: string;
-    activeTab: string;
+    activeTab?: string;
     queue: string[];
     errors: LogEntry[];
     warnings: LogEntry[];

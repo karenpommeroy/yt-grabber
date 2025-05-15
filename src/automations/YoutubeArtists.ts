@@ -41,7 +41,7 @@ export const execute = async (parameters: MessageHandlerParams) => {
             abortPromise,
         ]);
     } catch (error: any) {
-        const result: GetYoutubeResult = {errors: []};
+        const result: GetYoutubeResult = {errors: [], sources: params.values};
         
         if (error.message === "aborted") {
             throw error;
@@ -63,7 +63,7 @@ export const execute = async (parameters: MessageHandlerParams) => {
 };
 
 const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18next, onProgress: (data: ProgressInfo<GetYoutubeResult>) => void) => {
-    const result: GetYoutubeResult = {warnings: [], errors: [], values: []};
+    const result: GetYoutubeResult = {warnings: [], errors: [], values: [], sources: params.values};
     const userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
     await i18n.changeLanguage(params.lang);
     

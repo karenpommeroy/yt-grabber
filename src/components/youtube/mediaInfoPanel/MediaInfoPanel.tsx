@@ -120,6 +120,11 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                         </CardContent>
                         {!loading &&
                             <Box className={Styles.actions} padding={2} gap={2}>
+                                <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                    <Button data-help="editInfo" className={Styles.edit} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={editInfo}>
+                                        <EditIcon />
+                                    </Button>
+                                </Tooltip>
                                 {_some(trackStatus, (s) => s.completed) &&
                                     <Tooltip title={t("openOutputDirectory")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                         <Button data-help="openOutputDirectory" className={Styles.openOutput} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={openOutputFolder}>
@@ -130,11 +135,6 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                 <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                     <Button data-help="openInBrowser" className={Styles.openInBrowser} size="large" fullWidth disableElevation variant="contained" color="primary" onClick={onOpenInBrowser}>
                                         <YouTubeIcon />
-                                    </Button>
-                                </Tooltip>
-                                <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="editInfo" className={Styles.edit} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={editInfo}>
-                                        <EditIcon />
                                     </Button>
                                 </Tooltip>
                                 <Tooltip title={t("downloadPlaylist")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
