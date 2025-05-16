@@ -14,7 +14,7 @@ import _reduce from "lodash/reduce";
 import _size from "lodash/size";
 import _some from "lodash/some";
 import path from "path";
-import React, {MouseEvent, useEffect} from "react";
+import React, {MouseEvent, useCallback, useEffect} from "react";
 
 import CloseIcon from "@mui/icons-material/Close";
 import TabContext from "@mui/lab/TabContext";
@@ -50,16 +50,21 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     const tabWidth = window.innerWidth / (playlists.length + playlists.length) - 30; 
 
     useEffect(() => {
+        if (activeTab && _includes(_map(playlists, "url"), activeTab)) {
+            return;
+        }
         setActiveTab(_get(playlists, "0.url"));
     }, [JSON.stringify(playlists)]);
 
     useEffect(() => {
+        if (state.loading) return;
+
         const tabsOrder = global.store.get<string, [TabsOrderKey & keyof AlbumInfo, SortOrder]>("application.tabsOrder");
-        const next = tabsOrder[0] === TabsOrderKey.Default ? playlists : _orderBy(playlists, [(p) => p.album[tabsOrder[0]]], [tabsOrder[1]]);
+        const orderedPlaylists = tabsOrder[0] === TabsOrderKey.Default ? playlists : _orderBy(playlists, [(p) => p.album[tabsOrder[0]]], [tabsOrder[1]]);
+        const orderedTracks = _flatMap(orderedPlaylists, (n) => n.tracks);
         
-        setPlaylists(next);
-        const nextTracks = _flatMap(next, (n) => n.tracks);
-        setTracks(nextTracks);
+        setPlaylists(orderedPlaylists);
+        setTracks(orderedTracks);
     }, [state.loading, JSON.stringify(playlists)]);
 
     const isPlaylistLoading = (id: string) => {
@@ -91,10 +96,10 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
         }
     };
 
-    const onRemove = (event: MouseEvent<SVGSVGElement>) => {
+    const onRemove = useCallback((event: MouseEvent<SVGSVGElement>) => {
         event.stopPropagation();
         const currentIndex = _findIndex(playlists, (p) => p.url === activeTab);
-        const nextIndex = currentIndex === 0 ? 1 : currentIndex - 1;
+        const nextIndex = currentIndex === _size(playlists) - 1 ? currentIndex - 1 : currentIndex + 1;
         const albumId = event.currentTarget.getAttribute("data-id");
         const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
         
@@ -102,7 +107,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
         setTrackStatus((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.trackId)));
         setPlaylists((prev) => _filter(prev, (p) => p.album.id !== albumId));
         setTracks((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.id)));
-    };
+    }, [playlists, activeTab]);
 
     const onOpenFile = (trackId: string) => {
         const found = _find(trackStatus, ["trackId", trackId]);
