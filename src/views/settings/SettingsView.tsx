@@ -118,6 +118,10 @@ export const SettingsView: React.FC = () => {
         setApplicationOptions((prev) => ({...prev, formatScope: value}));
     };
 
+    const onDownloadSinglesAndEpsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, downloadSinglesAndEps: e.target.checked}));
+    };
+    
     const onOverwriteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, alwaysOverwrite: e.target.checked}));
     };
@@ -214,6 +218,9 @@ export const SettingsView: React.FC = () => {
                                     {applicationOptions.tabsOrder[1] === SortOrder.Desc && <Button variant="outlined" fullWidth value={SortOrder.Asc} onClick={onTabsOrderOrderChange}><SouthIcon /></Button>}
                                 </Grid>
                             }
+                        </Grid>
+                        <Grid size={12} data-help="downloadSinglesAndEps">
+                            <FormControlLabel control={<Switch checked={applicationOptions.downloadSinglesAndEps} onChange={onDownloadSinglesAndEpsChange} />} label={t("downloadSinglesAndEps")} />
                         </Grid>
                         <Grid size={12} data-help="alwaysOverwrite">
                             <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />

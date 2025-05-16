@@ -18,6 +18,7 @@ export type ApplicationOptions = {
     language?: string;
     alwaysOverwrite?: boolean;
     mergeParts?: boolean;
+    downloadSinglesAndEps?: boolean;
     inputMode?: InputMode;
     tabsOrder?: [TabsOrderKey, SortOrder];
 };
@@ -101,6 +102,10 @@ export const StoreSchema: Schema<IStore> = {
             mergeParts: {
                 type: "boolean",
                 default: true
+            },
+            downloadSinglesAndEps: {
+                type: "boolean",
+                default: false
             },
             inputMode: {
                 type: "string",

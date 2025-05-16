@@ -140,5 +140,7 @@
     "tabsOrderHeader": "Kolejność zakładek",
     "tabsOrderContent": "Określa kolejność w jakiej wyświetlane są zakładki.",
     "editTrackHeader": "Edycja danych ścieżki",
-    "editTrackContent": "Pozwala na edycję danych ścieżki takich jak tytuł."
+    "editTrackContent": "Pozwala na edycję danych ścieżki takich jak tytuł.",
+    "downloadSinglesAndEpsHeader": "Pobieraj single i epki",
+    "downloadSinglesAndEpsContent": "Uwzględnij single i epki podczas pobierania dyskografii artysty."
 }

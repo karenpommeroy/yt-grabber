@@ -180,7 +180,7 @@ export const HomeView: React.FC = () => {
         setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadMulti));
     }, [playlists]);
 
-    const update = (item: YoutubeInfoResult) => {
+    const update = useCallback((item: YoutubeInfoResult) => {
         if (!_isEmpty(item.warnings)) {
             setWarnings((prev) => [...prev, {url: item.url, message: _join(item.warnings, "\n")}]);
         }
@@ -191,21 +191,17 @@ export const HomeView: React.FC = () => {
 
         if (item.value) {
             setTracks((prev) => [...prev, ...item.value]);
-            setPlaylists((prev) => {
-                const toMap = _find(prev, ["url", item.url]) ? prev : [...prev, {url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value}];
-                
-                return _map(toMap, (p) => {
-                    if ((p.url === item.url)) {
-                        return {
-                            url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value
-                        };
-                    } else {
-                        return p;
-                    }
-                });
-            });
+            setPlaylists((prev) => _map(prev, (p) => {
+                if ((p.url === item.url)) {
+                    return {
+                        url: item.url, album: getAlbumInfo(item.value, item.url), tracks: item.value
+                    };
+                } else {
+                    return p;
+                }
+            }));
         }
-    };
+    }, [playlists]);
 
     const loadInfo = (urls: string[]) => {
         clear();
@@ -268,6 +264,9 @@ export const HomeView: React.FC = () => {
             values: artists,
             lang: i18n.language,
             url: appOptions.youtubeUrl,
+            options: {
+                downloadSinglesAndEps: appOptions.downloadSinglesAndEps,
+            },
         };
 
         setQueue((prev) => [...prev, QueueKeys.LoadMulti]);

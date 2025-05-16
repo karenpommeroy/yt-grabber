@@ -140,5 +140,7 @@
     "tabsOrderHeader": "Reihenfolge der Tabs",
     "tabsOrderContent": "Bestimmt die Reihenfolge, in der Registerkarten angezeigt werden.",
     "editTrackHeader": "Trackdaten bearbeiten",
-    "editTrackContent": "Ermöglicht das Bearbeiten von Trackdaten wie dem Titel."
+    "editTrackContent": "Ermöglicht das Bearbeiten von Trackdaten wie dem Titel.",
+    "downloadSinglesAndEpsHeader": "Download Singles und EPs",
+    "downloadSinglesAndEpsContent": "Schließen Sie beim Herunterladen von Künstleralben auch Singles und EPs ein."
 }

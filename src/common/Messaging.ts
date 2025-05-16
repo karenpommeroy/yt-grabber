@@ -22,6 +22,7 @@ export type GetYoutubeParams = {
     values?: string[];
     lang: string;
     url: string;
+    options?: Record<string, any>;
 };
 
 export type GetYoutubeResult = {
