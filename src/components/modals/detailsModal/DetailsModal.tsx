@@ -1,5 +1,5 @@
 import _map from "lodash/map";
-import React, {useEffect, useState} from "react";
+import React, {KeyboardEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
 import {Stack, TextField} from "@mui/material";
@@ -39,6 +39,12 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
         }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+        if (e.key === "Enter") {
+            onClose(value);
+        }
+    };
+
     useEffect(() => {
         setValue(details);
     }, [details]);
@@ -51,6 +57,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
             fullWidth
             maxWidth="sm"
             className={Styles.detailsModal}
+            onKeyUp={handleKeyUp}
             {...other}
         >
             <DialogTitle textAlign="center">{t("detailsModalTitle")}</DialogTitle>
