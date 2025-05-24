@@ -137,10 +137,12 @@
     ],
     "mergePartsHeader": "Merge parts",
     "mergePartsContent": "Merges all cut parts of the track into one file.",
-    "tabsOrderHeader": "Order of tabs",
-    "tabsOrderContent": "Specifies order in which tabs are displayed.",
+    "tabsOrderHeader": "Tabs order",
+    "tabsOrderContent": "Ascending or descending order.",
     "editTrackHeader": "Edit track info",
     "editTrackContent": "Allows to edit track details such as title.",
     "downloadSinglesAndEpsHeader": "Download singles and eps",
-    "downloadSinglesAndEpsContent": "Include singles and EPs when downloading artist's albums."
+    "downloadSinglesAndEpsContent": "Include singles and EPs when downloading artist's albums.",
+    "tabsOrderFieldHeader": "Tabs order attribute",
+    "tabsOrderFieldContent": "Specifies attribute used to order tabs."
 }

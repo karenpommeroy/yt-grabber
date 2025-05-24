@@ -138,9 +138,11 @@
     "mergePartsHeader": "Ausgeschnittene Teile zusammenfügen",
     "mergePartsContent": "Fügt alle ausgeschnittenen Teile des Titels in einer Datei zusammen.",
     "tabsOrderHeader": "Reihenfolge der Tabs",
-    "tabsOrderContent": "Bestimmt die Reihenfolge, in der Registerkarten angezeigt werden.",
+    "tabsOrderContent": "Ascending or descending order.",
     "editTrackHeader": "Trackdaten bearbeiten",
     "editTrackContent": "Ermöglicht das Bearbeiten von Trackdaten wie dem Titel.",
     "downloadSinglesAndEpsHeader": "Download Singles und EPs",
-    "downloadSinglesAndEpsContent": "Schließen Sie beim Herunterladen von Künstleralben auch Singles und EPs ein."
+    "downloadSinglesAndEpsContent": "Schließen Sie beim Herunterladen von Künstleralben auch Singles und EPs ein.",
+    "tabsOrderFieldHeader": "Tabs Reihenfolge Attribut",
+    "tabsOrderFieldContent": "Gibt das Attribut an, das zum Sortieren der Registerkarten verwendet wird."
 }

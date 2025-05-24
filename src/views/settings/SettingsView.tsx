@@ -195,8 +195,8 @@ export const SettingsView: React.FC = () => {
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
-                        <Grid size={12} spacing={1} container data-help="tabsOrder">
-                            <Grid size="grow">
+                        <Grid size={12} spacing={1} container >
+                            <Grid size="grow" data-help="tabsOrderField">
                                 <FormControl fullWidth>
                                     <InputLabel>{t("tabsOrder")}</InputLabel>
                                     <Select
@@ -213,7 +213,7 @@ export const SettingsView: React.FC = () => {
                                 </FormControl>
                             </Grid>
                             {applicationOptions.tabsOrder[0] !== TabsOrderKey.Default &&
-                                <Grid size={2} className={Styles.column}>
+                                <Grid size={2} className={Styles.column} data-help="tabsOrder">
                                     {applicationOptions.tabsOrder[1] === SortOrder.Asc && <Button variant="outlined" fullWidth value={SortOrder.Desc} onClick={onTabsOrderOrderChange}><NorthIcon /></Button>}
                                     {applicationOptions.tabsOrder[1] === SortOrder.Desc && <Button variant="outlined" fullWidth value={SortOrder.Asc} onClick={onTabsOrderOrderChange}><SouthIcon /></Button>}
                                 </Grid>
