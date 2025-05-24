@@ -1,4 +1,3 @@
-import fs from "fs-extra";
 import {i18n as i18next} from "i18next";
 import _forEach from "lodash/forEach";
 import _includes from "lodash/includes";
@@ -10,13 +9,11 @@ import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
-import {getProfilePath} from "../common/FileSystem";
-import {waitFor} from "../common/Helpers";
 import {GetYoutubeParams, GetYoutubeResult} from "../common/Messaging";
-import puppeteerOptions from "../common/PuppeteerOptions";
+import puppeteerOptions, {UserAgent} from "../common/PuppeteerOptions";
 import {IReporter, ProgressInfo, Reporter} from "../common/Reporter";
 import {MessageHandlerParams} from "../messaging/MessageChannel";
-import {clearInput, navigateToPage} from "./Helpers";
+import {clearInput, navigateToPage, setCookies} from "./Helpers";
 import {
     AlbumFilterSelector, AlbumLinkSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector,
     SingleFilterSelector, SingleLinkSelector, SinglesDirectLinkSelector, SinglesHrefSelector,
@@ -63,31 +60,17 @@ export const execute = async (parameters: MessageHandlerParams) => {
     }
 };
 
-const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18next, onProgress: (data: ProgressInfo<GetYoutubeResult>) => void) => {
+const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18next, onUpdate: (data: ProgressInfo<GetYoutubeResult>) => void) => {
     const result: GetYoutubeResult = {warnings: [], errors: [], values: [], sources: params.values};
-    const userAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
     await i18n.changeLanguage(params.lang);
     
-    reporter = new Reporter(onProgress);
+    reporter = new Reporter(onUpdate);
     reporter.start(i18n.t("starting"));
     browser = await puppeteer.launch(_merge(puppeteerOptions, options));
     [page] = await browser.pages();
     
-    await page.setUserAgent(userAgent);
-    
-    const cachedCookies = fs.readJSONSync(getProfilePath() + "/cookies.json", {throws: false});
-
-    if (_isEmpty(cachedCookies)) {
-        await waitFor(3000);
-        const pageCookies = await page.cookies();
-        
-        fs.writeJSONSync(getProfilePath() + "/cookies.json", pageCookies, {spaces: 2});
-
-        await page.setCookie(...pageCookies);
-    } else {
-        await page.setCookie(...cachedCookies);
-    }
-
+    await page.setUserAgent(UserAgent);
+    await setCookies(page);
     await navigateToPage(params.url, page);
     
     const process = async (artist: string) => {

@@ -5,7 +5,9 @@ import {getProfilePath} from "./FileSystem";
 const width = 1280;
 const height = 800;
 
-const options: LaunchOptions = {
+export const UserAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
+
+export const PuppeteerOptions: LaunchOptions = {
     headless: false,
     userDataDir: getProfilePath() + "/user-data-dir",
     defaultViewport: {
@@ -43,4 +45,4 @@ const options: LaunchOptions = {
     ignoreDefaultArgs: ["--enable-automation"],
 };
 
-export default options;
+export default PuppeteerOptions;
