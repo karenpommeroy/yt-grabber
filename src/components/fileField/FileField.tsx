@@ -78,7 +78,7 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
                             <IconButton
                                 onClick={handleButtonClick}
                                 edge="end"
-                                >
+                            >
                                 <FolderIcon />
                             </IconButton>
                         </InputAdornment>,
