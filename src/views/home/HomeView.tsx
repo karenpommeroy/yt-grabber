@@ -23,7 +23,7 @@ import _trim from "lodash/trim";
 import _uniq from "lodash/uniq";
 import path from "path";
 import {LaunchOptions} from "puppeteer";
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import YTDlpWrap, {Progress as YtDlpProgress} from "yt-dlp-wrap";
 
@@ -56,7 +56,6 @@ import {useAppContext} from "../../react/contexts/AppContext";
 import {useDataState} from "../../react/contexts/DataContext";
 import Styles from "./HomeView.styl";
 
-const ytDlpWrap = new YTDlpWrap(getBinPath() + "/yt-dlp.exe");
 const abortControllers: {[key: string]: AbortController;} = {};
 
 export const HomeView: React.FC = () => {
@@ -158,6 +157,12 @@ export const HomeView: React.FC = () => {
     useEffect(() => {
         actions.setLoading(queue.length > 0);
     }, [queue]);
+
+    const ytDlpWrap = useMemo<YTDlpWrap>(() => {
+        const ytdlpPath: string = global.store.get("application.ytdlpExecutablePath") || `${getBinPath()}/yt-dlp.exe`;
+        
+        return new YTDlpWrap(ytdlpPath);
+    }, []);
 
     const handleUrlChange = (urls: string[]) => {
         global.store.set("application.urls", urls);

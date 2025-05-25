@@ -150,5 +150,9 @@
         "Aktion bei mehreren gefundenen Übereinstimmungen",
         "`Ersten verwenden` – der erste passende Eintrag wird verwendet.",
         "`Fragen` – der Benutzer muss einen Eintrag aus der Liste der Übereinstimmungen auswählen."
-    ]
+    ],
+    "ytdlpExecutablePathHeader": "Pfad zur ausführbaren Datei yt-dpl",
+    "ytdlpExecutablePathContent": "Geben Sie einen benutzerdefinierten Pfad zur ausführbaren Datei der yt-dlp Bibliothek an, um diesen anstelle eines von der Anwendung bereitgestellten Pfads zu verwenden.",
+    "ffmpegExecutablePathHeader": "Pfad zur ausführbaren Datei ffmpeg",
+    "ffmpegExecutablePathContent": "Geben Sie einen benutzerdefinierten Pfad zur ausführbaren Datei der ffmpeg Bibliothek an, um diesen anstelle eines von der Anwendung bereitgestellten Pfads zu verwenden."
 }

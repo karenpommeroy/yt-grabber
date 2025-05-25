@@ -6,6 +6,8 @@ import {FormatScope, InputMode, MultiMatchAction, SortOrder, TabsOrderKey} from 
 export type ApplicationOptions = {
     youtubeUrl?: string;
     outputDirectory?: string;
+    ytdlpExecutablePath?: string;
+    ffmpegExecutablePath?: string;
     albumOutputTemplate?: string;
     playlistOutputTemplate?: string;
     videoOutputTemplate?: string;
@@ -59,6 +61,14 @@ export const StoreSchema: Schema<IStore> = {
             outputDirectory: {
                 type: "string",
                 default: "./output",
+            },
+            ytdlpExecutablePath: {
+                type: "string",
+                default: "",
+            },
+            ffmpegExecutablePath: {
+                type: "string",
+                default: ""
             },
             albumOutputTemplate: {
                 type: "string",

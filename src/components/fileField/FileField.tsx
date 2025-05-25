@@ -20,15 +20,15 @@ export type FileFieldProps = Omit<TextFieldProps, "onChange" | "onBlur"> & {
 };
 
 export const FileField: React.FC<FileFieldProps> = (props) => {
-    const {mode = "file", fileTypes, value, multiple, className, onChange, onBlur, ...rest} = props;
+    const {id, mode = "file", fileTypes, value, multiple, className, onChange, onBlur, ...rest} = props;
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        ipcRenderer.on(Messages.OpenSelectPathDialogCompleted, onOpenSelectPathDialogCompleted);
+        ipcRenderer.on(`${Messages.OpenSelectPathDialogCompleted}_${id}`, onOpenSelectPathDialogCompleted);
 
         return () => {
-            ipcRenderer.off(Messages.OpenSelectPathDialogCompleted, onOpenSelectPathDialogCompleted);
+            ipcRenderer.off(`${Messages.OpenSelectPathDialogCompleted}_${id}`, onOpenSelectPathDialogCompleted);
         };
     }, []);
 
@@ -41,7 +41,7 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     };
 
     const onOpenSelectPathDialog = () => {
-        ipcRenderer.send(Messages.OpenSelectPathDialog, {directory: mode === "directory", multiple, defaultPath: value});
+        ipcRenderer.send(Messages.OpenSelectPathDialog, {directory: mode === "directory", multiple, defaultPath: value, id});
     };
 
     const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {

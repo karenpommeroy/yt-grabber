@@ -69,6 +69,24 @@ export const SettingsView: React.FC = () => {
         const outputDirectory = _isNil(_first(value)) || _isEmpty(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.outputDirectory.default")) : _first(value);
         setApplicationOptions((prev) => ({...prev, outputDirectory}));
     };
+    
+    const onYtdlpExecutablePathChange = (value: string[]) => {
+        setApplicationOptions((prev) => ({...prev, ytdlpExecutablePath: _first(value)}));
+    };
+
+    const onYtdlpExecutablePathBlur = (value: string[]) => {
+        const ytdlpExecutablePath = _isNil(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.ytdlpExecutablePath.default")) : _first(value);
+        setApplicationOptions((prev) => ({...prev, ytdlpExecutablePath}));
+    };
+
+    const onFFmpegExecutablePathChange = (value: string[]) => {
+        setApplicationOptions((prev) => ({...prev, ffmpegExecutablePath: _first(value)}));
+    };
+
+    const onFFmpegExecutablePathBlur = (value: string[]) => {
+        const ffmpegExecutablePath = _isNil(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.ffmpegExecutablePath.default")) : _first(value);
+        setApplicationOptions((prev) => ({...prev, ffmpegExecutablePath}));
+    };
 
     const onAlbumOutputTemplateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         validateTemplateString(e.target);
@@ -328,6 +346,34 @@ export const SettingsView: React.FC = () => {
                                 helperText={validationErrors["youtubeUrl"]}
                                 error={!!validationErrors["youtubeUrl"]}
                                 type="string"
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <FileField
+                                data-help="ytdlpExecutablePath"
+                                fullWidth
+                                label={t("ytdlpExecutablePath")}
+                                id="ytdlpExecutablePath"
+                                variant="outlined"
+                                onChange={onYtdlpExecutablePathChange}
+                                onBlur={onYtdlpExecutablePathBlur}
+                                value={applicationOptions.ytdlpExecutablePath}
+                                mode="file"
+                                fileTypes={[".exe"]}
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <FileField
+                                data-help="ffmpegExecutablePath"
+                                fullWidth
+                                label={t("ffmpegExecutablePath")}
+                                id="ffmpegExecutablePath"
+                                variant="outlined"
+                                onChange={onFFmpegExecutablePathChange}
+                                onBlur={onFFmpegExecutablePathBlur}
+                                value={applicationOptions.ffmpegExecutablePath}
+                                mode="file"
+                                fileTypes={[".exe"]}
                             />
                         </Grid>
                     </Grid>

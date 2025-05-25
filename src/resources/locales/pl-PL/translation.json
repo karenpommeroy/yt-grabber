@@ -35,6 +35,7 @@
     "exceptionTimeout": "Błąd czasu oczekiwania",
     "exceptionTimeoutText": "Przekroczono limit czasu podczas wczytywania danych z YouTube",
     "extractingAudio": "Wyodrębnianie dźwięku",
+    "ffmpegExecutablePath": "Ścieżka do pliku wykonywalnego biblioteki ffmpeg",
     "findFileInSystem": "Pokaż w eksploratorze plików",
     "format": "Format",
     "formatScope": "Zakres parametrów pobierania",
@@ -84,5 +85,6 @@
     "videoOutputTemplate": "Szablon wyjściowy (pliki wideo)",
     "warnings": "Ostrzeżenia",
     "year": "Rok",
-    "youtubeUrl": "YouTube URL"
+    "youtubeUrl": "YouTube URL",
+    "ytdlpExecutablePath": "Ścieżka do pliku wykonywalnego biblioteki yt-dlp"
 }

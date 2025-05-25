@@ -150,5 +150,9 @@
         "Domyślna wykonywana gdy znaleziono kilka pasujących elementów",
         "`Użyj pierwszego` - użyty zostanie pierwszy pasujący element.",
         "`Pytaj` - użytkownik musi wybrać odpowiedni element z listy pasujących elementów."
-    ]
+    ],
+    "ytdlpExecutablePathHeader": "Ścieżka do pliku wykonywalnego yt-dlp",
+    "ytdlpExecutablePathContent": "Podaj ścieżkę do pliku wykonywalnego biblioteki yt-dlp aby użyć go zamiast dostarczonego wraz z aplikacją.",
+    "ffmpegExecutablePathHeader": "Ścieżka do pliku wykonywalnego ffmpeg",
+    "ffmpegExecutablePathContent": "Podaj ścieżkę do pliku wykonywalnego biblioteki ffmpeg aby użyć go zamiast dostarczonego wraz z aplikacją."
 }

@@ -9,6 +9,7 @@ import {Messages} from "./Messages";
 export type MultiMessageHandler = (params: MultiMessageHandlerParams) => Promise<any>
 
 export type MultiMessageHandlerParams = {
+    id: "string";
     [key: string]: any;
 }
 
@@ -37,6 +38,6 @@ export abstract class MultiMessageChannel {
         const messageDef = _find(this.messages, ["executeMessageKey", messageKey]);
         const result = await messageDef.messageHandler(params);
 
-        this.messageBus.mainWindow.webContents.send(messageDef.completedMessageKey, result);
+        this.messageBus.mainWindow.webContents.send(`${messageDef.completedMessageKey}_${params.id}`, result);
     };
 };

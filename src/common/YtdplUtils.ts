@@ -205,7 +205,8 @@ export const mergeOutputFiles = (directory: string, filename: string, extension:
         ];
     };
     const errors: string[] = [];
-    const proc = spawn(`${getBinPath()}/ffmpeg.exe`, getCommandArgs(getRealFileExtension(extension)));
+    const ffmpegPath: string = global.store.get("application.ffmpegExecutablePath") || `${getBinPath()}/ffmpeg.exe`;
+    const proc = spawn(ffmpegPath, getCommandArgs(getRealFileExtension(extension)));
 
     proc.stderr.on("data", (data) => {
         errors.push(`FFmpeg error: ${data}`);
@@ -271,8 +272,8 @@ export const convertOutputToFormat = (directory: string, filename: string, exten
     if (!cmdArgs) {
         return callback();
     }
-
-    const proc = spawn(`${getBinPath()}/ffmpeg.exe`, cmdArgs);
+    const ffmpegPath: string = global.store.get("application.ffmpegExecutablePath") || `${getBinPath()}/ffmpeg.exe`;
+    const proc = spawn(ffmpegPath, cmdArgs);
 
     proc.stderr.on("data", (data) => {
         errors.push(`FFmpeg error: ${data}`);

@@ -150,5 +150,9 @@
         "Action to use when multiple matching items are found",
         "`Use first` - first matching item is used.",
         "`Ask` - user must select item to use from list of matching items."
-    ]
+    ],
+    "ytdlpExecutablePathHeader": "Path to yt-dlp executable",
+    "ytdlpExecutablePathContent": "Specify custom path to yt-dlp library executable to use it instead of one provided by the application.",
+    "ffmpegExecutablePathHeader": "Path to ffmpeg executable",
+    "ffmpegExecutablePathContent": "Specify custom path to ffmpeg library executable to use it instead of one provided by the application."
 }
