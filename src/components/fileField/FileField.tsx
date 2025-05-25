@@ -68,7 +68,6 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     return (
         <>
             <TextField
-                {...rest}
                 className={classnames(Styles.fileField, className)}
                 value={value}
                 onChange={handleValueChange}
@@ -79,12 +78,13 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
                             <IconButton
                                 onClick={handleButtonClick}
                                 edge="end"
-                            >
+                                >
                                 <FolderIcon />
                             </IconButton>
                         </InputAdornment>,
                     },
                 }}
+                {...rest}
             />
             {/* eslint-disable react/no-unknown-property */ }
             {/* @ts-expect-error fix for webkitdirectory */}
