@@ -109,3 +109,9 @@ export enum UrlType {
     Track = "track",
     Other = "other",
 };
+
+export type YoutubeArtist = {
+    name: string;
+    thumbnail: string;
+    url: string;
+};

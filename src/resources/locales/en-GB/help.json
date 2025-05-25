@@ -144,5 +144,11 @@
     "downloadSinglesAndEpsHeader": "Download singles and eps",
     "downloadSinglesAndEpsContent": "Include singles and EPs when downloading artist's albums.",
     "tabsOrderFieldHeader": "Tabs order attribute",
-    "tabsOrderFieldContent": "Specifies attribute used to order tabs."
+    "tabsOrderFieldContent": "Specifies attribute used to order tabs.",
+    "multiMatchActionHeader": "Multiple matching items action",
+    "multiMatchActionContent": [
+        "Action to use when multiple matching items are found",
+        "`Use first` - first matching item is used.",
+        "`Ask` - user must select item to use from list of matching items."
+    ]
 }

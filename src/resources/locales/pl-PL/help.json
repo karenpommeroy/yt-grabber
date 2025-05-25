@@ -144,5 +144,11 @@
     "downloadSinglesAndEpsHeader": "Pobieraj single i epki",
     "downloadSinglesAndEpsContent": "Uwzględnij single i epki podczas pobierania dyskografii artysty.",
     "tabsOrderFieldHeader": "Atrybut sortowania zakładek",
-    "tabsOrderFieldContent": "Określa atrybut używany do sortowania zakładek."
+    "tabsOrderFieldContent": "Określa atrybut używany do sortowania zakładek.",
+    "multiMatchActionHeader": "Akcja gdy znaleziono kilka pasujących elementów",
+    "multiMatchActionContent": [
+        "Domyślna wykonywana gdy znaleziono kilka pasujących elementów",
+        "`Użyj pierwszego` - użyty zostanie pierwszy pasujący element.",
+        "`Pytaj` - użytkownik musi wybrać odpowiedni element z listy pasujących elementów."
+    ]
 }

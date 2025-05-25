@@ -8,7 +8,9 @@ export class YoutubeArtistsMessageChannel extends MessageChannel {
             execute: Messages.GetYoutubeArtists,
             completed: Messages.GetYoutubeArtistsCompleted,
             cancel: Messages.GetYoutubeArtistsCancel,
-            canceled: Messages.GetYoutubeArtistsCanceled
+            canceled: Messages.GetYoutubeArtistsCanceled,
+            pause: Messages.GetYoutubeArtistsPause,
+            resume: Messages.GetYoutubeArtistsResume,
         };
     }
 

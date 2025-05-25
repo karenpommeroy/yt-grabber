@@ -1,3 +1,5 @@
+import _toLower from "lodash/toLower";
+
 export const AlbumsHrefSelector = "//ytmusic-app-layout//div[@id='content']/ytmusic-browse-response//ytmusic-section-list-renderer//div[@id='content-group']//div[contains(@class, 'header-renderer')]/yt-formatted-string/a[contains(text(), 'Album')]";
 
 export const SinglesHrefSelector = "//ytmusic-app-layout//div[@id='content']/ytmusic-browse-response//ytmusic-section-list-renderer//div[@id='content-group']//div[contains(@class, 'header-renderer')]/yt-formatted-string/a[contains(text(), 'Single')]";
@@ -24,4 +26,14 @@ export const YtMusicAlbumsChipSelector = "//ytmusic-app-layout//ytmusic-search-p
 
 export const YtMusicSongsChipSelector = "//ytmusic-app-layout//ytmusic-search-page//div[contains(@class, 'content')]//ytmusic-section-list-renderer//ytmusic-chip-cloud-renderer//iron-selector[@id='chips']//a[contains(@class, 'ytmusic-chip-cloud-chip-renderer')]//yt-formatted-string[contains(text(), 'Utwory') or contains(text(), 'Songs')]//ancestor::a";
 
-export const YtMusicSearchResultsSelector = "//ytmusic-app-layout//div[@id='content']//ytmusic-search-page//div[@id='contents']//ytmusic-shelf-renderer//div[@id='contents']//ytmusic-responsive-list-item-renderer/a";
+export const YtMusicSearchResultsArtistsSelector = "//ytmusic-app-layout//div[@id='content']//ytmusic-search-page//div[@id='contents']//ytmusic-shelf-renderer//div[@id='contents']//ytmusic-responsive-list-item-renderer";
+
+export const YtMusicSearchResultsArtistsLinkSelector = "//ytmusic-app-layout//div[@id='content']//ytmusic-search-page//div[@id='contents']//ytmusic-shelf-renderer//div[@id='contents']//ytmusic-responsive-list-item-renderer/a";
+
+export const YtMusicArtistRelativeThumbnailSelector = ".//ytmusic-thumbnail-renderer//img";
+
+export const YtMusicArtistRelativeNameSelector = ".//div[contains(@class, 'title-column')]//yt-formatted-string";
+
+export const YtMusicArtistRelativeLinkSelector = ".//a";
+
+export const getYtMusicSearchResultsArtistsSelector = (artist: string) => `//ytmusic-app-layout//div[@id='content']//ytmusic-search-page//div[@id='contents']//ytmusic-shelf-renderer//div[@id='contents']//ytmusic-responsive-list-item-renderer//div[contains(@class, 'title-column')]/yt-formatted-string//text()[translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜÉÈÊÀÁÂÒÓÔÙÚÛÇÅÏÕÑŒĄĆĘŁŃÓŚŹŻ', 'abcdefghijklmnopqrstuvwxyzäöüéèêàáâòóôùúûçåïõñœąćęłńóśźż')='${_toLower(artist)}' or translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜÉÈÊÀÁÂÒÓÔÙÚÛÇÅÏÕÑŒĄĆĘŁŃÓŚŹŻ', 'abcdefghijklmnopqrstuvwxyzäöüéèêàáâòóôùúûçåïõñœąćęłńóśźż')='the ${_toLower(artist)}']//ancestor::ytmusic-responsive-list-item-renderer`;

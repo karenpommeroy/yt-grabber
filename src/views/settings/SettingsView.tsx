@@ -19,7 +19,7 @@ import {
     RadioGroup, Select, SelectChangeEvent, Switch, TextField
 } from "@mui/material";
 
-import {FormatScope, SortOrder, TabsOrderKey} from "../../common/Media";
+import {FormatScope, MultiMatchAction, SortOrder, TabsOrderKey} from "../../common/Media";
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
 import FileField from "../../components/fileField/FileField";
 import NumberField from "../../components/numberField/NumberField";
@@ -117,6 +117,10 @@ export const SettingsView: React.FC = () => {
     const onFormatScopeChange = (e: React.ChangeEvent<HTMLInputElement>, value: FormatScope) => {
         setApplicationOptions((prev) => ({...prev, formatScope: value}));
     };
+    
+    const onMultiMatchActionChange = (e: React.ChangeEvent<HTMLInputElement>, value: MultiMatchAction) => {
+        setApplicationOptions((prev) => ({...prev, multiMatchAction: value}));
+    };
 
     const onDownloadSinglesAndEpsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, downloadSinglesAndEps: e.target.checked}));
@@ -192,6 +196,15 @@ export const SettingsView: React.FC = () => {
                                 <RadioGroup row name="format-selector-scope-group" value={applicationOptions.formatScope} onChange={onFormatScopeChange}>
                                     <FormControlLabel value={FormatScope.Global} control={<Radio />} label={t("formatScopeGlobal")}/>
                                     <FormControlLabel value={FormatScope.Tab} control={<Radio />} label={t("formatScopeTab")}/>
+                                </RadioGroup>
+                            </FormControl>
+                        </Grid>
+                        <Grid size={12} data-help="multiMatchAction">
+                            <FormControl>
+                                <FormLabel id="format-selector-multi-match-group-label">{t("multiMatchAction")}</FormLabel>
+                                <RadioGroup row name="format-selector-multi-match-group" value={applicationOptions.multiMatchAction} onChange={onMultiMatchActionChange}>
+                                    <FormControlLabel value={MultiMatchAction.UseFirst} control={<Radio />} label={t("multiMatchActionUseFirst")}/>
+                                    <FormControlLabel value={MultiMatchAction.Ask} control={<Radio />} label={t("multiMatchActionAsk")}/>
                                 </RadioGroup>
                             </FormControl>
                         </Grid>

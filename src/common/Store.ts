@@ -1,7 +1,7 @@
 import {Schema} from "electron-store";
 import _values from "lodash/values";
 
-import {FormatScope, InputMode, SortOrder, TabsOrderKey} from "./Media";
+import {FormatScope, InputMode, MultiMatchAction, SortOrder, TabsOrderKey} from "./Media";
 
 export type ApplicationOptions = {
     youtubeUrl?: string;
@@ -14,6 +14,7 @@ export type ApplicationOptions = {
     quality?: number;
     debugMode?: boolean;
     formatScope?: FormatScope;
+    multiMatchAction?: MultiMatchAction;
     urls?: string[];
     language?: string;
     alwaysOverwrite?: boolean;
@@ -91,6 +92,11 @@ export const StoreSchema: Schema<IStore> = {
                 type: "string",
                 default: FormatScope.Global,
                 enum: _values(FormatScope),
+            },
+            multiMatchAction: {
+                type: "string",
+                default: MultiMatchAction.UseFirst,
+                enum: _values(MultiMatchAction),
             },
             language: {
                 type: "string"

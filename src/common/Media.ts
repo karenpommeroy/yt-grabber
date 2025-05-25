@@ -28,7 +28,12 @@ export type Format = {
 export enum FormatScope {
     Global = "global",
     Tab =  "tab"
-}
+};
+
+export enum MultiMatchAction {
+    Ask = "ask",
+    UseFirst =  "use-first"
+};
 
 export enum InputMode {
     Auto = "auto",

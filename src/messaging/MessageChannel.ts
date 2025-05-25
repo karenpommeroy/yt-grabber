@@ -15,6 +15,7 @@ export type MessageHandlerParams = {
     options: LaunchOptions;
     i18n: i18next;
     onUpdate: (data: ProgressInfo<GetYoutubeResult>) => void;
+    onPause?: (data: any[]) => Promise<any>;
     signal: AbortSignal;
 }
 
@@ -23,6 +24,8 @@ export type MessageKeys = {
     completed: Messages;
     cancel: Messages;
     canceled: Messages;
+    pause?: Messages;
+    resume?: Messages;
 }
 
 export abstract class MessageChannel {
@@ -47,7 +50,7 @@ export abstract class MessageChannel {
         this.messageBus.controllers.set(this.messageKeys.execute, controller);
         
         try {
-            await this.messageHandler({params, options, i18n, onUpdate: this.complete, signal: controller.signal});
+            await this.messageHandler({params, options, i18n, onUpdate: this.complete, onPause: this.pause, signal: controller.signal});
         } catch (error) {
             if (controller.signal.aborted) {
                 this.messageBus.mainWindow.webContents.send(this.messageKeys.canceled);
@@ -63,5 +66,16 @@ export abstract class MessageChannel {
 
     public cancel = () => {
         this.messageBus.controllers.get(this.messageKeys.execute)?.abort();
+    };
+
+    public pause = (data: any[]): Promise<any> => {
+        return new Promise((resolve) => {
+            this.resume((response: any) => resolve(response))
+            this.messageBus.mainWindow.webContents.send(this.messageKeys.pause, data);
+        });
+    };
+
+    public resume = (handler: (...args: any[]) => void) => {
+        this.messageBus.ipcMain.once(this.messageKeys.resume, (_, response) => handler(response));
     };
 };

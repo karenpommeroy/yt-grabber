@@ -17,6 +17,8 @@ export enum Messages {
     GetYoutubeArtistsCompleted = "get-youtube-artists-completed",
     GetYoutubeArtistsCancel = "get-youtube-artists-cancel",
     GetYoutubeArtistsCanceled = "get-youtube-artists-canceled",
+    GetYoutubeArtistsPause = "get-youtube-artists-pause",
+    GetYoutubeArtistsResume = "get-youtube-artists-resume",
 
     GetYoutubeAlbums = "get-youtube-albums",
     GetYoutubeAlbumsCompleted = "get-youtube-albums-completed",

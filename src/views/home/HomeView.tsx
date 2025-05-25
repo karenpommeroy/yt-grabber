@@ -40,12 +40,13 @@ import {afterEach} from "../../common/Promise";
 import {ProgressInfo} from "../../common/Reporter";
 import {ApplicationOptions, IStore} from "../../common/Store";
 import {
-    AlbumInfo, PlaylistInfo, TrackInfo, TrackStatusInfo, UrlType, YoutubeInfoResult
+    AlbumInfo, PlaylistInfo, TrackInfo, TrackStatusInfo, UrlType, YoutubeArtist, YoutubeInfoResult
 } from "../../common/Youtube";
 import {
     convertOutputToFormat, getOutputFile, getOutputFileParts, getOutputFilePath,
     getYtdplRequestParams, mergeOutputFiles
 } from "../../common/YtdplUtils";
+import SelectArtistModal from "../../components/modals/selectArtistModal/SelectArtistModal";
 import FormatSelector from "../../components/youtube/formatSelector/FormatSelector";
 import InfoBar from "../../components/youtube/infoBar/InfoBar";
 import InputPanel from "../../components/youtube/inputPanel/InputPanel";
@@ -82,6 +83,7 @@ export const HomeView: React.FC = () => {
     const {state, actions} = useAppContext();
     const [error, setError] = useState(false);
     const [abort, setAbort] = useState<string>();
+    const [matchingArtistsList, setMatchingArtistsList] = useState<YoutubeArtist[]>();
     const {t, i18n} = useTranslation();
     const trackStatusRef = useRef<TrackStatusInfo[]>(trackStatus);
     const abortRef = useRef<string>(abort);
@@ -93,11 +95,13 @@ export const HomeView: React.FC = () => {
         ipcRenderer.on(Messages.GetYoutubeArtistsCompleted, onGetYoutubeCompleted);
         ipcRenderer.on(Messages.GetYoutubeAlbumsCompleted, onGetYoutubeCompleted);
         ipcRenderer.on(Messages.GetYoutubeTracksCompleted, onGetYoutubeCompleted);
-
+        
         ipcRenderer.on(Messages.GetYoutubeUrlsCanceled, onGetYoutubeCancelled);
         ipcRenderer.on(Messages.GetYoutubeArtistsCanceled, onGetYoutubeCancelled);
         ipcRenderer.on(Messages.GetYoutubeAlbumsCanceled, onGetYoutubeCancelled);
         ipcRenderer.on(Messages.GetYoutubeTracksCanceled, onGetYoutubeCancelled);
+        
+        ipcRenderer.on(Messages.GetYoutubeArtistsPause, onGetYoutubeArtistsPause);
 
         return () => {
             unsubscribe();
@@ -111,6 +115,8 @@ export const HomeView: React.FC = () => {
             ipcRenderer.off(Messages.GetYoutubeArtistsCanceled, onGetYoutubeCancelled);
             ipcRenderer.off(Messages.GetYoutubeAlbumsCanceled, onGetYoutubeCancelled);
             ipcRenderer.off(Messages.GetYoutubeTracksCanceled, onGetYoutubeCancelled);
+
+            ipcRenderer.off(Messages.GetYoutubeArtistsPause, onGetYoutubeArtistsPause);
         };
     },  []);
 
@@ -173,6 +179,10 @@ export const HomeView: React.FC = () => {
         } catch {
             setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadMulti));
         }
+    };
+
+    const onGetYoutubeArtistsPause = (event: IpcRendererEvent, artists: YoutubeArtist[]) => {
+        setMatchingArtistsList(artists);
     };
 
     const onGetYoutubeCancelled = useCallback(() => {
@@ -266,6 +276,7 @@ export const HomeView: React.FC = () => {
             url: appOptions.youtubeUrl,
             options: {
                 downloadSinglesAndEps: appOptions.downloadSinglesAndEps,
+                multiMatchAction: appOptions.multiMatchAction,
             },
         };
 
@@ -754,33 +765,52 @@ export const HomeView: React.FC = () => {
         return formats.global;
     }, [formats]);
 
+    const onSelectArtistModalClose = (artist?: YoutubeArtist) => {
+        if (!artist) {
+            cancelAll();
+        } else {
+            ipcRenderer.send(Messages.GetYoutubeArtistsResume, artist);
+        }
+
+        setMatchingArtistsList(undefined);
+    };
+    
+
     return (
-        <Box className={Styles.home}>
-            <div className={Styles.header}>
-                <InputPanel
-                    onChange={handleUrlChange}
-                    loading={state.loading}
-                    onDownload={download}
-                    onCancel={cancelAll}
-                    onDownloadFailed={downloadFailed}
-                    onLoadInfo={loadInfo}
-                />
-                <FormatSelector disabled={_isEmpty(playlists) || _isEmpty(tracks)} />
-            </div>
-            <Grid className={Styles.content} container spacing={2} padding={2}>
-                {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}
-                <PlaylistTabs
-                    queue={queue}
-                    onDownloadTrack={downloadTrack}
-                    onDownloadPlaylist={downloadAlbum}
-                    onCancelPlaylist={cancelPlaylist}
-                    onCancelTrack={cancelTrack}
-                />
-            </Grid>
-            <Grid className={Styles.footer} container>
-                <InfoBar />
-            </Grid>
-        </Box>
+        <>
+            <Box className={Styles.home}>
+                <div className={Styles.header}>
+                    <InputPanel
+                        onChange={handleUrlChange}
+                        loading={state.loading}
+                        onDownload={download}
+                        onCancel={cancelAll}
+                        onDownloadFailed={downloadFailed}
+                        onLoadInfo={loadInfo}
+                    />
+                    <FormatSelector disabled={_isEmpty(playlists) || _isEmpty(tracks)} />
+                </div>
+                <Grid className={Styles.content} container spacing={2} padding={2}>
+                    {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}
+                    <PlaylistTabs
+                        queue={queue}
+                        onDownloadTrack={downloadTrack}
+                        onDownloadPlaylist={downloadAlbum}
+                        onCancelPlaylist={cancelPlaylist}
+                        onCancelTrack={cancelTrack}
+                    />
+                </Grid>
+                <Grid className={Styles.footer} container>
+                    <InfoBar />
+                </Grid>
+            </Box>
+            <SelectArtistModal
+                id="select-artist-modal"
+                artists={matchingArtistsList}
+                open={!!matchingArtistsList}
+                onClose={onSelectArtistModalClose}
+            />
+        </>
     );
 };
 

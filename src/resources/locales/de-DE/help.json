@@ -144,5 +144,11 @@
     "downloadSinglesAndEpsHeader": "Download Singles und EPs",
     "downloadSinglesAndEpsContent": "Schließen Sie beim Herunterladen von Künstleralben auch Singles und EPs ein.",
     "tabsOrderFieldHeader": "Tabs Reihenfolge Attribut",
-    "tabsOrderFieldContent": "Gibt das Attribut an, das zum Sortieren der Registerkarten verwendet wird."
+    "tabsOrderFieldContent": "Gibt das Attribut an, das zum Sortieren der Registerkarten verwendet wird.",
+    "multiMatchActionHeader": "Aktion bei mehreren übereinstimmenden Einträgen",
+    "multiMatchActionContent": [
+        "Aktion bei mehreren gefundenen Übereinstimmungen",
+        "`Ersten verwenden` – der erste passende Eintrag wird verwendet.",
+        "`Fragen` – der Benutzer muss einen Eintrag aus der Liste der Übereinstimmungen auswählen."
+    ]
 }

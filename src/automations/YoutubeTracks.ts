@@ -15,7 +15,7 @@ import {IReporter, ProgressInfo, Reporter} from "../common/Reporter";
 import {MessageHandlerParams} from "../messaging/MessageChannel";
 import {clearInput, navigateToPage, setCookies} from "./Helpers";
 import {
-    YtMusicSearchInputSelector, YtMusicSearchResultsSelector, YtMusicSongsChipSelector
+    YtMusicSearchInputSelector, YtMusicSearchResultsArtistsLinkSelector, YtMusicSongsChipSelector
 } from "./Selectors";
 
 let page: Page;
@@ -85,9 +85,9 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
             songsChip.click();
             await page.waitForNetworkIdle();
 
-            await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsSelector})`, {timeout: 1000});
+            await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsArtistsLinkSelector})`, {timeout: 1000});
 
-            const songsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsSelector})`);
+            const songsElements = await page.$$(`::-p-xpath(${YtMusicSearchResultsArtistsLinkSelector})`);
             const songEl = songsElements[0];
             const songUrl = await songEl.evaluate((el) => el.getAttribute("href"));
 

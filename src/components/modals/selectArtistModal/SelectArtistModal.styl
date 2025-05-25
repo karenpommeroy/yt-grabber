@@ -1,0 +1,65 @@
+@import "../../../styles/mixins.styl"
+
+.select-artist-modal {
+    width auto;
+
+    :global(.MuiDialog-paper) {
+        height 100%;
+    }
+
+    .dialog-title {
+        font-size 2em;
+        font-weight bold;
+    }
+
+    .dialog-content {
+        display inline-flex;
+
+        .image-placeholder {
+            width 100%;
+            height 100%;
+        }
+
+        .image {
+            height 100%;
+        }
+    }
+
+    .modal-actions {
+        justify-content center;
+    }
+
+    .artist-list {
+        flex-grow: 1;
+        overflow: overlay;
+
+        .artist {
+            padding-left: 0;
+            vendor("transition", background-color .25s ease-in-out);
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--theme-palette-primary-main);
+
+                .actions {
+                    opacity: 1;
+                }
+            }
+
+            .image-column {
+                width: 4rem;
+                align-content: center;
+                justify-items: center;
+
+                .image > img {
+                    width: 110%;
+                    height: 110%;
+                }
+            }
+
+            .artist-action {
+                min-width: 0;
+            }
+        }
+    }
+}
