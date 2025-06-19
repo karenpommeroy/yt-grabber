@@ -84,7 +84,6 @@
     "mkdirp": "^3.0.1",
     "moment": "^2.30.1",
     "moment-duration-format": "^2.3.2",
-    "mui-image": "^1.0.7",
     "puppeteer": "^24.4.0",
     "puppeteer-core": "^24.4.0",
     "puppeteer-extra": "^3.3.6",

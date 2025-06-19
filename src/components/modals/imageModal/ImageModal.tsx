@@ -1,11 +1,7 @@
-import Image from "mui-image";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
-import BrokenImageIcon from "@mui/icons-material/BrokenImage";
-import {
-    Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle
-} from "@mui/material";
+import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";
 
 import Styles from "./ImageModal.styl";
 
@@ -40,22 +36,24 @@ export const ImageModal = (props: ImageModalProps) => {
             <DialogTitle textAlign="center">{title}</DialogTitle>
             <DialogContent className={Styles.content}>
                 {imageUrl && (
-                    <Image
-                        src={imageUrl}
-                        title={title}
-                        alt={title}
-                        bgColor="transparent"
-                        wrapperStyle={{
+                    <Box
+                        component="img"
+                        sx={{
                             width: "100%",
                             height: "100%",
                             padding: ".8em",
                             display: "flex",
                             justifyContent: "center",
+                            bgcolor: "transparent"
                         }}
-                        fit="contain"
-                        duration={100}
-                        errorIcon={<BrokenImageIcon className={Styles.imagePlaceholder} color="primary" />}
-                        showLoading={<CircularProgress />}
+                        src={imageUrl}
+                        title={title}
+                        alt={title}
+                        // bgColor="transparent"
+                        // fit="contain"
+                        // duration={100}
+                        // errorIcon={<BrokenImageIcon className={Styles.imagePlaceholder} color="primary" />}
+                        // showLoading={<CircularProgress />}
                         className={Styles.image}
                     />
                 )}
