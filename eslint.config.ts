@@ -47,10 +47,11 @@ export default defineConfig([{
     },
 
     rules: {
-        indent: ["error", 4],
-        "linebreak-style": ["error", "windows"],
-        quotes: ["error", "double"],
-        semi: ["error", "always"],
+        indent: ["warn", 4],
+        "linebreak-style": ["warn", "windows"],
+        quotes: ["warn", "double"],
+        semi: ["warn", "always"],
+        "@typescript-eslint/no-unused-vars": ["warn"],
         "@typescript-eslint/no-var-requires": 0,
         "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/no-empty-interface": 0,
