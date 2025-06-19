@@ -98,6 +98,7 @@
     "yt-dlp-wrap": "^2.3.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.53.1",
     "@types/eslint": "^9.6.1",
     "@types/fs-extra": "^11.0.4",
     "@types/i18next": "^13.0.0",
@@ -121,6 +122,7 @@
     "css-loader": "^7.1.2",
     "electron": "^35.1.2",
     "electron-builder": "^26.0.12",
+    "electron-playwright-helpers": "^1.7.1",
     "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-css": "^0.11.0",
