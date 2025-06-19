@@ -26,6 +26,7 @@
       "dist/**/*",
       "package.json"
     ],
+    "publish": null,
     "asar": true,
     "win": {
       "target": "nsis",
