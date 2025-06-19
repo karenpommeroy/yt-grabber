@@ -54,7 +54,11 @@
     "resolutionHeader": "Auflösung",
     "resolutionContent": "Legen Sie die Ausgabeauflösung für das Video fest.",
     "concurrencyHeader": "Parallelität",
-    "concurrencyContent": "Anzahl der gleichzeitigen Downloads festlegen.",
+    "concurrencyContent": [
+        "Anzahl der gleichzeitigen Downloads festlegen.",
+        "Denken Sie daran, dass die Angabe einer zu großen Anzahl gleichzeitiger Downloads zu Downloadfehlern führen kann (dies hängt mit der Verarbeitungsleistung Ihres Geräts zusammen).",
+        "In diesem Fall sollte es hilfreich sein, diesen Wert zu senken."
+    ],
     "globalAudioQualityHeader": "Audioqualität (Global)",
     "globalAudioQualityContent": [
         "Globale Audioqualität für alle Downloads festlegen (sofern nicht überschrieben).",

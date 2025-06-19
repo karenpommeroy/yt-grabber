@@ -54,7 +54,11 @@
     "resolutionHeader": "Rozdzielczość",
     "resolutionContent": "Określ rozdzielczość wyjściowego wideo.",
     "concurrencyHeader": "Współbieżność",
-    "concurrencyContent": "Określ, ile jednoczesnych pobrań jest dozwolonych.",
+    "concurrencyContent": [
+        "Określ, ile jednoczesnych pobrań jest dozwolonych.",
+        "Pamiętaj, że zbyt duża ilość jednoczesnych pobrań może skutkować błędami (jest to zależne od mozliwości twojego urządzenia)",
+        "Jeśli naptkasz błędy, ustawienie niższej wartości powinno pomóc."
+    ],
     "globalAudioQualityHeader": "Jakość dźwięku (globalnie)",
     "globalAudioQualityContent": [
         "Określ globalną jakość dźwięku dla wszystkich pobrań (chyba że nadpisano).",

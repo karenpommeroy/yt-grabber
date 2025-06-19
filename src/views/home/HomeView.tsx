@@ -46,6 +46,7 @@ import {
     convertOutputToFormat, getOutputFile, getOutputFileParts, getOutputFilePath,
     getYtdplRequestParams, mergeOutputFiles
 } from "../../common/YtdplUtils";
+import FailuresModal from "../../components/modals/failuresModal/FailuresModal";
 import SelectArtistModal from "../../components/modals/selectArtistModal/SelectArtistModal";
 import FormatSelector from "../../components/youtube/formatSelector/FormatSelector";
 import InfoBar from "../../components/youtube/infoBar/InfoBar";
@@ -69,6 +70,7 @@ export const HomeView: React.FC = () => {
         formats,
         autoDownload,
         queue,
+        urls,
         setOperation,
         setPlaylists,
         setTracks,
@@ -81,6 +83,7 @@ export const HomeView: React.FC = () => {
     } = useDataState();
     const {state, actions} = useAppContext();
     const [error, setError] = useState(false);
+    const [failuresModalOpen, setFailuresModalOpen] = useState(false);
     const [abort, setAbort] = useState<string>();
     const [matchingArtistsList, setMatchingArtistsList] = useState<YoutubeArtist[]>();
     const {t, i18n} = useTranslation();
@@ -157,6 +160,14 @@ export const HomeView: React.FC = () => {
     useEffect(() => {
         actions.setLoading(queue.length > 0);
     }, [queue]);
+
+    useEffect(() => {
+        const hasFailures = !_isEmpty(_filter(trackStatus, "error"));
+
+        if (!state.loading && hasFailures && !_isEmpty(urls)) {
+            setFailuresModalOpen(true);
+        }
+    }, [trackStatus, state.loading, urls]);
 
     const ytDlpWrap = useMemo<YTDlpWrap>(() => {
         const ytdlpPath: string = global.store.get("application.ytdlpExecutablePath") || `${getBinPath()}/yt-dlp.exe`;
@@ -780,6 +791,14 @@ export const HomeView: React.FC = () => {
         setMatchingArtistsList(undefined);
     };
     
+    const onRetryFailures = () => {
+        setFailuresModalOpen(false);
+        downloadFailed();
+    };
+    
+    const onCancelFailures = () => {
+        setFailuresModalOpen(false);
+    };
 
     return (
         <>
@@ -814,6 +833,12 @@ export const HomeView: React.FC = () => {
                 artists={matchingArtistsList}
                 open={!!matchingArtistsList}
                 onClose={onSelectArtistModalClose}
+            />
+            <FailuresModal
+                id="failures-modal"
+                open={failuresModalOpen}
+                onConfirm={onRetryFailures}
+                onCancel={onCancelFailures}
             />
         </>
     );
