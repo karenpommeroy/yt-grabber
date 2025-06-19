@@ -188,7 +188,7 @@ export const SettingsView: React.FC = () => {
                                 decimalScale={0}
                                 step={1}
                                 min={1}
-                                max={12}
+                                max={60}
                             />
                         </Grid>
                         <Grid size={6} data-help="globalAudioQuality">
