@@ -206,6 +206,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                         variant="outlined"
                         onChange={onQualityChange}
                         value={selectedQuality}
+                        loop
                         decimalScale={0}
                         step={1}
                         min={0}

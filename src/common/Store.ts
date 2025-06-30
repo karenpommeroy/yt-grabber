@@ -92,7 +92,7 @@ export const StoreSchema: Schema<IStore> = {
             },
             quality: {
                 type: "integer",
-                default: 0
+                default: 10
             },
             debugMode: {
                 type: "boolean",

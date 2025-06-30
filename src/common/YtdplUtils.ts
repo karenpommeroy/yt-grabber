@@ -47,7 +47,7 @@ const getYtdplParamsForAudio = (format: Format) => {
         "--extract-audio",
         "--audio-format", format.extension,
         format.extension !== "wav" ? "--embed-thumbnail" : "", // wav does not support thumbnail embedding
-        "--audio-quality", _toString(format.audioQuality),
+        "--audio-quality", _toString(10 - format.audioQuality),
     ];
 };
 

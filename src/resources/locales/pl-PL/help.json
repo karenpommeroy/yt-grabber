@@ -62,7 +62,7 @@
     "globalAudioQualityHeader": "Jakość dźwięku (globalnie)",
     "globalAudioQualityContent": [
         "Określ globalną jakość dźwięku dla wszystkich pobrań (chyba że nadpisano).",
-        "Wartość 0 oznacza najlepszą jakość, wartość 10 najgorszą."
+        "Wartość 10 oznacza najlepszą jakość, wartość 0 najgorszą."
     ],
     "themePickerHeader": "Wybór motywu",
     "themePickerContent": "Wybierz motyw wyświetlania aplikacji.",

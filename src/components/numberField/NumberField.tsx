@@ -15,6 +15,10 @@ export interface INumberFieldProps extends Omit<NumericFormatProps<TextFieldProp
     label?: string;
     readOnly?: boolean;
     allowEmpty?: boolean;
+    loop?: boolean;
+    min?: number;
+    max?: number;
+    step?: number;
     showIncreaseDecreaseButtons?: boolean;
     inputLabelProps?: Partial<InputLabelProps>;
     initialPressedDelay?: number;
@@ -29,6 +33,7 @@ export const NumberField = (props: INumberFieldProps) => {
         inputLabelProps,
         allowEmpty,
         decimalScale = 2,
+        loop,
         fullWidth,
         fixedDecimalScale = true,
         onChange,
@@ -58,11 +63,15 @@ export const NumberField = (props: INumberFieldProps) => {
     };
 
     const onDecreaseClick = () => {
-        setText($_.max([$_.toNumber(value) - $_.toNumber(step), min]));
+        const predicted = $_.toNumber(value) - $_.toNumber(step);
+
+        setText(loop && predicted < min ? max : $_.max([predicted, min]));
     };
 
     const onIncreaseClick = () => {
-        setText($_.min([$_.toNumber(value) + $_.toNumber(step), max]));
+        const predicted = $_.toNumber(value) + $_.toNumber(step);
+        
+        setText(loop && predicted > max ? min : $_.min([predicted, max]));
     };
 
     const onDecreaseMouseDown = () => {

@@ -200,6 +200,7 @@ export const SettingsView: React.FC = () => {
                                 onChange={onQualityChange}
                                 value={applicationOptions.quality}
                                 decimalScale={0}
+                                loop
                                 step={1}
                                 min={0}
                                 max={10}

@@ -62,7 +62,7 @@
     "globalAudioQualityHeader": "Audioqualität (Global)",
     "globalAudioQualityContent": [
         "Globale Audioqualität für alle Downloads festlegen (sofern nicht überschrieben).",
-        "0 bedeutet höchste Qualität, 10 bedeutet niedrigste Qualität."
+        "10 bedeutet höchste Qualität, 0 bedeutet niedrigste Qualität."
     ],
     "themePickerHeader": "Themenauswahl",
     "themePickerContent": "Anzeige-Thema der Anwendung auswählen.",

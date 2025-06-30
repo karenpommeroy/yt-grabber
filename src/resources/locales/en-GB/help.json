@@ -62,7 +62,7 @@
     "globalAudioQualityHeader": "Audio Quality (Global)",
     "globalAudioQualityContent": [
         "Specify global audio quality that applies to all downloads (unless overwriten)",
-        "0 means highest quality, 10 means lowest quality."
+        "10 means highest quality, 0 means lowest quality."
     ],
     "themePickerHeader": "Theme Picker",
     "themePickerContent": "Select application display theme.",
