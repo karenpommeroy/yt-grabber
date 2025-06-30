@@ -14,6 +14,7 @@ import _isNil from "lodash/isNil";
 import _join from "lodash/join";
 import _map from "lodash/map";
 import _min from "lodash/min";
+import _partition from "lodash/partition";
 import _size from "lodash/size";
 import _some from "lodash/some";
 import _split from "lodash/split";
@@ -271,7 +272,7 @@ export const HomeView: React.FC = () => {
 
     const loadMedia = (urls: string[]) => {
         try {
-            Promise.all(afterEach(getResolveDataPromise(urls), update))
+            Promise.all(afterEach(getResolveDataPromise(urls, true), update))
                 .then((result) => {
                     setQueue((prev) => _filter(prev, (p) => p !== QueueKeys.LoadSingle));
 
@@ -336,7 +337,7 @@ export const HomeView: React.FC = () => {
         ipcRenderer.send(Messages.GetYoutubeUrls, params, options);
     };
 
-    const getResolveDataPromise = (urls: string[]) => {
+    const getResolveDataPromise = (urls: string[], flatPlaylist?: boolean) => {
         if (appOptions.debugMode) {
             return resolveMockData(300);
         } else {
@@ -345,11 +346,22 @@ export const HomeView: React.FC = () => {
                 abortControllers[url] = controller;
 
                 return new Promise<YoutubeInfoResult>((resolve) => {
-                    ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass"], undefined, controller.signal)
-                        .then((result) => {
-                            const parsed = _map(_split(_trim(result), "\n"), (item) => JSON.parse(item));
+                    const ytdlpArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass"];
 
-                            resolve({url, value: _isArray(parsed) ? parsed : [parsed]});
+                    if (flatPlaylist) {
+                        ytdlpArgs.push("--flat-playlist");
+                    }
+
+                    ytDlpWrap.execPromise(ytdlpArgs, undefined, controller.signal)
+                        .then((result) => {
+                            const parsed = _map<string, TrackInfo>(_split(_trim(result), "\n"), (item) => JSON.parse(item));
+                            const [deletedOrPrivateMedia, validMedia] = _partition(parsed, (item) => !item.duration);
+
+                            resolve({
+                                url,
+                                value: _isArray(validMedia) ? validMedia : [validMedia],
+                                warnings: _isEmpty(deletedOrPrivateMedia) ? [] : [t("foundDeletedOrPrivateMedia")]
+                            });
                         })
                         .catch((e) => {
                             const warningRegex = /WARNING:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;

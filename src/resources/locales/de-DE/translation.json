@@ -45,6 +45,7 @@
     "formatScope": "Download-Parameterumfang",
     "formatScopeGlobal": "Allgemein",
     "formatScopeTab": "Für jeden Tab unterschiedlich",
+    "foundDeletedOrPrivateMedia": "Einige gelöschte oder private Medien wurden gefunden. Sie wurden übersprungen und werden in den Ergebnissen nicht angezeigt.",
     "from": "von",
     "invalidTemplateKeys": "Ungültige Vorlagenschlüssel: {{invalidKeys}}",
     "langName": "Deutsch",

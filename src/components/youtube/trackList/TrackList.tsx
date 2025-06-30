@@ -7,6 +7,7 @@ import _includes from "lodash/includes";
 import _isEmpty from "lodash/isEmpty";
 import _isFunction from "lodash/isFunction";
 import _join from "lodash/join";
+import _last from "lodash/last";
 import _map from "lodash/map";
 import _omit from "lodash/omit";
 import _omitBy from "lodash/omitBy";
@@ -275,6 +276,10 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
             `${formatTime(_toString(cut[0]))} - ${formatTime(_toString(cut[1]))}`
         ), "\n"));
     };
+    
+    const resolveTrackThumbnail = (track: TrackInfo) => {
+        return track.thumbnail ?? _get(_last(track.thumbnails), "url");
+    };
 
     const getTrackStatusInfo = useCallback((track: TrackInfo): TrackStatusInfo => {
         const trackStatusInfo = _find(trackStatus, ["trackId", track.id]);
@@ -437,7 +442,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                     </Grid>
                                 }
                                 <Grid size={1} className={Styles.imageColumn}>
-                                    <Avatar className={Styles.image} src={item.thumbnail}>{item.playlist_autonumber}</Avatar>
+                                    <Avatar className={Styles.image} src={resolveTrackThumbnail(item)}>{item.playlist_autonumber}</Avatar>
                                 </Grid>
                                 <Grid size={3.25}>
                                     <ListItemText primary={item.title} secondary={moment.duration(item.duration, "seconds").format("mm:ss", { trim: false})} />

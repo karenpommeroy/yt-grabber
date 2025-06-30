@@ -32,7 +32,7 @@
     "audioQualityHeader": "Jakość dźwięku",
     "audioQualityContent": [
         "Określ pożądaną jakość dźwięku.",
-        "Wartość 0 oznacza najlepszą jakość, wartość 10 najgorszą."
+        "Wartość 10 oznacza najlepszą jakość, wartość 0 najgorszą."
     ],
     "showThumbnailHeader": "Obraz/Miniatura",
     "showThumbnailContent": "Podgląd obrazu powiązanego z tą playlistą, utworem lub filmem.",

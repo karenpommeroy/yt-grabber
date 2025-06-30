@@ -32,7 +32,7 @@
     "audioQualityHeader": "Audio Quality",
     "audioQualityContent": [
         "Specify desired audio quality.",
-        "0 means highest quality, 10 means lowest quality."
+        "10 means highest quality, 0 means lowest quality."
     ],
     "showThumbnailHeader": "Image/Thumbnail",
     "showThumbnailContent": "Preview image related to this playlist, track or video.",

@@ -1,6 +1,7 @@
 import _groupBy from "lodash/groupBy";
 import _includes from "lodash/includes";
 import _indexOf from "lodash/indexOf";
+import _isNumber from "lodash/isNumber";
 import _keys from "lodash/keys";
 import _map from "lodash/map";
 import _replace from "lodash/replace";
@@ -11,6 +12,7 @@ import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
 export const isDev = () => process.env.NODE_ENV === "development";
 
 export const formatFileSize = (sizeInBytes: number, decimals = 2) => {
+    if (!_isNumber(sizeInBytes)) return "";
     if (sizeInBytes === 0) return "0 Bytes";
     
     const k = 1024;

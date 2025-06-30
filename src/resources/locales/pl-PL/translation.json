@@ -45,6 +45,7 @@
     "formatScope": "Zakres parametrów pobierania",
     "formatScopeGlobal": "Globalny",
     "formatScopeTab": "Oddzielny dla każdej zakładki",
+    "foundDeletedOrPrivateMedia": "Napotkano usunięte lub prywatne media. Zostały one pominięte i nie będą wyświetlane w wynikach.",
     "from": "start",
     "invalidTemplateKeys": "Nieprawidłowe wartości: {{invalidKeys}}",
     "langName": "Polski",

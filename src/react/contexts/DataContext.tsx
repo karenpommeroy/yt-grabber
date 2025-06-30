@@ -55,7 +55,7 @@ export function DataProvider(props: any) {
     const [tracks, setTracks] = useState<TrackInfo[]>([]);
     const [trackStatus, setTrackStatus] = useState<TrackStatusInfo[]>([]);
     const [trackCuts, setTrackCuts] = useState<{[key: string]: [number, number][]}>({});
-    const [formats, setFormats] = useState<Record<string, Format>>({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 0}});
+    const [formats, setFormats] = useState<Record<string, Format>>({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 10}});
     const [urls, setUrls] = useState<string[]>(appOptions.urls);
     const [autoDownload, setAutoDownload] = useState<boolean>(false);
     const [queue, setQueue] = useState<string[]>([]);
@@ -71,7 +71,7 @@ export function DataProvider(props: any) {
         setTrackCuts({});
         setAutoDownload(false);
         setQueue([]);
-        setFormats({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 0}});
+        setFormats({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 10}});
         setOperation(undefined);
         setErrors([]);
         setWarnings([]);

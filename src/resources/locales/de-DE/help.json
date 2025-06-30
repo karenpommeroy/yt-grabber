@@ -32,7 +32,7 @@
     "audioQualityHeader": "Audioqualität",
     "audioQualityContent": [
         "Gewünschte Audioqualität festlegen.",
-        "0 bedeutet höchste Qualität, 10 bedeutet niedrigste Qualität."
+        "10 bedeutet höchste Qualität, 0 bedeutet niedrigste Qualität."
     ],
     "showThumbnailHeader": "Bild/Vorschau",
     "showThumbnailContent": "Vorschau des zugehörigen Bildes für diese Playlist, diesen Titel oder dieses Video.",
