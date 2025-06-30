@@ -14,12 +14,17 @@ export type TrackInfo = {
     creators: string[];
     duration: number;
     id: string;
+    uploader: string;
     original_url: string;
     playlist: string;
     playlist_title: string;
     playlist_id: string;
     playlist_autonumber: number;
     playlist_count: number;
+    playlist_uploader: string;
+    playlist_uploader_id: string;
+    playlist_channel: string;
+    playlist_channel_id: string;
     release_year: number;
     title: string;
     thumbnail: string;

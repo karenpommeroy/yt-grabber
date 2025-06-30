@@ -29,6 +29,7 @@ export const NumberField = (props: INumberFieldProps) => {
     const {
         value = 0,
         label,
+        width,
         readOnly,
         inputLabelProps,
         allowEmpty,
@@ -121,7 +122,7 @@ export const NumberField = (props: INumberFieldProps) => {
             decimalScale={decimalScale}
             fixedDecimalScale={fixedDecimalScale}
             inputProps={{
-                style: {textAlign: "center"},
+                style: {textAlign: "center", width},
             }}
             isAllowed={isAllowed}
             InputProps={

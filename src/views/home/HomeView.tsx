@@ -344,15 +344,10 @@ export const HomeView: React.FC = () => {
             return _map(urls, (url) => {
                 const controller = new AbortController();
                 abortControllers[url] = controller;
+                const ytdplArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass"];
 
-                return new Promise<YoutubeInfoResult>((resolve) => {
-                    const ytdlpArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass"];
-
-                    if (flatPlaylist) {
-                        ytdlpArgs.push("--flat-playlist");
-                    }
-
-                    ytDlpWrap.execPromise(ytdlpArgs, undefined, controller.signal)
+                const promiseCreator = (ytdplArgsToUse: string[], resolve: (params: any) => any) => {
+                    ytDlpWrap.execPromise(ytdplArgsToUse, undefined, controller.signal)
                         .then((result) => {
                             const parsed = _map<string, TrackInfo>(_split(_trim(result), "\n"), (item) => JSON.parse(item));
                             const [deletedOrPrivateMedia, validMedia] = _partition(parsed, (item) => !item.duration);
@@ -377,6 +372,39 @@ export const HomeView: React.FC = () => {
                         .finally(() => {
                             delete abortControllers[url];
                         });
+                };
+
+                const playlistValidationPromise = async (currentItem: number): Promise<boolean | null> => {
+                    const result = await ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass", "--flat-playlist", "--playlist-items", `${currentItem}`], undefined)
+                    const playlistCheckItemsCount = global.store.get<string, number>("application.playlistCheckItemsCount");
+                    const flatPlaylistCountThreshold = global.store.get<string, number>("application.playlistCountThreshold");
+                    const parsed = _map<string, TrackInfo>(_split(_trim(result), "\n"), (item) => JSON.parse(item));
+                    const validMedia = _filter(parsed, (item) => !!item.duration);
+                    
+                    if (!_isEmpty(validMedia)) {
+                        return _get(validMedia, "0.playlist_count") > flatPlaylistCountThreshold;
+                    } else if (currentItem === playlistCheckItemsCount) {
+                        return null;
+                    }
+
+                    return playlistValidationPromise(currentItem + 1);
+                };
+
+                return new Promise<YoutubeInfoResult>((resolve) => {
+                    if (flatPlaylist) {
+                        playlistValidationPromise(1)
+                            .then((result) => {
+                                const ytdplArgsToUse = result ? ytdplArgs.concat("--flat-playlist") : ytdplArgs;
+                                
+                                if (result === null) {
+                                    return resolve({url, errors: [t("noValidMediaFoundWhenCheckingPlaylist")]});
+                                }
+
+                                return promiseCreator(ytdplArgsToUse, resolve);
+                            });
+                    } else {
+                        return promiseCreator(ytdplArgs, resolve);
+                    }
                 });
             });
         }

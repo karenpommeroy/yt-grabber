@@ -10,7 +10,7 @@ import _toString from "lodash/toString";
 import moment from "moment";
 
 import {getBinPath} from "./FileSystem";
-import {isAlbumTrack} from "./Formatters";
+import {isAlbumTrack, isPlaylistTrack} from "./Formatters";
 import {escapePathString, getRealFileExtension} from "./Helpers";
 import {Format, MediaFormat, VideoType} from "./Media";
 import StoreSchema from "./Store";
@@ -110,7 +110,19 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
     };
 
     if (format.type === MediaFormat.Audio) {
-        if (!isAlbumTrack(track)) {
+        if (isPlaylistTrack(track)) {
+            try {
+                const compiled = _template(appOptions.playlistOutputTemplate, {interpolate});
+
+                return `${appOptions.outputDirectory}/${compiled(data)}`;
+            } catch {
+                const defaultPlaylistOutputTemplate = _get(StoreSchema.application, "properties.playlistOutputTemplate.default");
+                const compiled = _template(defaultPlaylistOutputTemplate, {interpolate});
+
+                return `${appOptions.outputDirectory}/${compiled(data)}`;
+            }
+        }
+        else if (!isAlbumTrack(track)) {
             try {
                 const compiled = _template(appOptions.trackOutputTemplate, {interpolate});
 

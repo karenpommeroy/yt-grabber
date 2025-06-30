@@ -11,7 +11,7 @@ export const getAlbumInfo = (items: TrackInfo[], url?: string): AlbumInfo => {
 
     return {
         id: item.playlist_id ?? item.id,
-        artist: _get(item, "creators.0", _get(item, "artist", item.channel)),
+        artist: isPlaylistTrack(item) ? _get(item, "uploader", _get(item, "channel", _get(item, "playlist_uploader"))) : _get(item, "creators.0", _get(item, "artist", item.channel)),
         title: isAlbumTrack(item) ? _get(item, "album", _get(item, "playlist_title", _get(item, "playlist"))) : item.title,
         releaseYear: _get(item, "release_year") ?? (new Date(item.timestamp * 1000)).getFullYear(),
         tracksNumber: _get(item, "playlist_count", 1),
@@ -19,6 +19,12 @@ export const getAlbumInfo = (items: TrackInfo[], url?: string): AlbumInfo => {
         thumbnail: _get(item, "thumbnail", _get(_find(item.thumbnails, ["id", "2"]) ?? _last(item.thumbnails), "url")),
         url,
     };
+};
+
+export const isPlaylistTrack = (track: TrackInfo) => {
+    const appOptions = global.store.get("application");
+
+    return track.playlist_count > appOptions.playlistCountThreshold;
 };
 
 export const isAlbumTrack = (track: TrackInfo) => {

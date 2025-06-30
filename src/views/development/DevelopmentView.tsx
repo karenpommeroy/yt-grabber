@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 
 import {ApplicationOptions} from "../../common/Store";
+import NumberField from "../../components/numberField/NumberField";
 import {useAppContext} from "../../react/contexts/AppContext";
 import Styles from "./DevelopmentView.styl";
 
@@ -24,7 +25,7 @@ export const DevelopmentView: React.FC = () => {
     };
 
     const handleDebugModeChange = (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-        setOptions((prev) => ({ ...prev, debugMode: checked }));
+        setOptions((prev) => ({...prev, debugMode: checked}));
     };
 
     const handleChromeExecutablePathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,6 +34,14 @@ export const DevelopmentView: React.FC = () => {
 
     const handleShowBrowserChange = (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
         setPuppeteerOptions((prev) => ({...prev, headless: !checked}));
+    };
+    
+    const handlePlaylistCountThresholdChange = (value: number) => {
+        setOptions((prev) => ({...prev, playlistCountThreshold: value}));
+    };
+    
+    const handlePlaylistCheckMaxItemsCountChange = (value: number) => {
+        setOptions((prev) => ({...prev, playlistCheckMaxItemsCount: value}));
     };
 
     useEffect(() => {
@@ -63,6 +72,33 @@ export const DevelopmentView: React.FC = () => {
                         control={<Switch checked={!puppeteerOptions.headless} onChange={handleShowBrowserChange} />}
                         label={t("showBrowser")}
                     />
+                    <Stack direction="row" spacing={2}>
+                        <NumberField
+                            label={t("playlistCountThreshold")}
+                            id="playlistCountThreshold"
+                            variant="outlined"
+                            onChange={handlePlaylistCountThresholdChange}
+                            value={options.playlistCountThreshold}
+                            decimalScale={0}
+                            step={1}
+                            min={1}
+                            max={50}
+                            loop
+                        />
+                        <NumberField
+                            label={t("playlistCheckMaxItemsCount")}
+                            id="playlistCheckMaxItemsCount"
+                            variant="outlined"
+                            onChange={handlePlaylistCheckMaxItemsCountChange}
+                            value={options.playlistCheckMaxItemsCount}
+                            decimalScale={0}
+                            step={1}
+                            min={1}
+                            max={10}
+                            width={250}
+                            loop
+                        />
+                    </Stack>
                     <TextField
                         fullWidth
                         label={t("chromeExecutablePath")}

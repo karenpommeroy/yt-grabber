@@ -14,6 +14,8 @@ export type ApplicationOptions = {
     trackOutputTemplate?: string;
     concurrency?: number;
     quality?: number;
+    playlistCountThreshold?: number;
+    playlistCheckMaxItemsCount?: number;
     debugMode?: boolean;
     formatScope?: FormatScope;
     multiMatchAction?: MultiMatchAction;
@@ -88,11 +90,19 @@ export const StoreSchema: Schema<IStore> = {
             },
             concurrency: {
                 type: "integer",
-                default: 3
+                default: 5
             },
             quality: {
                 type: "integer",
                 default: 10
+            },
+            playlistCountThreshold: {
+                type: "integer",
+                default: 25
+            },
+            playlistCheckMaxItemsCount: {
+                type: "integer",
+                default: 3
             },
             debugMode: {
                 type: "boolean",
