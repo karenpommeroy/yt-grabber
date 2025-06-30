@@ -1,8 +1,10 @@
 {
+    "albumOrAlbums": "Album/albums",
     "albumOutputTemplate": "Output template (albums)",
     "albums": "Albums",
     "alwaysOverwrite": "Overwrite downloaded files",
     "artist": "Artist",
+    "artistOrArtists": "Artist/artists",
     "artists": "Artists",
     "audioQuality": "Audio Quality",
     "autodetect": "Autodetect",
@@ -74,6 +76,7 @@
     "selectArtist": "Select artists",
     "selectInputMode": "Input mode",
     "showBrowser": "Show web browser",
+    "songOrSongs": "Song title/titles",
     "songs": "Songs",
     "starting": "Starting",
     "startingDownload": "Starting download...",

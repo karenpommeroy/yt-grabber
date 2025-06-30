@@ -1,8 +1,10 @@
 {
+    "albumOrAlbums": "Nazwa lub nazwy albumów",
     "albumOutputTemplate": "Szablon wyjściowy (albumy)",
     "albums": "Albumy",
     "alwaysOverwrite": "Nadpisuj pobrane pliki",
     "artist": "Wykonawca",
+    "artistOrArtists": "Wykonawca lub wykonawcy",
     "artists": "Artyści",
     "audioQuality": "Jakość audio",
     "autodetect": "Automatycznie",
@@ -74,6 +76,7 @@
     "selectArtist": "Wybierz wykonawcę",
     "selectInputMode": "Tryb wprowadzania",
     "showBrowser": "Pokaż przeglądarkę",
+    "songOrSongs": "Tytuł lub tytuły utworów",
     "songs": "Utwory",
     "starting": "Rozpoczynanie",
     "startingDownload": "Rozpoczynanie pobierania...",

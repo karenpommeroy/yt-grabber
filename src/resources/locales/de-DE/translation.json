@@ -1,8 +1,10 @@
 {
+    "albumOrAlbums": "Albumname/Albumnamen",
     "albumOutputTemplate": "Ausgabenvorlage (Alben)",
     "albums": "Alben",
     "alwaysOverwrite": "Heruntergeladene Dateien überschreiben",
     "artist": "Künstler",
+    "artistOrArtists": "Künstler",
     "artists": "Künstler",
     "audioQuality": "Audio-Qualität",
     "autodetect": "Automatische Erkennung",
@@ -74,6 +76,7 @@
     "selectArtist": "Künstler auswählen",
     "selectInputMode": "Eingabemodus",
     "showBrowser": "Webbrowser anzeigen",
+    "songOrSongs": "Liedtitel",
     "songs": "Lieder",
     "starting": "Starten",
     "startingDownload": "Der Download wird gestartet...",

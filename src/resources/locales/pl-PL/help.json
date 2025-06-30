@@ -1,7 +1,8 @@
 {
     "youtubeUrlHeader": "Pole adresu URL YouTube",
     "youtubeUrlContent": [
-        "Wprowadź adres URL do filmu, playlisty lub kanału z YouTube lub YouTube Music.",
+        "Wprowadź adres URL do filmu, playlisty lub kanału z YouTube lub YouTube Music (w trybie automatycznym).",
+        "Możesz również wprowadzić nazwę wykonawcę, nazwę albumu lub tytuł piosenki zgodnie z wybranym trybem (dla innych trybów poza automatycznym).",
         "Adresy URL są automatycznie rozpoznawane i oznaczane.",
         "Kanały są oznaczane kolorem zielonym, playlisty kolorem podstawowym, a filmy kolorem domyślnym.",
         "Nieprawidłowe linki są odfiltrowywane.",

@@ -1,7 +1,8 @@
 {
     "youtubeUrlHeader": "Youtube URL field",
     "youtubeUrlContent": [
-        "Input url to video, playlist or channel from YouTube or YouTubeMusic.",
+        "Input url to video, playlist or channel from YouTube or YouTubeMusic (when in Autodetect mode).",
+        "You can also input artist, album name or song name according to mode selected (for all modes except Autodetect).",
         "Urls are automatically recognized and marked.",
         "Channels are marked with green color, playlists with primary color and videos with default color.",
         "Invalid links are filtered out.",
@@ -78,28 +79,28 @@
     "outputDirectoryContent": "Specifies the output directory for all downloads.",
     "albumOutputTemplateHeader": "Album Output Template",
     "albumOutputTemplateContent": [
-        "Specifies tenplate (path/filename) that is used when downloading albums.",
+        "Specifies template (path/filename) that is used when downloading albums.",
         "Following tokens are available:",
         "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}\n{{trackNo}}",
         "Tokens will be replaced with corresponding values when writing output file."
     ],
     "playlistOutputTemplateHeader": "Playlist Output Template",
     "playlistOutputTemplateContent": [
-        "Specifies tenplate (path/filename) that is used when downloading video playlists.",
+        "Specifies template (path/filename) that is used when downloading video playlists.",
         "Following tokens are available:",
         "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}\n{{trackNo}}",
         "Tokens will be replaced with corresponding values when writing output file."
     ],
     "videoOutputTemplateHeader": "Video Output Template",
     "videoOutputTemplateContent": [
-        "Specifies tenplate (path/filename) that is used when downloading videos.",
+        "Specifies template (path/filename) that is used when downloading videos.",
         "Following tokens are available:",
         "{{artist}}\n{{releaseYear}}\n{{trackTitle}}",
         "Tokens will be replaced with corresponding values when writing output file."
     ],
     "trackOutputTemplateHeader": "Track Output Template",
     "trackOutputTemplateContent": [
-        "Specifies tenplate (path/filename) that is used when downloading tracks.",
+        "Specifies template (path/filename) that is used when downloading tracks.",
         "Following tokens are available:",
         "{{artist}}\n{{albumTitle}}\n{{releaseYear}}\n{{trackTitle}}",
         "Tokens will be replaced with corresponding values when writing output file."

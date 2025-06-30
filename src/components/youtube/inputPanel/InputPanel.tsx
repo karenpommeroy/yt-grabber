@@ -138,6 +138,21 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         event.target.value = "";
     };
 
+    const getInputLabel = () => {
+        switch (inputMode) {
+        case InputMode.Auto:
+            return t("youtubeUrl");
+        case InputMode.Artists:
+            return t("artistOrArtists");
+        case InputMode.Albums:
+            return t("albumOrAlbums");
+        case InputMode.Songs:
+            return t("songOrSongs");
+        default:
+            return t("youtubeUrl");
+        }
+    };
+
     const copyToClipboard = async (value: string) => {
         try {
             await navigator.clipboard.writeText(value);
@@ -190,7 +205,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                             data-help="youtubeUrl"
                             fullWidth
                             variant="outlined"
-                            label={t("youtubeUrl")}
+                            label={getInputLabel()}
                             error={containsInvalidValues}
                             slotProps={{
                                 input: {

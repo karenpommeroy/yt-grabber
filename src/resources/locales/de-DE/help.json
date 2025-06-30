@@ -1,7 +1,8 @@
 {
     "youtubeUrlHeader": "YouTube-URL-Feld",
     "youtubeUrlContent": [
-        "Geben Sie eine URL zu einem Video, einer Playlist oder einem Kanal von YouTube oder YouTube Music ein.",
+        "Geben Sie die URL zu einem Video, einer Playlist oder einem Kanal von YouTube oder YouTubeMusic ein (im Autodetect-Modus).",
+        "Sie können je nach ausgewähltem Modus auch den Künstler, den Albumnamen oder den Songnamen eingeben (für alle Modi außer Autodetect-Modus).",
         "URLs werden automatisch erkannt und markiert.",
         "Kanäle werden grün markiert, Playlists in der Primärfarbe und Videos in der Standardfarbe.",
         "Ungültige Links werden herausgefiltert.",
