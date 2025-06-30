@@ -375,7 +375,7 @@ export const HomeView: React.FC = () => {
                 };
 
                 const playlistValidationPromise = async (currentItem: number): Promise<boolean | null> => {
-                    const result = await ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass", "--flat-playlist", "--playlist-items", `${currentItem}`], undefined)
+                    const result = await ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass", "--flat-playlist", "--playlist-items", `${currentItem}`], undefined);
                     const playlistCheckItemsCount = global.store.get<string, number>("application.playlistCheckItemsCount");
                     const flatPlaylistCountThreshold = global.store.get<string, number>("application.playlistCountThreshold");
                     const parsed = _map<string, TrackInfo>(_split(_trim(result), "\n"), (item) => JSON.parse(item));
