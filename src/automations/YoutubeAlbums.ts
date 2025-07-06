@@ -71,8 +71,15 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
 
     const process = async (album: string) => {
         const results: string[] = [];
+        const albumUrlRegex = /^https?:\/\/.*playlist/i;
 
         try {
+            if (albumUrlRegex.test(album)) {
+                results.push(album);
+
+                return results;
+            }
+
             const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
             await clearInput(searchInput, page);
             await searchInput.type(album);

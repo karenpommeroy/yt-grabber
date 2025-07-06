@@ -72,8 +72,15 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
 
     const process = async (song: string) => {
         const results: string[] = [];
+        const trackUrlRegex = /^https?:\/\/.*watch/i;
 
         try {
+            if (trackUrlRegex.test(song)) {
+                results.push(song);
+
+                return results;
+            }
+            
             const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
             await clearInput(searchInput, page);
             await searchInput.type(song);

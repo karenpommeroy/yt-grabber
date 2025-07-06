@@ -85,13 +85,6 @@ const run = async (
     
     const process = async (artist: string) => {
         const results: string[] = [];
-        const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
-        
-        await clearInput(searchInput, page);
-        await searchInput.type(artist);
-        page.keyboard.press("Enter");
-        await page.waitForNetworkIdle();
-        
         const artistChannelUrl = await getArtistUrl(params, artist, onPause);
 
         await navigateToPage(artistChannelUrl, page);
@@ -120,6 +113,17 @@ const run = async (
 
 const getArtistUrl = async (params: GetYoutubeParams, artist: string, onPause?: (data: YoutubeArtist[]) => Promise<YoutubeArtist>): Promise<string> => {
     try {
+        const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
+        const channelUrlRegex = /^https?:\/\/.*channel/i;
+        
+        if (channelUrlRegex.test(artist)) {
+            return artist;
+        } else {
+            await clearInput(searchInput, page);
+            await searchInput.type(artist);
+            page.keyboard.press("Enter");
+            await page.waitForNetworkIdle();
+        }
         const artistsChip = await page.waitForSelector(`::-p-xpath(${YtMusicArtistsChipSelector})`, {visible: true, timeout: 1000});
 
         artistsChip.click();
