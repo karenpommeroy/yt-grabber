@@ -43,20 +43,30 @@ export const resolveMockData = (delay = 1000) => {
 
 export const waitFor = (miliseconds: number) => new Promise((resolve) => setTimeout(resolve, miliseconds));
 
-export const getUrlType = (url: string) => {
-    const artistRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/|youtu\.be\/)?(channel)/;
+export const isPlaylist = (url: string) => {
     const playlistRegex = /^(?:https?:\/\/)?(?:www\.)?(?:music\.)?youtube\.com\/(?:playlist\?list=|watch\?.*?\blist=)([a-zA-Z0-9_-]+)/;
+
+    return playlistRegex.test(url);
+};
+
+export const isArtist = (url: string) => {
+    const artistRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/|youtu\.be\/)?(channel)/;
+
+    return artistRegex.test(url);
+};
+
+export const isTrack = (url: string) => {
     const trackRegex = /^(?:https?:\/\/)?(?:www\.)?(?:music\.)?youtube\.com\/watch\?.*?\bv=([a-zA-Z0-9_-]+)/;
 
-    const isArtist = artistRegex.test(url);
-    const isPlaylist = playlistRegex.test(url);
-    const isTrack = trackRegex.test(url);
-    
-    if (isArtist) {
+    return trackRegex.test(url);
+};
+
+export const getUrlType = (url: string) => {    
+    if (isArtist(url)) {
         return UrlType.Artist;
-    } else if (isPlaylist) {
+    } else if (isPlaylist(url)) {
         return UrlType.Playlist;
-    } else if (isTrack) {
+    } else if (isTrack(url)) {
         return UrlType.Track;
     }
 

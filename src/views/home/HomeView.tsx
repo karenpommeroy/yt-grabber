@@ -32,7 +32,9 @@ import {Alert, Box, Grid} from "@mui/material";
 
 import {getBinPath, removeIncompleteFiles} from "../../common/FileSystem";
 import {getAlbumInfo} from "../../common/Formatters";
-import {getRealFileExtension, getUrlType, mapRange, resolveMockData} from "../../common/Helpers";
+import {
+    getRealFileExtension, getUrlType, isPlaylist, mapRange, resolveMockData
+} from "../../common/Helpers";
 import {
     Format, FormatScope, InputMode, MediaFormat, QueueKeys, VideoType
 } from "../../common/Media";
@@ -390,8 +392,8 @@ export const HomeView: React.FC = () => {
                 };
 
                 return new Promise<YoutubeInfoResult>((resolve) => {
-                    if (flatPlaylist) {
-                        playlistValidationPromise(1)
+                    if (isPlaylist(url) && flatPlaylist) {
+                        return playlistValidationPromise(1)
                             .then((result) => {
                                 const ytdplArgsToUse = result ? ytdplArgs.concat("--flat-playlist") : ytdplArgs;
                                 
