@@ -92,9 +92,11 @@
     "totalTracksCount": "Dostepne utwory: {{num}}",
     "trackOutputTemplate": "Szablon wyjściowy (pliki audio)",
     "tracks": "Ścieżki",
+    "update": "Aktualizuj",
     "videoOutputTemplate": "Szablon wyjściowy (pliki wideo)",
     "warnings": "Ostrzeżenia",
     "year": "Rok",
     "youtubeUrl": "YouTube URL",
-    "ytdlpExecutablePath": "Ścieżka do pliku wykonywalnego biblioteki yt-dlp"
+    "ytdlpExecutablePath": "Ścieżka do pliku wykonywalnego biblioteki yt-dlp",
+    "ytdlpVersion": "Wersja YT-DLP"
 }

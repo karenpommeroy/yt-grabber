@@ -92,9 +92,11 @@
     "totalTracksCount": "Total tracks: {{num}}",
     "trackOutputTemplate": "Output template (audio tracks)",
     "tracks": "Tracks",
+    "update": "Update",
     "videoOutputTemplate": "Output template (videos)",
     "warnings": "Warnings",
     "year": "Year",
     "youtubeUrl": "YouTube URL",
-    "ytdlpExecutablePath": "Path to yt-dpl executable"
+    "ytdlpExecutablePath": "Path to yt-dpl executable",
+    "ytdlpVersion": "YT-DLP version"
 }

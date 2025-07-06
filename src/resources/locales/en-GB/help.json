@@ -159,5 +159,7 @@
     "ytdlpExecutablePathHeader": "Path to yt-dlp executable",
     "ytdlpExecutablePathContent": "Specify custom path to yt-dlp library executable to use it instead of one provided by the application.",
     "ffmpegExecutablePathHeader": "Path to ffmpeg executable",
-    "ffmpegExecutablePathContent": "Specify custom path to ffmpeg library executable to use it instead of one provided by the application."
+    "ffmpegExecutablePathContent": "Specify custom path to ffmpeg library executable to use it instead of one provided by the application.",
+    "ytdlpVersionHeader": "Info about yt-dlp library version",
+    "ytdlpVersionContent": "Displays version of yt-dlp library and allows to update it."
 }

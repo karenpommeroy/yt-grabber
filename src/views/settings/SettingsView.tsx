@@ -1,3 +1,4 @@
+import {spawn} from "child_process";
 import _filter from "lodash/filter";
 import _first from "lodash/first";
 import _get from "lodash/get";
@@ -11,14 +12,16 @@ import path from "path";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
+import versionInfo from "win-version-info";
 
 import NorthIcon from "@mui/icons-material/North";
 import SouthIcon from "@mui/icons-material/South";
 import {
     Box, Button, FormControl, FormControlLabel, FormLabel, Grid, InputLabel, MenuItem, Paper, Radio,
-    RadioGroup, Select, SelectChangeEvent, Switch, TextField
+    RadioGroup, Select, SelectChangeEvent, Stack, Switch, TextField, Typography
 } from "@mui/material";
 
+import {getBinPath} from "../../common/FileSystem";
 import {FormatScope, MultiMatchAction, SortOrder, TabsOrderKey} from "../../common/Media";
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
 import FileField from "../../components/fileField/FileField";
@@ -31,6 +34,8 @@ export const SettingsView: React.FC = () => {
     const {actions} = useAppContext();
     const {t} = useTranslation();
     const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+    const [updatingYtDlp, setUpdatingYtDlp] = useState(false);
+    const [ytDlpVersion, setYtDlpVersion] = useState("");
     const [applicationOptions, setApplicationOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const [debouncedApplicationOptions] = useDebounceValue(applicationOptions, 500, {leading: true});
     const tabsOrderKeyOptions = [
@@ -40,6 +45,7 @@ export const SettingsView: React.FC = () => {
         {value: "releaseYear", text: t("year")},
         {value: "duration", text: t("duration")},
     ];
+
     const validateTemplateString = (input: HTMLInputElement) => {
         const allowedKeys = ["artist", "albumTitle", "trackTitle", "trackNo", "releaseYear"];
         const regex = /{{(.*?)}}/g;
@@ -167,10 +173,29 @@ export const SettingsView: React.FC = () => {
     const onTabsOrderOrderChange = (event: React.MouseEvent<HTMLButtonElement>) => {       
         setApplicationOptions((prev) => ({...prev, tabsOrder: [prev.tabsOrder[0], event.currentTarget.value as SortOrder]}));
     };
+    
+    const refreshYtDlpVersion = () => {
+        const info = versionInfo(global.store.get("application.ytdlpExecutablePath") || `${getBinPath()}/yt-dlp.exe`);
+        setYtDlpVersion(info.FileVersion);
+    };
+
+    const onUpdateYtDlpClick = async (event: React.MouseEvent<HTMLButtonElement>) => {       
+        const child = spawn(global.store.get("application.ytdlpExecutablePath") || `${getBinPath()}/yt-dlp.exe`, ["-U"], {shell: true});
+        
+        setUpdatingYtDlp(true);
+        child.on("close", () => {
+            refreshYtDlpVersion();
+            setUpdatingYtDlp(false);
+        });
+    };
 
     useEffect(() => {
         global.store.set("application", debouncedApplicationOptions);
     }, [debouncedApplicationOptions]);
+    
+    useEffect(() => {
+        refreshYtDlpVersion();
+    }, []);
 
     return (
         <Box className={Styles.settings}>
@@ -259,6 +284,12 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12} data-help="mergeParts">
                             <FormControlLabel control={<Switch checked={applicationOptions.mergeParts} onChange={onMergePartsChange} />} label={t("mergeParts")} />
+                        </Grid>
+                        <Grid size={12} data-help="ytdlpVersion">
+                            <Stack direction="row" spacing={1} className={Styles.ytdlpVersion}>
+                                <Typography component="span" variant="body1">{t("ytdlpVersion")}: {ytDlpVersion}</Typography>
+                                <Button size="small" variant="contained" loading={updatingYtDlp} onClick={onUpdateYtDlpClick}>{t("update")}</Button>
+                            </Stack>
                         </Grid>
                     </Grid>
                     <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">

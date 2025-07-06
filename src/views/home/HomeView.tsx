@@ -168,7 +168,7 @@ export const HomeView: React.FC = () => {
         if (!state.loading && hasFailures && !_isEmpty(urls)) {
             setFailuresModalOpen(true);
         }
-    }, [trackStatus, state.loading, urls]);
+    }, [state.loading]);
 
     const ytDlpWrap = useMemo<YTDlpWrap>(() => {
         const ytdlpPath: string = global.store.get("application.ytdlpExecutablePath") || `${getBinPath()}/yt-dlp.exe`;
@@ -342,9 +342,9 @@ export const HomeView: React.FC = () => {
             return resolveMockData(300);
         } else {
             return _map(urls, (url) => {
+                const ytdplArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass"];
                 const controller = new AbortController();
                 abortControllers[url] = controller;
-                const ytdplArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass"];
 
                 const promiseCreator = (ytdplArgsToUse: string[], resolve: (params: any) => any) => {
                     ytDlpWrap.execPromise(ytdplArgsToUse, undefined, controller.signal)
@@ -373,7 +373,6 @@ export const HomeView: React.FC = () => {
                             delete abortControllers[url];
                         });
                 };
-
                 const playlistValidationPromise = async (currentItem: number): Promise<boolean | null> => {
                     const result = await ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass", "--flat-playlist", "--playlist-items", `${currentItem}`], undefined);
                     const playlistCheckItemsCount = global.store.get<string, number>("application.playlistCheckItemsCount");
