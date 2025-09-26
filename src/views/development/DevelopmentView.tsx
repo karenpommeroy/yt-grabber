@@ -3,9 +3,7 @@ import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
-import {
-    Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField
-} from "@mui/material";
+import {Box, Button, Divider, FormControlLabel, Grid, Stack, Switch} from "@mui/material";
 
 import {ApplicationOptions} from "../../common/Store";
 import NumberField from "../../components/numberField/NumberField";
@@ -26,10 +24,6 @@ export const DevelopmentView: React.FC = () => {
 
     const handleDebugModeChange = (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
         setOptions((prev) => ({...prev, debugMode: checked}));
-    };
-
-    const handleChromeExecutablePathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPuppeteerOptions((prev) => ({...prev, executablePath: e.target.value}));
     };
 
     const handleShowBrowserChange = (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
@@ -99,13 +93,6 @@ export const DevelopmentView: React.FC = () => {
                             loop
                         />
                     </Stack>
-                    <TextField
-                        fullWidth
-                        label={t("chromeExecutablePath")}
-                        variant="outlined"
-                        onChange={handleChromeExecutablePathChange}
-                        value={puppeteerOptions.executablePath}
-                    />
                 </Stack>
             </Stack>
             <Grid className={Styles.footer}>

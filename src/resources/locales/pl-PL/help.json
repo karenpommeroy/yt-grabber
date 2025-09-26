@@ -161,5 +161,7 @@
     "ffmpegExecutablePathHeader": "Ścieżka do pliku wykonywalnego ffmpeg",
     "ffmpegExecutablePathContent": "Podaj ścieżkę do pliku wykonywalnego biblioteki ffmpeg aby użyć go zamiast dostarczonego wraz z aplikacją.",
     "ytdlpVersionHeader": "Informacje o bibliotece yt-dlp",
-    "ytdlpVersionContent": "Wyświetla wersję biblioteki yt-dlp i umożliwia jej aktualizację."
+    "ytdlpVersionContent": "Wyświetla wersję biblioteki yt-dlp i umożliwia jej aktualizację.",
+    "chromeExecutablePathHeader": "Ścieżka do pliku wykonywalnego chrome",
+    "chromeExecutablePathContent": "Ścieżka do pliku wykonywalnego chrome (pozostaw puste aby użyć chromium dostarczonego razem z aplikacją)."
 }

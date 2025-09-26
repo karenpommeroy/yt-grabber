@@ -161,5 +161,7 @@
     "ffmpegExecutablePathHeader": "Pfad zur ausführbaren Datei ffmpeg",
     "ffmpegExecutablePathContent": "Geben Sie einen benutzerdefinierten Pfad zur ausführbaren Datei der ffmpeg Bibliothek an, um diesen anstelle eines von der Anwendung bereitgestellten Pfads zu verwenden.",
     "ytdlpVersionHeader": "Informationen zur Version der yt-dlp",
-    "ytdlpVersionContent": "Zeigt die Version der yt-dlp an und ermöglicht deren Aktualisierung."
+    "ytdlpVersionContent": "Zeigt die Version der yt-dlp an und ermöglicht deren Aktualisierung.",
+    "chromeExecutablePathHeader": "Pfad zur ausführbaren Datei chrome",
+    "chromeExecutablePathContent": "Pfad zur ausführbaren Chrome-Datei (leer lassen, um gebündeltes Chromium zu verwenden)."
 }

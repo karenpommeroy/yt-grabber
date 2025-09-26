@@ -76,6 +76,15 @@ export const SettingsView: React.FC = () => {
         setApplicationOptions((prev) => ({...prev, outputDirectory}));
     };
     
+    const onChromeExecutablePathChange = (value: string[]) => {
+        setApplicationOptions((prev) => ({...prev, chromeExecutablePath: _first(value)}));
+    };
+
+    const onChromeExecutablePathBlur = (value: string[]) => {
+        const chromeExecutablePath = _isNil(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.chromeExecutablePath.default")) : _first(value);
+        setApplicationOptions((prev) => ({...prev, chromeExecutablePath}));
+    };
+    
     const onYtdlpExecutablePathChange = (value: string[]) => {
         setApplicationOptions((prev) => ({...prev, ytdlpExecutablePath: _first(value)}));
     };
@@ -378,6 +387,20 @@ export const SettingsView: React.FC = () => {
                                 helperText={validationErrors["youtubeUrl"]}
                                 error={!!validationErrors["youtubeUrl"]}
                                 type="string"
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <FileField
+                                data-help="chromeExecutablePath"
+                                fullWidth
+                                label={t("chromeExecutablePath")}
+                                id="chromeExecutablePath"
+                                variant="outlined"
+                                onChange={onChromeExecutablePathChange}
+                                onBlur={onChromeExecutablePathBlur}
+                                value={applicationOptions.chromeExecutablePath}
+                                mode="file"
+                                fileTypes={[".exe"]}
                             />
                         </Grid>
                         <Grid size={12}>

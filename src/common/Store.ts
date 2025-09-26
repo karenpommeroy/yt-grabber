@@ -8,6 +8,7 @@ export type ApplicationOptions = {
     outputDirectory?: string;
     ytdlpExecutablePath?: string;
     ffmpegExecutablePath?: string;
+    chromeExecutablePath?: string;
     albumOutputTemplate?: string;
     playlistOutputTemplate?: string;
     videoOutputTemplate?: string;
@@ -69,6 +70,10 @@ export const StoreSchema: Schema<IStore> = {
                 default: "",
             },
             ffmpegExecutablePath: {
+                type: "string",
+                default: ""
+            },
+            chromeExecutablePath: {
                 type: "string",
                 default: ""
             },

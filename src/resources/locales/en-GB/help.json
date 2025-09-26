@@ -161,5 +161,7 @@
     "ffmpegExecutablePathHeader": "Path to ffmpeg executable",
     "ffmpegExecutablePathContent": "Specify custom path to ffmpeg library executable to use it instead of one provided by the application.",
     "ytdlpVersionHeader": "Info about yt-dlp library version",
-    "ytdlpVersionContent": "Displays version of yt-dlp library and allows to update it."
+    "ytdlpVersionContent": "Displays version of yt-dlp library and allows to update it.",
+    "chromeExecutablePathHeader": "Path to chrome executable",
+    "chromeExecutablePathContent": "Path to chrome executable (leave empty to used bundled chromium)."
 }
