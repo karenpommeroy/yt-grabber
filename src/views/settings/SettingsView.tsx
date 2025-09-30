@@ -188,7 +188,7 @@ export const SettingsView: React.FC = () => {
         setYtDlpVersion(info.FileVersion);
     };
 
-    const onUpdateYtDlpClick = async (event: React.MouseEvent<HTMLButtonElement>) => {       
+    const onUpdateYtDlpClick = async () => {       
         const child = spawn(global.store.get("application.ytdlpExecutablePath") || `${getBinPath()}/yt-dlp.exe`, ["-U"], {shell: true});
         
         setUpdatingYtDlp(true);

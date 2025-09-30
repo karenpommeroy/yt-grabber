@@ -15,7 +15,6 @@ import _size from "lodash/size";
 import _some from "lodash/some";
 import path from "path";
 import React, {MouseEvent, useCallback, useEffect} from "react";
-import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
 import TabContext from "@mui/lab/TabContext";
@@ -48,7 +47,6 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     const {queue, onDownloadTrack, onDownloadPlaylist, onCancelPlaylist, onCancelTrack} = props;
     const {trackStatus, playlists, activeTab, setActiveTab, setTrackStatus, setPlaylists, setTracks} = useDataState();
     const {state} = useAppContext();
-    const {t} = useTranslation();
     const tabWidth = window.innerWidth / (playlists.length + playlists.length) - 30; 
 
     useEffect(() => {
@@ -196,6 +194,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                             return <Tab
                                 key={item.album.id}
                                 className={Styles.tab}
+                                
                                 icon={
                                     <Badge
                                         className={Styles.tabRemoveButton}
