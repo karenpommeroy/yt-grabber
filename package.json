@@ -1,6 +1,6 @@
 {
   "name": "yt-grabber",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Youtube Grabber",
   "main": "./dist/index.js",
   "repository": {
