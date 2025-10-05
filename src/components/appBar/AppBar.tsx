@@ -1,5 +1,4 @@
 import classnames from "classnames";
-import React from "react";
 import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -27,7 +26,7 @@ export type AppBarProps = {
 };
 
 const AppBar = (props: AppBarProps) => {
-    const {disableNavigation} = props;
+    const {disableNavigation, ...rest} = props;
     const {state, actions} = useAppContext();
     const {onClick} = useClickCounter(() => handleOpenDevelopment(), 3, 500);
     const {t} = useTranslation();
@@ -66,7 +65,7 @@ const AppBar = (props: AppBarProps) => {
         } else {
             return (
                 <div>
-                    <IconButton data-help="settings" disabled={disableNavigation} onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
+                    <IconButton name="settings" data-help="settings" disabled={disableNavigation} onClick={handleOpenSettings} color="inherit" className={Styles.icon}>
                         <SettingsIcon />
                     </IconButton>
                 </div>
@@ -75,7 +74,7 @@ const AppBar = (props: AppBarProps) => {
     };
 
     return (
-        <ApplicationBar elevation={0} position="static" className={Styles.appBar}>
+        <ApplicationBar elevation={0} position="static" className={Styles.appBar} {...rest}>
             <Container maxWidth="xl" className={Styles.wrapper}>
                 <Toolbar disableGutters variant="dense">
                     <Logo onClick={onClick} className={Styles.logo} />

@@ -15,7 +15,7 @@ import DevelopmentView from "./views/development/DevelopmentView";
 import {HomeView} from "./views/home/HomeView";
 import SettingsView from "./views/settings/SettingsView";
 
-export const App: React.FC = () => {
+export const App: React.FC = (props: Record<string, any>) => {
     const {state} = useAppContext();
     const {anchorEl, help} = useHelp();
 
@@ -31,7 +31,7 @@ export const App: React.FC = () => {
 
     return (
         <HashRouter>
-            <Box className={classnames(Styles.app, {[Styles.help]: state.help})}>
+            <Box {...props} className={classnames(Styles.app, {[Styles.help]: state.help})}>
                 <CssBaseline enableColorScheme />
                 <AppBar disableNavigation={state.loading} />
                 <Routes location={state.location}>

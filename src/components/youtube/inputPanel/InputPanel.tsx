@@ -48,7 +48,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const {trackStatus, urls, setUrls} = useDataState();
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const valueCount = urls.length;
+    const valueCount = urls?.length ?? 0;
     const [fromYear, setFromYear] = useState<string>();
     const [untilYear, setUntilYear] = useState<string>();
     const [inputMode, setInputMode] = useState<InputMode>(global.store.get("application.inputMode"));
@@ -165,16 +165,16 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
 
     const getInputLabel = () => {
         switch (inputMode) {
-            case InputMode.Auto:
-                return t("youtubeUrl");
-            case InputMode.Artists:
-                return t("artistOrArtists");
-            case InputMode.Albums:
-                return t("albumOrAlbums");
-            case InputMode.Songs:
-                return t("songOrSongs");
-            default:
-                return t("youtubeUrl");
+        case InputMode.Auto:
+            return t("youtubeUrl");
+        case InputMode.Artists:
+            return t("artistOrArtists");
+        case InputMode.Albums:
+            return t("albumOrAlbums");
+        case InputMode.Songs:
+            return t("songOrSongs");
+        default:
+            return t("youtubeUrl");
         }
     };
 

@@ -9,16 +9,22 @@ import _replace from "lodash/replace";
 import {VideoType} from "./Media";
 import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
 
+type DataAttributes<T> = {
+  [K in keyof T as K extends `data-${string}` ? K : never]: T[K];
+};
+
+type NonDataAttributes<T> = Omit<T, keyof DataAttributes<T>>;
+
 export const isDev = () => process.env.NODE_ENV === "development";
 
 export const formatFileSize = (sizeInBytes: number, decimals = 2) => {
     if (!_isNumber(sizeInBytes)) return "";
     if (sizeInBytes === 0) return "0 Bytes";
-    
+
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
     const i = Math.floor(Math.log(sizeInBytes) / Math.log(k));
-  
+
     return parseFloat((sizeInBytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 };
 
@@ -33,7 +39,7 @@ export const escapePathString = (value: string) => {
 export const resolveMockData = (delay = 1000) => {
     const TracksMock: any[] = [];
     const groupped = _groupBy(TracksMock as unknown as TrackInfo[], (item) => item.playlist_id ?? item.id);
-    
+
     return _map(groupped, (v, k, c) => new Promise<YoutubeInfoResult>((resolve) => {
         setTimeout(() => {
             resolve({url: k, value: v});
@@ -61,7 +67,7 @@ export const isTrack = (url: string) => {
     return trackRegex.test(url);
 };
 
-export const getUrlType = (url: string) => {    
+export const getUrlType = (url: string) => {
     if (isArtist(url)) {
         return UrlType.Artist;
     } else if (isPlaylist(url)) {
@@ -75,4 +81,29 @@ export const getUrlType = (url: string) => {
 
 export const getRealFileExtension = (ext: string) => {
     return _includes([VideoType.Avi, VideoType.Mov, VideoType.Mpeg], ext) ? VideoType.Mkv : ext;
+};
+
+export const getDataAttributes = (props: Record<string, any>) => {
+    const dataAttrs: Record<string, any> = {};
+    for (const key in props) {
+        if (key.startsWith("data-")) {
+            dataAttrs[key] = props[key];
+        }
+    }
+    return dataAttrs;
+};
+
+export const splitDataAttributes = <T extends Record<string, any>>(props: T) => {
+    const dataProps: Partial<DataAttributes<T>> = {};
+    const restProps: Partial<NonDataAttributes<T>> = {};
+
+    for (const key in props) {
+        if (key.startsWith("data-")) {
+            (dataProps as any)[key] = props[key];
+        } else {
+            (restProps as any)[key] = props[key];
+        }
+    }
+
+    return [dataProps as DataAttributes<T>, restProps as NonDataAttributes<T>] as const;
 };

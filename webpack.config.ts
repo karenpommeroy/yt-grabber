@@ -6,15 +6,14 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import {Configuration, ProgressPlugin} from "webpack";
 import {Configuration as DevServerConfiguration} from "webpack-dev-server";
-
-const WebpackNodeExternals = require("webpack-node-externals");
+import WebpackNodeExternals from "webpack-node-externals";
 
 export const getRoot = (dirname: string = __dirname, ...args: any[]) => {
     const rootDir = path.resolve(dirname, ".");
 
     args = Array.prototype.slice.call(args, 0);
 
-    return path.join.apply(path, [rootDir].concat(args));
+    return path.join(rootDir, ...args);
 };
 
 export const reportProgress = (percentage: number, message: string, ...args: any[]) => {
@@ -154,24 +153,24 @@ export const renderConfig: Configuration & DevServerConfiguration = {
                 ],
             },
             {
-                test: /url\("([^\)]+?\.(woff|eot|woff2|ttf|svg)[^"]*)"/,
+                test: /url\("([^)]+?\.(woff|eot|woff2|ttf|svg)[^"]*)"/,
                 exclude: [],
                 type: "asset/resource",
                 dependency: {not: ["url"]},
             },
             {
-                test: /[^\)]+?\.(woff|eot|woff2|ttf|svg)[^"]*/,
+                test: /[^)]+?\.(woff|eot|woff2|ttf|svg)[^"]*/,
                 exclude: [],
                 type: "asset/resource",
                 dependency: {not: ["url"]},
             },
             {
-                test: /[^\)]+?\.(svg|png|jpg|gif)[^"]*/,
+                test: /[^)]+?\.(svg|png|jpg|gif)[^"]*/,
                 exclude: [/fonts/],
                 type: "asset/resource",
             },
             {
-                test: /[^\)]+?\.(svg|png|jpg|gif)[^"]*/,
+                test: /[^)]+?\.(svg|png|jpg|gif)[^"]*/,
                 exclude: [/images/],
                 type: "asset/resource",
             },

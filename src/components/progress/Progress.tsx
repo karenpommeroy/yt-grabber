@@ -3,6 +3,7 @@ import React from "react";
 
 import {Box, CircularProgress, CircularProgressProps, Typography} from "@mui/material";
 
+import {splitDataAttributes} from "../../common/Helpers";
 import Styles from "./Progress.styl";
 
 export type ProgressProps = CircularProgressProps & {
@@ -13,10 +14,10 @@ export type ProgressProps = CircularProgressProps & {
 };
 
 export const Progress: React.FC<ProgressProps> = (props) => {
-    const {size, labelScale = 1, label = true, renderLabel, position = "inline", className, ...rest} = props;
-
+    const [dataProps, otherProps] = splitDataAttributes(props);
+    const {size, labelScale = 1, label = true, renderLabel, position = "inline", className, ...rest} = otherProps;
     return (
-        <Box className={classnames(Styles.progress, className, Styles[position])}>
+        <Box className={classnames(Styles.progress, className, Styles[position])} {...dataProps}>
             <CircularProgress variant="determinate" size={size} {...rest} />
             {label && <Box className={Styles.labelWrapper}>
                 <Typography variant="caption" sx={{scale: labelScale}}>{renderLabel ? renderLabel(props.value) : `${Math.round(props.value)}%`}</Typography>

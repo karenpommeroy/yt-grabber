@@ -1,0 +1,20 @@
+{
+  "jsc": {
+    "target": "es2020",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "decorators": false
+    },
+    "transform": {
+      "react": {
+        "runtime": "automatic",
+        "development": true
+      }
+    }
+  },
+  "module": {
+    "type": "commonjs"
+  },
+  "sourceMaps": true
+}

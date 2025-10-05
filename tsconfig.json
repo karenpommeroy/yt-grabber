@@ -10,11 +10,14 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "jsx": "react",
+    "jsx": "react-jsx",
     "outDir": "./dist",
     "sourceMap": true,
-    "typeRoots": ["./src/@types"]
+    "typeRoots": ["./src/@types", "./node_modules/@types"],
+    "paths": {
+      "@tests/*": ["tests/*"]
+    }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./webpack.config.ts"],
   "exclude": ["node_modules"]
 }

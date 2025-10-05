@@ -21,23 +21,6 @@ i18next.use(i18nextBackend).use(initReactI18next).init({
     lng: "en-GB",
     preload: ["en-GB", "de-DE", "pl-PL"],
     debug: false,
-    saveMissing: process.env.NODE_ENV === "development",
-    missingKeyHandler: (lngs, ns, key) => {
-        _forEach(_without(i18next.options.supportedLngs as string[], "cimode"), (lng) => {
-            const targetPath = prependPath + `/src/resources/locales/${lng}/${ns}.json`;
-            if (!fs.existsSync(targetPath)) {
-                fs.writeJSONSync(targetPath, {}, {spaces: 4});
-            }
-
-            const data = fs.readJsonSync(targetPath);
-            
-            if (!_isUndefined(data[key])) return;
-            
-            data[key] = "";
-            fs.writeJSONSync(targetPath, data, {spaces: 4});
-        });
-    },
-    saveMissingTo: "all",
     load: "currentOnly",
     returnEmptyString: false,
     fallbackLng: false,

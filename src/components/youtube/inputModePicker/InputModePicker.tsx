@@ -82,8 +82,8 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
     return (
         <div className={classnames(Styles.inputModePicker, className)} data-help="selectInputMode">
             <Tooltip title={t("selectInputMode")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
-                <Button disabled={disabled} className={Styles.button} variant="contained" color={selected.color as any} disableElevation onClick={handleToggle} ref={anchorRef}>
-                    <selected.icon className={Styles.icon} />
+                <Button disabled={disabled} className={Styles.button} variant="contained" color={selected?.color as any} disableElevation onClick={handleToggle} ref={anchorRef}>
+                    {selected && <selected.icon className={Styles.icon} />}
                     <ArrowDropDownIcon />
                 </Button>
             </Tooltip>

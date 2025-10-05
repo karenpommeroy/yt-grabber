@@ -57,5 +57,6 @@ export default defineConfig([{
         "@typescript-eslint/no-empty-interface": 0,
         "react/prop-types": 0,
         "react/display-name": 0,
+        "react/react-in-jsx-scope": 0,
     },
 }]);

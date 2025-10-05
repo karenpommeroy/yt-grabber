@@ -4,4 +4,8 @@ import {IStore} from "../common/Store";
 
 declare global {
     var store: ElectronStore<IStore>;
+
+    interface Global {
+    [key: string]: any;
+  }
 }

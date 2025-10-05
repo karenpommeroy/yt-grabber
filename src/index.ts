@@ -8,10 +8,12 @@ import {MessagingService} from "./messaging/MessagingService";
 
 const isDev = () => !app.isPackaged;
 
-isDev() && electronReload(__dirname, {
-    electron: path.join(__dirname, "..", 'node_modules', "electron", 'dist', "electron.exe"),
-    interval: 2000,
-});
+if (isDev()) {
+    electronReload(__dirname, {
+        electron: path.join(__dirname, "..", "node_modules", "electron", "dist", "electron.exe"),
+        interval: 2000,
+    });
+}
 
 /* Alternative reload using different electron binary */
 
@@ -75,7 +77,9 @@ app.on("before-quit", () => {
 });
 
 app.whenReady().then(() => {
-    isDev() && installExtension(REACT_DEVELOPER_TOOLS)
-        .then((name) => console.log(`Added Extension:  ${name}`))
-        .catch((err) => console.log("An error occurred: ", err));
+    if (isDev()) {
+        installExtension(REACT_DEVELOPER_TOOLS)
+            .then((name) => console.log(`Added Extension:  ${name}`))
+            .catch((err) => console.log("An error occurred: ", err));
+    }
 });
