@@ -1,7 +1,29 @@
 {
   "name": "yt-grabber",
   "version": "1.8.2",
-  "description": "Youtube Grabber",
+  "description": "Youtube Grabber - robust desktop application designed to retrieve multimedia from YouTube and YouTube Music services",
+  "keywords": [
+    "youtube",
+    "youtube music",
+    "grabber",
+    "downloader",
+    "music",
+    "albums",
+    "artists",
+    "album releases",
+    "songs",
+    "discography",
+    "yt-dlp",
+    "youtube playlist",
+    "youtube channel",
+    "youtube video",
+    "youtube audio",
+    "youtube mp3",
+    "youtube mp4",
+    "youtube mpeg",
+    "youtube mkv",
+    "youtube avi"
+  ],
   "main": "./dist/index.js",
   "repository": {
     "url": "https://github.com/karenpommeroy/yt-grabber.git"
