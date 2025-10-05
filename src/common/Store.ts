@@ -25,6 +25,8 @@ export type ApplicationOptions = {
     alwaysOverwrite?: boolean;
     mergeParts?: boolean;
     downloadSinglesAndEps?: boolean;
+    downloadAlbums?: boolean;
+    showAdvancedSearchOptions?: boolean;
     inputMode?: InputMode;
     tabsOrder?: [TabsOrderKey, SortOrder];
 };
@@ -134,7 +136,15 @@ export const StoreSchema: Schema<IStore> = {
                 type: "boolean",
                 default: true
             },
+            downloadAlbums: {
+                type: "boolean",
+                default: true
+            },
             downloadSinglesAndEps: {
+                type: "boolean",
+                default: false
+            },
+            showAdvancedSearchOptions: {
                 type: "boolean",
                 default: false
             },

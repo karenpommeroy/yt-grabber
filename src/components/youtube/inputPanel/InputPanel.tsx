@@ -8,17 +8,20 @@ import _replace from "lodash/replace";
 import _truncate from "lodash/truncate";
 import _uniq from "lodash/uniq";
 import _without from "lodash/without";
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FolderIcon from "@mui/icons-material/Folder";
 import ReplayIcon from "@mui/icons-material/Replay";
 import SearchIcon from "@mui/icons-material/Search";
 import {
-    Autocomplete, AutocompleteRenderInputParams, Button, Chip, Grid, Stack, TextField, Tooltip
+    Accordion, AccordionDetails, AccordionSummary, Autocomplete, AutocompleteRenderInputParams,
+    Button, Checkbox, Chip, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, Stack,
+    TextField, Tooltip, Typography
 } from "@mui/material";
 
 import {getUrlType} from "../../../common/Helpers";
@@ -40,14 +43,16 @@ export type InputPanelProps = {
 
 export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) => {
     const {loading, onDownload, onCancel, onDownloadFailed, onChange, onLoadInfo} = props;
-    const [options] = useState<ApplicationOptions>(global.store.get("application"));
-    const [debouncedOptions] = useDebounceValue(options, 500, {leading: true});
+    const [applicationOptions, setApplicationOptions] = useState<ApplicationOptions>(global.store.get("application"));
+    const [debouncedApplicationOptions] = useDebounceValue(applicationOptions, 500, {leading: true, trailing: true});
     const {trackStatus, urls, setUrls} = useDataState();
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const valueCount = urls.length;
+    const [fromYear, setFromYear] = useState<string>();
+    const [untilYear, setUntilYear] = useState<string>();
     const [inputMode, setInputMode] = useState<InputMode>(global.store.get("application.inputMode"));
-    
+
     const truncateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)/;
     const validateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)([\w-]{11})/;
 
@@ -62,10 +67,6 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     };
 
     useEffect(() => {
-        global.store.set("application", debouncedOptions);
-    }, [debouncedOptions]);
-
-    useEffect(() => {
         const unsubscribeInputMode = global.store.onDidChange<any>("application.inputMode", (newInputMode: InputMode) => {
             setInputMode(newInputMode);
         });
@@ -73,24 +74,24 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         return () => {
             unsubscribeInputMode();
         };
-    },  []);
+    }, []);
 
     const handleDelete = useCallback((valueToDelete: string) => {
         const newUrls = _without(urls, valueToDelete);
 
         setUrls((prev) => _without(prev, valueToDelete));
-        
+
         if (_isFunction(onChange)) {
             onChange(newUrls);
         }
     }, [urls]);
-    
+
     const handleOpenFromFile = () => {
         fileInputRef.current?.click();
     };
 
     const handleLoadInfo = () => {
-        onLoadInfo(urls);
+        onLoadInfo(urls, fromYear, untilYear);
     };
 
     const containsInvalidValues = useMemo(() => {
@@ -102,10 +103,10 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     }, [trackStatus]);
 
     const onMultiValueChange = (value: React.ChangeEvent<HTMLInputElement>, newValue: []) => {
-        const newUrls = _uniq(_filter(newValue, isValid)); 
+        const newUrls = _uniq(_filter(newValue, isValid));
 
         setUrls(newUrls);
-        
+
         if (_isFunction(onChange)) {
             onChange(newUrls);
         }
@@ -121,9 +122,9 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
 
     const onSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        
+
         if (!file) return;
-        
+
         const reader = new FileReader();
 
         reader.onload = (e) => {
@@ -138,18 +139,42 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         event.target.value = "";
     };
 
+    const onShowAdvancedSearchOptionsChange = (e: React.SyntheticEvent<HTMLDivElement>, isExpanded: boolean) => {
+        setApplicationOptions((prev) => ({...prev, showAdvancedSearchOptions: isExpanded}));
+    };
+
+    const onDownloadSinglesAndEpsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, downloadSinglesAndEps: e.target.checked}));
+    };
+    
+    const onDownloadAlbumsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, downloadAlbums: e.target.checked}));
+    };
+    
+    const onFromYearChanged = (event: ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(event.target.value);
+
+        setFromYear(isNaN(value) ? undefined : event.target.value);
+    };
+
+    const onUntilYearChanged = (event: ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(event.target.value);
+
+        setUntilYear(isNaN(value) ? undefined : event.target.value);
+    };
+
     const getInputLabel = () => {
         switch (inputMode) {
-        case InputMode.Auto:
-            return t("youtubeUrl");
-        case InputMode.Artists:
-            return t("artistOrArtists");
-        case InputMode.Albums:
-            return t("albumOrAlbums");
-        case InputMode.Songs:
-            return t("songOrSongs");
-        default:
-            return t("youtubeUrl");
+            case InputMode.Auto:
+                return t("youtubeUrl");
+            case InputMode.Artists:
+                return t("artistOrArtists");
+            case InputMode.Albums:
+                return t("albumOrAlbums");
+            case InputMode.Songs:
+                return t("songOrSongs");
+            default:
+                return t("youtubeUrl");
         }
     };
 
@@ -183,7 +208,11 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             </Tooltip>
         );
     }, [inputMode]);
-    
+
+    useEffect(() => {
+        global.store.set("application", debouncedApplicationOptions);
+    }, [debouncedApplicationOptions]);
+
     return (
         <Grid className={Styles.inputPanel} container spacing={2} padding={2} paddingBottom={1}>
             <Grid size="grow">
@@ -226,7 +255,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     <Tooltip title={t("loadFromFile")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
                             <Button data-help="loadFromFile" disabled={loading} variant="contained" disableElevation color="secondary" onClick={() => handleOpenFromFile()}>
-                                <FolderIcon/>
+                                <FolderIcon />
                             </Button>
                         </div>
                     </Tooltip>
@@ -264,6 +293,58 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     }
                 </Stack>
             </Grid>
+            {global.store.get("application.inputMode") === InputMode.Artists &&
+                <Grid size={12}>
+                    <Accordion
+                        elevation={0}
+                        className={Styles.accordion}
+                        data-help="showAdvancedSearchOptions"
+                        disableGutters
+                        expanded={applicationOptions.showAdvancedSearchOptions}
+                        onChange={onShowAdvancedSearchOptionsChange}
+                    >
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />} className={Styles.accordionSummary}>
+                            <Typography variant="body1">{t("showAdvancedSearchOptions")}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails className={Styles.accordionDetails}>
+                            <Stack direction="column" spacing={1} paddingX={0} paddingY={2} paddingBottom={0}>  
+                                <FormControl className={Styles.textInputGroup} data-help="downloadReleaseDate">
+                                    <FormLabel component="legend">{t("releaseDate")}</FormLabel>
+                                    <FormGroup row className={Styles.controlGroup}>
+                                        <TextField data-help="downloadReleaseDateFrom" label={t("fromYear")} variant="outlined" value={fromYear} onChange={onFromYearChanged} />
+                                        <TextField data-help="downloadReleaseDateUntil" label={t("untilYear")} variant="outlined" value={untilYear} onChange={onUntilYearChanged}/>
+                                    </FormGroup>
+                                </FormControl>
+                                <FormControl data-help="downloadReleaseType">
+                                    <FormLabel component="legend">{t("download")}</FormLabel>
+                                    <FormGroup row>
+                                        <FormControlLabel
+                                            data-help="downloadAlbums"
+                                            label={t("downloadAlbums")}
+                                            control={
+                                                <Checkbox
+                                                    checked={applicationOptions.downloadAlbums}
+                                                    onChange={onDownloadAlbumsChange}
+                                                />
+                                            }
+                                        />
+                                        <FormControlLabel
+                                            data-help="downloadSinglesAndEps"
+                                            label={t("downloadSinglesAndEps")}
+                                            control={
+                                                <Checkbox
+                                                    checked={applicationOptions.downloadSinglesAndEps}
+                                                    onChange={onDownloadSinglesAndEpsChange}
+                                                />
+                                            }
+                                        />
+                                    </FormGroup>
+                                </FormControl>
+                            </Stack>
+                        </AccordionDetails>
+                    </Accordion>
+                </Grid>
+            }
         </Grid>
     );
 };

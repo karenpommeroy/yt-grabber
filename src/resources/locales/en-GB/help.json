@@ -146,7 +146,7 @@
     "tabsOrderContent": "Ascending or descending order.",
     "editTrackHeader": "Edit track info",
     "editTrackContent": "Allows to edit track details such as title.",
-    "downloadSinglesAndEpsHeader": "Download singles and eps",
+    "downloadSinglesAndEpsHeader": "Singles and EPs",
     "downloadSinglesAndEpsContent": "Include singles and EPs when downloading artist's albums.",
     "tabsOrderFieldHeader": "Tabs order attribute",
     "tabsOrderFieldContent": "Specifies attribute used to order tabs.",
@@ -163,5 +163,17 @@
     "ytdlpVersionHeader": "Info about yt-dlp library version",
     "ytdlpVersionContent": "Displays version of yt-dlp library and allows to update it.",
     "chromeExecutablePathHeader": "Path to chrome executable",
-    "chromeExecutablePathContent": "Path to chrome executable (leave empty to used bundled chromium)."
+    "chromeExecutablePathContent": "Path to chrome executable (leave empty to used bundled chromium).",
+    "showAdvancedSearchOptionsHeader": "Advanced search options",
+    "showAdvancedSearchOptionsContent": "Displays advanced search options panel.",
+    "downloadReleaseTypeHeader": "Download release type",
+    "downloadReleaseTypeContent": "Specify types of items to be downloaded.",
+    "downloadReleaseDateHeader": "Download release date",
+    "downloadReleaseDateContent": "Specify release date range of items to be downloaded.",
+    "downloadReleaseDateFromHeader": "From year",
+    "downloadReleaseDateFromContent": "Items with release date prior to this year will be omitted",
+    "downloadReleaseDateUntilHeader": "Until year",
+    "downloadReleaseDateUntilContent": "Items with release date after this year will be omitted.",
+    "downloadAlbumsHeader": "Albums",
+    "downloadAlbumsContent": "Include full album releases when downloading artist's albums."
 }

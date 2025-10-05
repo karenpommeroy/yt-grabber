@@ -232,7 +232,7 @@ export const HomeView: React.FC = () => {
         }
     }, [playlists]);
 
-    const loadInfo = (urls: string[]) => {
+    const loadInfo = (urls: string[], fromYear: string, untilYear: string) => {
         clear();
         setPlaylists(_map(urls, (v) => ({url: v, album: {}, tracks: []} as PlaylistInfo)));
         
@@ -244,7 +244,7 @@ export const HomeView: React.FC = () => {
         const basic = [...lists, ...vids];
 
         if (inputMode === InputMode.Artists) {
-            loadArtists(urls);
+            loadArtists(urls, fromYear, untilYear);
             return;
         }
 
@@ -287,15 +287,18 @@ export const HomeView: React.FC = () => {
         }
     };
 
-    const loadArtists = (artists: string[]) => {
+    const loadArtists = (artists: string[], fromYear: string, untilYear: string) => {
         const options: LaunchOptions = global.store.get("options");
         const params: GetYoutubeParams = {
             values: artists,
             lang: i18n.language,
             url: appOptions.youtubeUrl,
             options: {
+                downloadAlbums: appOptions.downloadAlbums,
                 downloadSinglesAndEps: appOptions.downloadSinglesAndEps,
                 multiMatchAction: appOptions.multiMatchAction,
+                fromYear,
+                untilYear
             },
         };
 
@@ -411,12 +414,12 @@ export const HomeView: React.FC = () => {
         }
     };
 
-    const download = async (urls: string[]) => {
+    const download = async (urls: string[], fromYear?: string, untilYear?: string) => {
         const albums = _map(playlists, "album");
         const albumUrls = _map(albums, "url");
 
         if (_isEmpty(playlists) || !_difference(albumUrls, urls)) {
-            loadInfo(urls);
+            loadInfo(urls, fromYear, untilYear);
             setAutoDownload(true);
         } else if (_some(albums, (album) => _some(album, v => _isNil(v)))) {
             setError(true);
@@ -853,7 +856,7 @@ export const HomeView: React.FC = () => {
                         onDownloadFailed={downloadFailed}
                         onLoadInfo={loadInfo}
                     />
-                    <FormatSelector disabled={_isEmpty(playlists) || _isEmpty(tracks)} />
+                    {!_isEmpty(playlists) && <FormatSelector disabled={_isEmpty(playlists) || _isEmpty(tracks)} />}
                 </div>
                 <Grid className={Styles.content} container spacing={2} padding={2}>
                     {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}

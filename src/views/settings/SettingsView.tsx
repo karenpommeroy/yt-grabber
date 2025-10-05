@@ -17,8 +17,9 @@ import versionInfo from "win-version-info";
 import NorthIcon from "@mui/icons-material/North";
 import SouthIcon from "@mui/icons-material/South";
 import {
-    Box, Button, FormControl, FormControlLabel, FormLabel, Grid, InputLabel, MenuItem, Paper, Radio,
-    RadioGroup, Select, SelectChangeEvent, Stack, Switch, TextField, Typography
+    Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, InputLabel,
+    MenuItem, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Stack, Switch, TextField,
+    Typography
 } from "@mui/material";
 
 import {getBinPath} from "../../common/FileSystem";
@@ -159,6 +160,10 @@ export const SettingsView: React.FC = () => {
         setApplicationOptions((prev) => ({...prev, downloadSinglesAndEps: e.target.checked}));
     };
     
+    const onDownloadAlbumsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, downloadAlbums: e.target.checked}));
+    };
+    
     const onOverwriteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, alwaysOverwrite: e.target.checked}));
     };
@@ -285,8 +290,14 @@ export const SettingsView: React.FC = () => {
                                 </Grid>
                             }
                         </Grid>
-                        <Grid size={12} data-help="downloadSinglesAndEps">
-                            <FormControlLabel control={<Switch checked={applicationOptions.downloadSinglesAndEps} onChange={onDownloadSinglesAndEpsChange} />} label={t("downloadSinglesAndEps")} />
+                        <Grid size={12} data-help="downloadReleaseType">
+                            <FormControl>
+                                <FormLabel component="legend">{t("download")}</FormLabel>
+                                <FormGroup row>
+                                    <FormControlLabel data-help="downloadAlbums" control={<Checkbox checked={applicationOptions.downloadAlbums} onChange={onDownloadAlbumsChange} />} label={t("downloadAlbums")} />
+                                    <FormControlLabel data-help="downloadSinglesAndEps" control={<Checkbox checked={applicationOptions.downloadSinglesAndEps} onChange={onDownloadSinglesAndEpsChange} />} label={t("downloadSinglesAndEps")} />
+                                </FormGroup>
+                            </FormControl>
                         </Grid>
                         <Grid size={12} data-help="alwaysOverwrite">
                             <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />

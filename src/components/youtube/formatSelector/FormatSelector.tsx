@@ -151,7 +151,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
 
     return (
         <Grid className={Styles.formatSelector} container spacing={2} padding={2}>
-            <Grid size={4}>
+            <Grid size="grow">
                 <FormControl fullWidth disabled={disabled} data-help="mediaType">
                     <InputLabel id="media-type-label">{t("mediaType")}</InputLabel>
                     <Select<MediaFormat>
@@ -167,7 +167,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                     </Select>
                 </FormControl>
             </Grid>
-            <Grid size={4}>
+            <Grid size="grow">
                 <FormControl fullWidth disabled={disabled} data-help="format">
                     <InputLabel id="format-label">{t("format")}</InputLabel>
                     <Select<string>
@@ -181,7 +181,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                 </FormControl>
             </Grid>
             {selectedMediaType === MediaFormat.Video &&
-                <Grid size={4}>
+                <Grid size="grow">
                     <FormControl fullWidth disabled={disabled} data-help="resolution">
                         <InputLabel id="resolution-label">{t("resolution")}</InputLabel>
                         <Select<string>
@@ -196,7 +196,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                 </Grid>
             }
             {selectedMediaType === MediaFormat.Audio &&
-                <Grid size={4}>
+                <Grid size="grow">
                     <NumberField
                         data-help="audioQuality"
                         disabled={disabled}

@@ -146,7 +146,7 @@
     "tabsOrderContent": "Rosnąca lub malejąca kolejność.",
     "editTrackHeader": "Edycja danych ścieżki",
     "editTrackContent": "Pozwala na edycję danych ścieżki takich jak tytuł.",
-    "downloadSinglesAndEpsHeader": "Pobieraj single i epki",
+    "downloadSinglesAndEpsHeader": "Single i epki",
     "downloadSinglesAndEpsContent": "Uwzględnij single i epki podczas pobierania dyskografii artysty.",
     "tabsOrderFieldHeader": "Atrybut sortowania zakładek",
     "tabsOrderFieldContent": "Określa atrybut używany do sortowania zakładek.",
@@ -163,5 +163,17 @@
     "ytdlpVersionHeader": "Informacje o bibliotece yt-dlp",
     "ytdlpVersionContent": "Wyświetla wersję biblioteki yt-dlp i umożliwia jej aktualizację.",
     "chromeExecutablePathHeader": "Ścieżka do pliku wykonywalnego chrome",
-    "chromeExecutablePathContent": "Ścieżka do pliku wykonywalnego chrome (pozostaw puste aby użyć chromium dostarczonego razem z aplikacją)."
+    "chromeExecutablePathContent": "Ścieżka do pliku wykonywalnego chrome (pozostaw puste aby użyć chromium dostarczonego razem z aplikacją).",
+    "showAdvancedSearchOptionsHeader": "Zaawansowane opcje wyszukiwania",
+    "showAdvancedSearchOptionsContent": "Panel zaawansowanych opcji wyszukiwania.",
+    "downloadReleaseTypeHeader": "Rodzaj pobieranych elementów",
+    "downloadReleaseTypeContent": "Określa rodzaj elementów, które będą pobrane.",
+    "downloadReleaseDateHeader": "Data wydania",
+    "downloadReleaseDateContent": "Określa przedział lat dla daty wydania elementów, które będą pobrane.",
+    "downloadReleaseDateFromHeader": "Od",
+    "downloadReleaseDateFromContent": "Elementy z datą wydania wcześniejszą niż ten rok zostaną pominięte.",
+    "downloadReleaseDateUntilHeader": "Do",
+    "downloadReleaseDateUntilContent": "Elementy z datą wydania późniejszą niż ten rok zostaną pominięte.",
+    "downloadAlbumsHeader": "Albumy",
+    "downloadAlbumsContent": "Uwzględnij pełne wydania albumów podczas pobierania dyskografii artysty."
 }

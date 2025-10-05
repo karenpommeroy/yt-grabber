@@ -18,7 +18,9 @@ import {MessageHandlerParams} from "../messaging/MessageChannel";
 import {clearInput, navigateToPage, setCookies} from "./Helpers";
 import {
     AlbumFilterSelector, AlbumLinkSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector,
-    getYtMusicSearchResultsArtistsSelector, SingleFilterSelector, SingleLinkSelector,
+    getYtMusicAlbumLinkSelectorFilteredByDate, getYtMusicAlbumsDirectLinkSelectorFilteredByDate,
+    getYtMusicSearchResultsArtistsSelector, getYtMusicSingleLinkSelectorFilteredByDate,
+    getYtMusicSinglesDirectLinkSelectorFilteredByDate, SingleFilterSelector, SingleLinkSelector,
     SinglesDirectLinkSelector, SinglesHrefSelector, YtMusicArtistBestResultLinkSelector,
     YtMusicArtistRelativeLinkSelector, YtMusicArtistRelativeNameSelector,
     YtMusicArtistRelativeThumbnailSelector, YtMusicArtistsChipSelector, YtMusicSearchInputSelector,
@@ -90,9 +92,11 @@ const run = async (
         await navigateToPage(artistChannelUrl, page);
         await page.waitForNetworkIdle();
 
-        const albums = await getAlbums(params);
-        results.push(...albums);
-    
+        if (params.options?.downloadAlbums) {
+            const albums = await getAlbums(params);
+            results.push(...albums);
+        }
+
         if (params.options?.downloadSinglesAndEps) {
             await navigateToPage(artistChannelUrl, page);
             await page.waitForNetworkIdle();
@@ -168,6 +172,7 @@ const getArtistUrl = async (params: GetYoutubeParams, artist: string, onPause?: 
 
 const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
     const results: string[] = [];
+    const {fromYear, untilYear} = params.options;
 
     try {
         const element = await page.waitForSelector(`::-p-xpath(${AlbumsHrefSelector})`, {timeout: 1000});
@@ -184,16 +189,19 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
         } catch (e) {
             console.log("Albums already filtered");
         } finally {
-            const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+            const selector =  fromYear || untilYear ? getYtMusicAlbumLinkSelectorFilteredByDate(fromYear, untilYear) : AlbumLinkSelector;
+            const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
             for (const item of items) {
                 results.push(`${params.url}/${item}`);
             }
 
+            // eslint-disable-next-line no-unsafe-finally
             return results;
         }
     } catch (error) {
-        const albums = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+        const selector =  fromYear || untilYear ? getYtMusicAlbumsDirectLinkSelectorFilteredByDate(fromYear, untilYear) : AlbumsDirectLinkSelector;
+        const albums = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
         for (const item of albums) {
             results.push(`${params.url}/${item}`);
@@ -205,6 +213,7 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
 
 const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
     const results: string[] = [];
+    const {fromYear, untilYear} = params.options;
 
     try {
         const element = await page.waitForSelector(`::-p-xpath(${SinglesHrefSelector})`, {timeout: 1000});
@@ -221,16 +230,19 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
         } catch (e) {
             console.log("Singles already filtered");
         } finally {
-            const items = await page.$$eval(`xpath/${SingleLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+            const selector =  fromYear || untilYear ? getYtMusicSingleLinkSelectorFilteredByDate(fromYear, untilYear) : SingleLinkSelector;
+            const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
             for (const item of items) {
                 results.push(`${params.url}/${item}`);
             }
 
+            // eslint-disable-next-line no-unsafe-finally
             return results;
         }
     } catch (error) {
-        const singles = await page.$$eval(`xpath/${SinglesDirectLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+        const selector =  fromYear || untilYear ? getYtMusicSinglesDirectLinkSelectorFilteredByDate(fromYear, untilYear) : SinglesDirectLinkSelector;
+        const singles = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
         for (const item of singles) {
             results.push(`${params.url}/${item}`);

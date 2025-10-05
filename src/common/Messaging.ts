@@ -20,6 +20,7 @@ export type OpenUrlInBrowserParams = {
 
 export type GetYoutubeParams = {
     values?: string[];
+    fromYear?: string;
     lang: string;
     url: string;
     options?: Record<string, any>;

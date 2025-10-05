@@ -146,7 +146,7 @@
     "tabsOrderContent": "Ascending or descending order.",
     "editTrackHeader": "Trackdaten bearbeiten",
     "editTrackContent": "Ermöglicht das Bearbeiten von Trackdaten wie dem Titel.",
-    "downloadSinglesAndEpsHeader": "Download Singles und EPs",
+    "downloadSinglesAndEpsHeader": "Singles und EPs",
     "downloadSinglesAndEpsContent": "Schließen Sie beim Herunterladen von Künstleralben auch Singles und EPs ein.",
     "tabsOrderFieldHeader": "Tabs Reihenfolge Attribut",
     "tabsOrderFieldContent": "Gibt das Attribut an, das zum Sortieren der Registerkarten verwendet wird.",
@@ -163,5 +163,17 @@
     "ytdlpVersionHeader": "Informationen zur Version der yt-dlp",
     "ytdlpVersionContent": "Zeigt die Version der yt-dlp an und ermöglicht deren Aktualisierung.",
     "chromeExecutablePathHeader": "Pfad zur ausführbaren Datei chrome",
-    "chromeExecutablePathContent": "Pfad zur ausführbaren Chrome-Datei (leer lassen, um gebündeltes Chromium zu verwenden)."
+    "chromeExecutablePathContent": "Pfad zur ausführbaren Chrome-Datei (leer lassen, um gebündeltes Chromium zu verwenden).",
+    "showAdvancedSearchOptionsHeader": "Erweiterte Suchoptionen",
+    "showAdvancedSearchOptionsContent": "Zeigt das Feld mit den erweiterten Suchoptionen an.",
+    "downloadReleaseTypeHeader": "Veröffentlichungstyp herunterladen",
+    "downloadReleaseTypeContent": "Geben Sie die Typen der Elemente an, die heruntergeladen werden sollen.",
+    "downloadReleaseDateHeader": "Veröffentlichungsdatum herunterladen",
+    "downloadReleaseDateContent": "Geben Sie den Veröffentlichungszeitraum der herunterzuladenden Elemente an.",
+    "downloadReleaseDateFromHeader": "Ab Jahr",
+    "downloadReleaseDateFromContent": "Elemente mit einem Veröffentlichungsdatum vor diesem Jahr werden ausgelassen.",
+    "downloadReleaseDateUntilHeader": "Bis Jahr",
+    "downloadReleaseDateUntilContent": "Elemente mit einem Veröffentlichungsdatum nach diesem Jahr werden ausgelassen.",
+    "downloadAlbumsHeader": "Alben",
+    "downloadAlbumsContent": "Schließen Sie beim Herunterladen der Alben des Künstlers vollständige Albumveröffentlichungen ein."
 }
