@@ -80,7 +80,7 @@ export const getUrlType = (url: string) => {
 };
 
 export const getRealFileExtension = (ext: string) => {
-    return _includes([VideoType.Avi, VideoType.Mov, VideoType.Mpeg], ext) ? VideoType.Mkv : ext;
+    return _includes([VideoType.Avi, VideoType.Mov, VideoType.Mpeg, VideoType.Gif], ext) ? VideoType.Mkv : ext;
 };
 
 export const getDataAttributes = (props: Record<string, any>) => {

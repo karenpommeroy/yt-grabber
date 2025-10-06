@@ -1,4 +1,5 @@
 import {spawn} from "child_process";
+import fs from "fs-extra";
 import _flatten from "lodash/flatten";
 import _get from "lodash/get";
 import _isEmpty from "lodash/isEmpty";
@@ -59,6 +60,7 @@ const getYtdplParamsForVideo = (format: Format) => {
         [VideoType.Mov]: "webm",
         [VideoType.Avi]: "webm",
         [VideoType.Mpeg]: "webm",
+        [VideoType.Gif]: "webm",
     };
     const selected = format.videoQuality;
     const [, height] = _map(selected.match(/\d+/g), Number);
@@ -301,6 +303,88 @@ export const convertOutputToFormat = (directory: string, filename: string, exten
             callback();
         } else {
             callback(new Error(`FFmpeg exited with code ${code}. Errors: ${errors.join(", ")}`));
+        }
+    });
+};
+
+export const generateColorPalette = (directory: string, filename: string, format: Format, extension: string, callback: (error?: Error) => void) => {
+    const errors: string[] = [];
+    const selected = format.videoQuality;
+    const [width] = _map(selected.match(/\d+/g), Number);
+    const cmdArgs = [
+        "-y",
+        "-i", `${directory}/${filename}.mkv`,
+        "-vf", `fps=15,scale=${width}:-1:flags=lanczos,palettegen`,
+        `${directory}/${filename}-palette.png`,
+    ];
+
+    const ffmpegPath: string = global.store.get("application.ffmpegExecutablePath") || `${getBinPath()}/ffmpeg.exe`;
+    const proc = spawn(ffmpegPath, cmdArgs);
+
+    proc.on("error", (err) => {
+        errors.push(`Error: ${err.message}`);
+    });
+
+    proc.on("close", (code: number) => {
+        if (code === 0) {
+            callback();
+        } else {
+            callback(new Error(`FFmpeg exited with code ${code}. Errors: ${errors.join(", ")}`));
+        }
+    });
+};
+
+export const createGifUsingPalette = (directory: string, filename: string, format: Format, extension: string, callback: (error?: Error) => void) => {
+    const errors: string[] = [];
+    const selected = format.videoQuality;
+    const [width] = _map(selected.match(/\d+/g), Number);
+    const cmdArgs = [
+        "-y",
+        "-i", `${directory}/${filename}.mkv`,
+        "-i", `${directory}/${filename}-palette.png`,
+        "-filter_complex", `fps=15,scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=floyd_steinberg`,
+        `${directory}/${filename}.gif`,
+    ];
+
+    const ffmpegPath: string = global.store.get("application.ffmpegExecutablePath") || `${getBinPath()}/ffmpeg.exe`;
+    const proc = spawn(ffmpegPath, cmdArgs);
+
+    proc.on("error", (err) => {
+        errors.push(`Error: ${err.message}`);
+    });
+
+    proc.on("close", (code: number) => {
+        fs.removeSync(`${directory}/${filename}-palette.png`);
+
+        if (code === 0) {
+            callback();
+        } else {
+            callback(new Error(`FFmpeg exited with code ${code}. Errors: ${errors.join(", ")}`));
+        }
+    });
+};
+
+export const optimizeGif = (directory: string, filename: string, callback: (error?: Error) => void) => {
+    const errors: string[] = [];
+    const cmdArgs = [
+        "--optimize=3",
+        "--colors", "256",
+        `${directory}/${filename}.gif`,
+        "-o", `${directory}/${filename}.gif`,
+    ];
+
+    const gifsiclePath: string = global.store.get("application.gifsicleExecutablePath") || `${getBinPath()}/gifsicle.exe`;
+    const proc = spawn(gifsiclePath, cmdArgs);
+    
+    proc.on("error", (err) => {
+        errors.push(`Error: ${err.message}`);
+    });
+    
+    proc.on("close", (code: number) => {
+        if (code === 0) {
+            callback();
+        } else {
+            callback(new Error(`Gifsicle exited with code ${code}. Errors: ${errors.join(", ")}`));
         }
     });
 };

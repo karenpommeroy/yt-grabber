@@ -2631,15 +2631,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/puppeteer-core@npm:^7.0.4":
-  version: 7.0.4
-  resolution: "@types/puppeteer-core@npm:7.0.4"
-  dependencies:
-    puppeteer-core: "npm:*"
-  checksum: 10/2147d2881029b3bd700b1bd99ca09b0fbe6b072570f72df9d67a751d87056bd8fbb78e5a6381e70d233602f95e7ce4030f24cfa3becca7e5d966e2dd28f7e646
-  languageName: node
-  linkType: hard
-
 "@types/qs@npm:*":
   version: 6.14.0
   resolution: "@types/qs@npm:6.14.0"
@@ -11375,7 +11366,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-core@npm:*, puppeteer-core@npm:24.10.2, puppeteer-core@npm:^24.4.0":
+"puppeteer-core@npm:24.10.2":
   version: 24.10.2
   resolution: "puppeteer-core@npm:24.10.2"
   dependencies:
@@ -14771,7 +14762,6 @@ __metadata:
     "@types/mui-image": "npm:^1.0.5"
     "@types/node": "npm:^22.13.14"
     "@types/prettier": "npm:^3.0.0"
-    "@types/puppeteer-core": "npm:^7.0.4"
     "@types/react": "npm:^19.0.12"
     "@types/react-dom": "npm:^19.0.4"
     "@types/webpack-dev-server": "npm:^4.7.2"
@@ -14814,7 +14804,6 @@ __metadata:
     moment-duration-format: "npm:^2.3.2"
     prettier: "npm:^3.5.3"
     puppeteer: "npm:^24.4.0"
-    puppeteer-core: "npm:^24.4.0"
     puppeteer-extra: "npm:^3.3.6"
     puppeteer-extra-plugin-devtools: "npm:^2.4.6"
     puppeteer-extra-plugin-stealth: "npm:^2.11.2"

@@ -1,10 +1,6 @@
-import fs from "fs-extra";
 import i18next from "i18next";
 import i18nextBackend from "i18next-node-fs-backend";
-import _forEach from "lodash/forEach";
-import _isUndefined from "lodash/isUndefined";
 import _replace from "lodash/replace";
-import _without from "lodash/without";
 import path from "path";
 import {initReactI18next} from "react-i18next";
 

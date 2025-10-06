@@ -46,8 +46,8 @@ import {
     AlbumInfo, PlaylistInfo, TrackInfo, TrackStatusInfo, UrlType, YoutubeArtist, YoutubeInfoResult
 } from "../../common/Youtube";
 import {
-    convertOutputToFormat, getOutputFile, getOutputFileParts, getOutputFilePath,
-    getYtdplRequestParams, mergeOutputFiles
+    convertOutputToFormat, createGifUsingPalette, generateColorPalette, getOutputFile,
+    getOutputFileParts, getOutputFilePath, getYtdplRequestParams, mergeOutputFiles, optimizeGif
 } from "../../common/YtdplUtils";
 import FailuresModal from "../../components/modals/failuresModal/FailuresModal";
 import SelectArtistModal from "../../components/modals/selectArtistModal/SelectArtistModal";
@@ -616,6 +616,7 @@ export const HomeView: React.FC = () => {
 
         const results = await Promise.all(_map(filePaths, (fp) => new Promise<string>((resolve) => {
             const fileInfo = path.parse(fp);
+
             convertOutputToFormat(fileInfo.dir, fileInfo.name, format.extension, (error) => {
                 if (error) {
                     setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
@@ -628,8 +629,7 @@ export const HomeView: React.FC = () => {
 
         callback(results);
     };
-
-
+    
     const updateProgress = useCallback((trackId: string, progress: YtDlpProgress, progressMapRange = [0, 100]) => {
         setProgressPercentage(trackId, mapRange(progress.percent, [0, 100], progressMapRange));
     }, [trackStatus, setTrackStatus]);
@@ -684,7 +684,32 @@ export const HomeView: React.FC = () => {
             }
             if (!shouldMerge) {
                 setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, percent: 90} : item));
-                return resolve(result);
+                const filepath = getOutputFile(track, album, format) + "." + getRealFileExtension(format.extension);
+                const fileInfo = path.parse(filepath);
+                
+                if (format.extension === VideoType.Gif) {
+                    return generateColorPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error: Error) => {
+                        if (error) {
+                            setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                        }
+                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error: Error) => {
+                            if (error) {
+                                setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                            }
+                            optimizeGif(fileInfo.dir, fileInfo.name, (error: Error) => {
+                                if (error) {
+                                    setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                                }
+                                fs.removeSync(filepath);
+                                
+                                return resolve(result);
+                            });
+                        });
+                        
+                    });
+                } else {
+                    return resolve(result);
+                }
             }
 
             setTrackStatus((prev) => _map(prev, (item) => {
@@ -701,9 +726,32 @@ export const HomeView: React.FC = () => {
 
             mergeFileParts(track, album, format, result.parts, (filepath) => {
                 const totalSize = fs.statSync(filepath).size;
+                const fileInfo = path.parse(filepath);
 
                 setTrackStatus((prev) => _map(prev, (item) => item.trackId === result.trackId ? {...item, totalSize, percent: 90} : item));
-                resolve(result);
+                
+                if (format.extension === VideoType.Gif) {
+                    generateColorPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error) => {
+                        if (error) {
+                            setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                        }
+                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error) => {
+                            if (error) {
+                                setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                            }
+                            optimizeGif(fileInfo.dir, fileInfo.name, (error) => {
+                                if (error) {
+                                    setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
+                                }
+
+                                fs.removeSync(filepath);
+                                resolve(result);
+                            });
+                        });
+                    });
+                } else {
+                    resolve(result);
+                }
             });
         });
     }, [abort, abortRef, tracks, trackStatus, trackStatusRef.current, formats, queue, appOptions]);

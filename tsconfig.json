@@ -13,7 +13,7 @@
     "jsx": "react-jsx",
     "outDir": "./dist",
     "sourceMap": true,
-    "typeRoots": ["./src/@types", "./node_modules/@types"],
+    "typeRoots": ["./src/@types"],
     "paths": {
       "@tests/*": ["tests/*"]
     }

@@ -16,6 +16,7 @@ export enum VideoType {
     Mov = "mov",
     Avi = "avi",
     Mpeg = "mpeg",
+    Gif = "gif",
 };
 
 export type Format = {
