@@ -27,6 +27,7 @@ Each download can be customized to your needs for easy workflow automation.
 - [Development](#development)
 - [Running](#running)
 - [Packaging](#packaging)
+- [Testing](#testing)
 - [License](#license)
 - [Legal Disclaimer](#legal-disclaimer)
 
@@ -35,7 +36,7 @@ Each download can be customized to your needs for easy workflow automation.
 
 * Download video, audio, playlists, songs, albums and complete artist discographies
 
-* Multiple output formats (mp3, m4u, flac, wav, mp4, mkv)
+* Multiple output formats (mp3, m4a, flac, wav, mp4, mkv, mov, avi, mpeg, gif)
 
 * Customizable audio and video quality
 
@@ -43,7 +44,13 @@ Each download can be customized to your needs for easy workflow automation.
 
 * Batch multimedia download
 
+* Autodetecting download type
+
 * Metadata (tags) embedding
+
+* Filterable artist discography downloads by release type (album, single, ep) or release year
+
+* Generating animated GIF's from videos (with embedding customizable top and/or bottom text)
 
 * Configurable output
 
@@ -93,6 +100,16 @@ This will start webpack development server that will watch for changes to source
 ## Packaging
 
 To prepare release application package run `npm dist` or `yarn dist` command.
+
+## Testing
+
+There are two types of tests avalable:
+- *unit tests* (using Jest)
+- *end2end tests* (using Playwright)
+
+To execute unit tests run `npm test` or `yarn test` command (unit tests are also run when packaging the applciation).
+
+To execute end2end tests run `npm playwright test` or `yarn playwright test` command.
 
 ## License
 
