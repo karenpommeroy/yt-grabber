@@ -692,7 +692,7 @@ export const HomeView: React.FC = () => {
                         if (error) {
                             setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                         }
-                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error: Error) => {
+                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, (error: Error) => {
                             if (error) {
                                 setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                             }
@@ -735,7 +735,7 @@ export const HomeView: React.FC = () => {
                         if (error) {
                             setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                         }
-                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error) => {
+                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, (error) => {
                             if (error) {
                                 setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                             }

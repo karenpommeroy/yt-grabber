@@ -24,6 +24,8 @@ export type Format = {
     extension?: AudioType | VideoType;
     videoQuality?: string;
     audioQuality?: number;
+    gifTopText?: string;
+    gifBottomText?: string;
 }
 
 export enum FormatScope {

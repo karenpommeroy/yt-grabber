@@ -1,3 +1,38 @@
 .format-selector {
+    
+    .accordion {
+        background: transparent;
+        background-image: none;
 
+        .accordion-summary {
+            border-radius: 8px;
+            background-color: var(--theme-palette-background-paper);
+            background-color: var(--theme-palette-primary-dark);
+            background-image: var(--Paper-overlay);
+            border: 1px solid var(--theme-palette-divider);
+        }
+
+        &:global(.Mui-expanded) {
+            .accordion-summary {
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+        }
+
+        .accordion-details {
+            border-radius: 8px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border: 1px solid var(--theme-palette-divider);
+            border-top: none;
+        }
+    }
+
+    .text-input-group {
+        gap: var(--Grid-rowSpacing) var(--Grid-columnSpacing);
+
+        .control-group {
+            gap: var(--Grid-rowSpacing) var(--Grid-columnSpacing);
+        }
+    }
 }

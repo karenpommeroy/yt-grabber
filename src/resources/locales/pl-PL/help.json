@@ -175,5 +175,11 @@
     "downloadReleaseDateUntilHeader": "Do",
     "downloadReleaseDateUntilContent": "Elementy z datą wydania późniejszą niż ten rok zostaną pominięte.",
     "downloadAlbumsHeader": "Albumy",
-    "downloadAlbumsContent": "Uwzględnij pełne wydania albumów podczas pobierania dyskografii artysty."
+    "downloadAlbumsContent": "Uwzględnij pełne wydania albumów podczas pobierania dyskografii artysty.",
+    "gifTextOptionsHeader": "Opcje tekstu GIF",
+    "gifTextOptionsContent": "Opcje dodawania tekstu na górze i/lub dole generowanych plików GIF.",
+    "gifTopTextHeader": "Tekst na górze",
+    "gifTopTextContent": "Tekst do dodania na górze generowanego pliku GIF",
+    "gifBottomTextHeader": "Tekst na dole",
+    "gifBottomTextContent": "Tekst do dodania na dole generowanego pliku GIF"
 }

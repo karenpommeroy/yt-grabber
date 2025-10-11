@@ -334,15 +334,17 @@ export const generateColorPalette = (directory: string, filename: string, format
     });
 };
 
-export const createGifUsingPalette = (directory: string, filename: string, format: Format, extension: string, callback: (error?: Error) => void) => {
+export const createGifUsingPalette = (directory: string, filename: string, format: Format, callback: (error?: Error) => void) => {
     const errors: string[] = [];
     const selected = format.videoQuality;
     const [width] = _map(selected.match(/\d+/g), Number);
+    const gifTopText = format.gifTopText ? `,drawtext=fontfile=/path/to/Arial.ttf:text='${format.gifTopText}':x=(w-text_w)/2:y=h*0.05:fontcolor=white:fontsize=h*0.07:bordercolor=black:borderw=3` : "";
+    const gifBottomText = format.gifBottomText ? `,drawtext=fontfile=/path/to/Arial.ttf:text='${format.gifBottomText}':x=(w-text_w)/2:y=h*0.90-th:fontcolor=white:fontsize=h*0.07:bordercolor=black:borderw=3` : "";
     const cmdArgs = [
         "-y",
         "-i", `${directory}/${filename}.mkv`,
         "-i", `${directory}/${filename}-palette.png`,
-        "-filter_complex", `fps=15,scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=floyd_steinberg`,
+        "-filter_complex", `fps=15,scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=floyd_steinberg${gifTopText}${gifBottomText}`,
         `${directory}/${filename}.gif`,
     ];
 

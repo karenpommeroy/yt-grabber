@@ -175,5 +175,11 @@
     "downloadReleaseDateUntilHeader": "Until year",
     "downloadReleaseDateUntilContent": "Items with release date after this year will be omitted.",
     "downloadAlbumsHeader": "Albums",
-    "downloadAlbumsContent": "Include full album releases when downloading artist's albums."
+    "downloadAlbumsContent": "Include full album releases when downloading artist's albums.",
+    "gifTextOptionsHeader": "GIF Text Options",
+    "gifTextOptionsContent": "Options to add text to top and/or bottom of generated GIF files.",
+    "gifTopTextHeader": "Top Text",
+    "gifTopTextContent": "Text to be added at the top of generated GIF file",
+    "gifBottomTextHeader": "Bottom Text",
+    "gifBottomTextContent": "Text to be added at the bottom of generated GIF file"
 }

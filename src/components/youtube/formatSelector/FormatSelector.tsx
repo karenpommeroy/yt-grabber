@@ -10,10 +10,13 @@ import _last from "lodash/last";
 import _map from "lodash/map";
 import _uniq from "lodash/uniq";
 import _values from "lodash/values";
-import React, {useEffect, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
-import {FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
+import {
+    Accordion, AccordionDetails, AccordionSummary, FormControl, Grid, InputLabel, MenuItem, Select,
+    SelectChangeEvent, Stack, TextField, Typography
+} from "@mui/material";
 
 import {AudioType, Format, FormatScope, MediaFormat, VideoType} from "../../../common/Media";
 import {ApplicationOptions} from "../../../common/Store";
@@ -44,7 +47,9 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     const [format, setFormat] = useState(resolveFormat(options.formatScope, formats, activeTab)); 
     const [extensions, setExtensions] = useState<Array<AudioType | VideoType>>(format.type === MediaFormat.Audio ? audioExtensions : videoExtensions);
     const [resolutions, setResolutions] = useState<string[]>();
-    
+    const [gifTopText, setGifTopText] = useState<string>();
+    const [gifBottomText, setGifBottomText] = useState<string>();
+
     const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(format.type ?? MediaFormat.Audio);
     const [selectedAudioExtension, setSelectedAudioExtension] = useState<AudioType>(format.type === MediaFormat.Audio ? format.extension as AudioType :_first(audioExtensions));
     const [selectedVideoExtension, setSelectedVideoExtension] = useState<VideoType>(format.type === MediaFormat.Video ? format.extension as VideoType :_first(videoExtensions));
@@ -83,8 +88,10 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
             extension: selectedFormat,
             videoQuality: selectedResolution,
             audioQuality: selectedQuality,
+            gifTopText,
+            gifBottomText
         });
-    }, [selectedMediaType, selectedFormat, selectedVideoExtension, selectedResolution, selectedQuality]);
+    }, [selectedMediaType, selectedFormat, selectedVideoExtension, selectedResolution, selectedQuality, gifTopText, gifBottomText]);
 
     useEffect(() => {        
         setFormat(resolveFormat(options.formatScope, formats, activeTab));
@@ -147,6 +154,14 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     
     const onQualityChange = (value: number) => {       
         setSelectedQuality(value);
+    };
+
+    const onGifTopTextChanged = (event: ChangeEvent<HTMLInputElement>) => {
+        setGifTopText(event.target.value);
+    };
+
+    const onGifBottomTextChanged = (event: ChangeEvent<HTMLInputElement>) => {
+        setGifBottomText(event.target.value);
     };
 
     return (
@@ -212,6 +227,31 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                         min={0}
                         max={10}
                     />
+                </Grid>
+            }
+            {selectedMediaType === MediaFormat.Video && selectedFormat === VideoType.Gif &&
+                <Grid size={12}>
+                    <Accordion
+                        elevation={0}
+                        className={Styles.accordion}
+                        data-help="gifTextOptions"
+                        disableGutters
+                        expanded
+                    >
+                        <AccordionSummary className={Styles.accordionSummary}>
+                            <Typography variant="body1">{t("gifTextOptions")}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails className={Styles.accordionDetails}>
+                            <Stack direction="column" spacing={1} paddingX={0} paddingY={2} paddingBottom={0}>  
+                                <FormControl className={Styles.textInputGroup} data-help="gifTopText">
+                                    <TextField label={t("gifTopText")} variant="outlined" value={gifTopText} onChange={onGifTopTextChanged} />
+                                </FormControl>
+                                <FormControl className={Styles.textInputGroup} data-help="gifBottomText">
+                                    <TextField label={t("gifBottomText")} variant="outlined" value={gifBottomText} onChange={onGifBottomTextChanged} />
+                                </FormControl>
+                            </Stack>
+                        </AccordionDetails>
+                    </Accordion>
                 </Grid>
             }
         </Grid>
