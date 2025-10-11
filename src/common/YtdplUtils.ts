@@ -341,10 +341,12 @@ export const createGifUsingPalette = (directory: string, filename: string, forma
     const gifTopTextLength = format.gifTopText ? format.gifTopText.length : 0;
     const gifBottomTextLength = format.gifBottomText ? format.gifBottomText.length : 0;
     const scalingFactor = 1.7;
-    const paddingX = 30;
-    const fontSize = Math.min(Math.round(((width - paddingX * 2) / Math.max(gifTopTextLength, gifBottomTextLength, 1)) * scalingFactor), height * 0.07);
-    const gifTopText = format.gifTopText ? `,drawtext=fontfile=/path/to/Arial.ttf:text='${format.gifTopText}':x=(w-text_w)/2:y=h*0.05:fontcolor=white:fontsize=${fontSize}:bordercolor=black:borderw=3` : "";
-    const gifBottomText = format.gifBottomText ? `,drawtext=fontfile=/path/to/Arial.ttf:text='${format.gifBottomText}':x=(w-text_w)/2:y=h*0.95-th:fontcolor=white:fontsize=${fontSize}:bordercolor=black:borderw=3` : "";
+    const paddingX = width * 0.02;
+    const maxFontSize = height * 0.07;
+    const fontSize = Math.min(Math.round(((width - paddingX * 2) / Math.max(gifTopTextLength, gifBottomTextLength, 1)) * scalingFactor), maxFontSize);
+    const borderSize = Math.max(Math.round(fontSize * 0.04));
+    const gifTopText = format.gifTopText ? `,drawtext=fontfile=/path/to/Arial.ttf:text='${format.gifTopText}':x=(w-text_w)/2:y=h*0.05:fontcolor=white:fontsize=${fontSize}:bordercolor=black:borderw=${borderSize}` : "";
+    const gifBottomText = format.gifBottomText ? `,drawtext=fontfile=/path/to/Arial.ttf:text='${format.gifBottomText}':x=(w-text_w)/2:y=h*0.95-th:fontcolor=white:fontsize=${fontSize}:bordercolor=black:borderw=${borderSize}` : "";
     const cmdArgs = [
         "-y",
         "-i", `${directory}/${filename}.mkv`,
