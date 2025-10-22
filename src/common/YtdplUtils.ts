@@ -28,7 +28,7 @@ export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackC
         "--progress",
         ...getCutArgs(track, trackCuts),
         appOptions.alwaysOverwrite ? "--force-overwrite" : "",
-        "--extractor-args", "youtube:player-client=default,-tv_simply",
+        "--extractor-args", "youtube:player_client=default,web_safari;player_js_version=actual",
         "--postprocessor-args", getPostProcessorArgs(track, album),
         "--output", getOutput(track, album, format, trackCuts)
     ];
