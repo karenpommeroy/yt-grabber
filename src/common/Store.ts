@@ -14,6 +14,7 @@ export type ApplicationOptions = {
     playlistOutputTemplate?: string;
     videoOutputTemplate?: string;
     trackOutputTemplate?: string;
+    customYtdlpArgs?: string;
     concurrency?: number;
     quality?: number;
     playlistCountThreshold?: number;
@@ -99,6 +100,10 @@ export const StoreSchema: Schema<IStore> = {
             trackOutputTemplate: {
                 type: "string",
                 default: "{{artist}} - {{trackTitle}}",
+            },
+            customYtdlpArgs: {
+                type: "string",
+                default: "",
             },
             concurrency: {
                 type: "integer",

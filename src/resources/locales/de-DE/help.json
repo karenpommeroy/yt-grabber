@@ -181,5 +181,10 @@
     "gifTopTextHeader": "Text oben",
     "gifTopTextContent": "Text, der oben in der generierten GIF-Datei hinzugefügt werden soll",
     "gifBottomTextHeader": "Text unten",
-    "gifBottomTextContent": "Text, der unten in der generierten GIF-Datei hinzugefügt werden soll"
+    "gifBottomTextContent": "Text, der unten in der generierten GIF-Datei hinzugefügt werden soll",
+    "customYtdlpArgsHeader": "Benutzerdefinierte yt-dlp Argumente",
+    "customYtdlpArgsContent": [
+        "Kommandozeilenargumente, die während des Downloads an yt-dlp übergeben werden sollen (durch Leerzeichen getrennt).",
+        "Beispiel: `--no-check-certificate --audio-format=wav`"
+    ]
 }

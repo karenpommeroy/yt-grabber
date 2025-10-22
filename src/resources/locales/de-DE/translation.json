@@ -16,6 +16,7 @@
     "closeSettings": "Einstellungen schließen",
     "concurrency": "Parallelität",
     "convertingOutput": "Ausgabedatei konvertieren",
+    "customYtdlpArgs": "Benutzerdefinierte Argumente für yt-dlp",
     "cut": "Schneiden",
     "debugMode": "Debug-Modus",
     "default": "Default",

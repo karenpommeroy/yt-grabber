@@ -16,6 +16,7 @@
     "closeSettings": "Zamknij Ustawienia",
     "concurrency": "Liczba równocześnie pobieranych plików",
     "convertingOutput": "Konwertowanie pliku",
+    "customYtdlpArgs": "Dodatkowe argumenty dla yt-dlp",
     "cut": "Przytnij",
     "debugMode": "Tryb debugowania",
     "default": "Domyślna",

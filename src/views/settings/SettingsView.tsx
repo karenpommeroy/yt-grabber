@@ -67,6 +67,10 @@ export const SettingsView: React.FC = () => {
     const onYoutubeUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, youtubeUrl: e.target.value}));
     };
+    
+    const onCustomYtdlpArgsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, customYtdlpArgs: e.target.value}));
+    };
 
     const onOutputDirectoryChange = (value: string[]) => {
         setApplicationOptions((prev) => ({...prev, outputDirectory: _first(value)}));
@@ -440,6 +444,20 @@ export const SettingsView: React.FC = () => {
                                 value={applicationOptions.ffmpegExecutablePath}
                                 mode="file"
                                 fileTypes={[".exe"]}
+                            />
+                        </Grid>
+                        <Grid size={12}>
+                            <TextField
+                                data-help="customYtdlpArgs"
+                                fullWidth
+                                label={t("customYtdlpArgs")}
+                                id="customYtdlpArgs"
+                                variant="outlined"
+                                onChange={onCustomYtdlpArgsChange}
+                                value={applicationOptions.customYtdlpArgs}
+                                helperText={validationErrors["customYtdlpArgs"]}
+                                error={!!validationErrors["customYtdlpArgs"]}
+                                type="string"
                             />
                         </Grid>
                     </Grid>

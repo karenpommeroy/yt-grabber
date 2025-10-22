@@ -16,6 +16,7 @@
     "closeSettings": "Close Settings",
     "concurrency": "Concurrent downloads",
     "convertingOutput": "Converting output",
+    "customYtdlpArgs": "Custom arguments for yt-dlp",
     "cut": "Cut",
     "debugMode": "Debug Mode",
     "default": "Default",

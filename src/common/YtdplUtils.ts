@@ -17,7 +17,7 @@ import {Format, MediaFormat, VideoType} from "./Media";
 import StoreSchema from "./Store";
 import {AlbumInfo, TrackInfo} from "./Youtube";
 
-export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackCuts: {[key: string]: [number, number][]}, format: Format) => {
+export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackCuts: {[key: string]: [number, number][]}, format: Format, customYtdlpArgs = "") => {
     const paramRetrievers = {
         [MediaFormat.Audio]: getYtdplParamsForAudio,
         [MediaFormat.Video]: getYtdplParamsForVideo,
@@ -33,7 +33,7 @@ export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackC
         "--output", getOutput(track, album, format, trackCuts)
     ];
 
-    return [...paramRetriever(format), ...commonParams];
+    return [...paramRetriever(format), ...commonParams, customYtdlpArgs];
 };
 
 export const getOutputFilePath = (track: TrackInfo, album: AlbumInfo, format: Format) => {

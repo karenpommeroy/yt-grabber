@@ -181,5 +181,10 @@
     "gifTopTextHeader": "Tekst na górze",
     "gifTopTextContent": "Tekst do dodania na górze generowanego pliku GIF",
     "gifBottomTextHeader": "Tekst na dole",
-    "gifBottomTextContent": "Tekst do dodania na dole generowanego pliku GIF"
+    "gifBottomTextContent": "Tekst do dodania na dole generowanego pliku GIF",
+    "customYtdlpArgsHeader": "Dodatkowe argumenty yt-dlp",
+    "customYtdlpArgsContent": [
+        "Argumenty wiersza poleceń, które mają być przekazane do yt-dlp podczas pobierania (oddzielone spacjami).",
+        "Przykład: `--no-check-certificate --audio-format=wav`"
+    ]
 }
