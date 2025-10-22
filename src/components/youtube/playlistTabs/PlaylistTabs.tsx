@@ -1,18 +1,9 @@
 import classnames from "classnames";
 import {ipcRenderer, IpcRendererEvent} from "electron";
-import _filter from "lodash/filter";
-import _find from "lodash/find";
-import _findIndex from "lodash/findIndex";
-import _flatMap from "lodash/flatMap";
-import _get from "lodash/get";
-import _includes from "lodash/includes";
-import _isEmpty from "lodash/isEmpty";
-import _isFunction from "lodash/isFunction";
-import _map from "lodash/map";
-import _orderBy from "lodash/orderBy";
-import _reduce from "lodash/reduce";
-import _size from "lodash/size";
-import _some from "lodash/some";
+import {
+    filter, find, findIndex, flatMap, get, includes, isEmpty, isFunction, map, orderBy, reduce,
+    size, some
+} from "lodash-es";
 import path from "path";
 import React, {MouseEvent, useCallback, useEffect} from "react";
 
@@ -50,28 +41,28 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     const tabWidth = window.innerWidth / (playlists.length + playlists.length) - 30; 
 
     useEffect(() => {
-        if (activeTab && _includes(_map(playlists, "url"), activeTab)) {
+        if (activeTab && includes(map(playlists, "url"), activeTab)) {
             return;
         }
-        setActiveTab(_get(playlists, "0.url"));
+        setActiveTab(get(playlists, "0.url"));
     }, [JSON.stringify(playlists)]);
 
     useEffect(() => {
         if (state.loading) return;
 
         const tabsOrder = global.store.get<string, [TabsOrderKey & keyof AlbumInfo, SortOrder]>("application.tabsOrder");
-        const orderedPlaylists = tabsOrder[0] === TabsOrderKey.Default ? playlists : _orderBy(playlists, [(p) => p.album[tabsOrder[0]]], [tabsOrder[1]]);
-        const orderedTracks = _flatMap(orderedPlaylists, (n) => n.tracks);
+        const orderedPlaylists = tabsOrder[0] === TabsOrderKey.Default ? playlists : orderBy(playlists, [(p) => p.album[tabsOrder[0]]], [tabsOrder[1]]);
+        const orderedTracks = flatMap(orderedPlaylists, (n) => n.tracks);
         
         setPlaylists(orderedPlaylists);
         setTracks(orderedTracks);
     }, [state.loading, JSON.stringify(playlists)]);
 
     const isPlaylistLoading = (id: string) => {
-        const playlist = _find(playlists, ["album.id", id]);
-        const playlistTracks = _map(_get(playlist, "tracks"), "id");
+        const playlist = find(playlists, ["album.id", id]);
+        const playlistTracks = map(get(playlist, "tracks"), "id");
 
-        return _some(playlistTracks, (pt) => _includes(queue, pt));
+        return some(playlistTracks, (pt) => includes(queue, pt));
     };
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -79,44 +70,44 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     };
 
     const handleDownloadTrack = (trackId: string) => {
-        if (_isFunction(onDownloadTrack)) {
+        if (isFunction(onDownloadTrack)) {
             onDownloadTrack(trackId);
         }
     };
 
     const handleDownloadAlbum = (albumId: string) => {
-        if (_isFunction(onDownloadPlaylist)) {
+        if (isFunction(onDownloadPlaylist)) {
             onDownloadPlaylist(albumId);
         }
     };
 
     const onCancel = () => {
-        if (_isFunction(onCancelPlaylist)) {
+        if (isFunction(onCancelPlaylist)) {
             onCancelPlaylist(activeTab);
         }
     };
 
     const onRemove = useCallback((event: MouseEvent<SVGSVGElement>) => {
         event.stopPropagation();
-        const currentIndex = _findIndex(playlists, (p) => p.url === activeTab);
-        const nextIndex = currentIndex === _size(playlists) - 1 ? currentIndex - 1 : currentIndex + 1;
+        const currentIndex = findIndex(playlists, (p) => p.url === activeTab);
+        const nextIndex = currentIndex === size(playlists) - 1 ? currentIndex - 1 : currentIndex + 1;
         const albumId = event.currentTarget.getAttribute("data-id");
-        const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
+        const trackIdsForAlbum = map(get(find(playlists, ["album.id", albumId]), "tracks"), "id");
         
         setActiveTab(playlists[nextIndex]?.url);
-        setTrackStatus((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.trackId)));
-        setPlaylists((prev) => _filter(prev, (p) => p.album.id !== albumId));
-        setTracks((prev) => _filter(prev, (p) => !_includes(trackIdsForAlbum, p.id)));
+        setTrackStatus((prev) => filter(prev, (p) => !includes(trackIdsForAlbum, p.trackId)));
+        setPlaylists((prev) => filter(prev, (p) => p.album.id !== albumId));
+        setTracks((prev) => filter(prev, (p) => !includes(trackIdsForAlbum, p.id)));
     }, [playlists, activeTab]);
 
     const onOpenFile = (trackId: string) => {
-        const found = _find(trackStatus, ["trackId", trackId]);
+        const found = find(trackStatus, ["trackId", trackId]);
 
         ipcRenderer.send(Messages.OpenSystemPath, {filepath: found.path});
     };
 
     const onOpenDirectory = () => {
-        const found = _find(trackStatus, "completed");
+        const found = find(trackStatus, "completed");
 
         ipcRenderer.send(Messages.OpenSystemPath, {dirpath: path.dirname(found.path)});
     };
@@ -126,16 +117,16 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     };
 
     const getTotalProgress = (albumId: string) => {
-        const trackIdsForAlbum = _map(_get(_find(playlists, ["album.id", albumId]), "tracks"), "id");
-        const tracksCompletedForAlbum = _filter(trackStatus, (item) => _includes(trackIdsForAlbum, item.trackId) && (item.completed || item.error));
-        const tracksPendingForAlbum = _filter(queue, (item) => _includes(trackIdsForAlbum, item));
+        const trackIdsForAlbum = map(get(find(playlists, ["album.id", albumId]), "tracks"), "id");
+        const tracksCompletedForAlbum = filter(trackStatus, (item) => includes(trackIdsForAlbum, item.trackId) && (item.completed || item.error));
+        const tracksPendingForAlbum = filter(queue, (item) => includes(trackIdsForAlbum, item));
 
-        const completed = _size(tracksCompletedForAlbum);
-        const running = _size(tracksPendingForAlbum);
+        const completed = size(tracksCompletedForAlbum);
+        const running = size(tracksPendingForAlbum);
         const total = completed + running;
 
-        const progress = _reduce(tracksPendingForAlbum, (prev, curr) => {
-            const status = _find(trackStatus, ["trackId", curr]);
+        const progress = reduce(tracksPendingForAlbum, (prev, curr) => {
+            const status = find(trackStatus, ["trackId", curr]);
     
             return status ? prev + status.percent / 100 : prev;
         }, 0);
@@ -144,7 +135,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     };
 
     const resolveActiveTab = (): any => {
-        if (_includes(_map(playlists, "url"), activeTab)) {
+        if (includes(map(playlists, "url"), activeTab)) {
             return activeTab;
         }
         return false;
@@ -163,7 +154,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     };
 
     const cancelTrack = (id: string) => {
-        if (_isFunction(onCancelTrack)) {
+        if (isFunction(onCancelTrack)) {
             onCancelTrack(id);
         }
     };
@@ -178,7 +169,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
         };
     }, []);
     
-    if (_isEmpty(playlists)) {
+    if (isEmpty(playlists)) {
         return null;
     }
 
@@ -187,7 +178,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
             <TabContext value={resolveActiveTab()}>
                 <Box borderBottom={1} borderColor="divider">
                     <TabList variant="scrollable" scrollButtons="auto" onChange={handleTabChange} textColor="primary" indicatorColor="secondary" className={Styles.tablist}>
-                        {_map(_filter(playlists, (p) => !_isEmpty(p.album)), (item) => {
+                        {map(filter(playlists, (p) => !isEmpty(p.album)), (item) => {
                             const progress = getTotalProgress(item.album.id);
                             const loading = !isNaN(progress) && progress !== 100;
 
@@ -214,7 +205,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                                 value={item.url}
                             />;
                         })}
-                        {_map(_filter(playlists, (p) => _isEmpty(p.album)), (item) => {
+                        {map(filter(playlists, (p) => isEmpty(p.album)), (item) => {
                             return <Tab
                                 key={item.url}
                                 className={Styles.tab}
@@ -226,7 +217,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                         })}
                     </TabList>
                 </Box>
-                {_map(_filter(playlists, (p) => !_isEmpty(p.album)), (item) =>
+                {map(filter(playlists, (p) => !isEmpty(p.album)), (item) =>
                     <TabPanel className={Styles.tabPanel} value={item.url} key={item.url}>
                         <MediaInfoPanel
                             item={item.album}
@@ -246,7 +237,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                         />
                     </TabPanel>
                 )}
-                {_map(_filter(playlists, (p) => _isEmpty(p.album)), (item) =>
+                {map(filter(playlists, (p) => isEmpty(p.album)), (item) =>
                     <TabPanel className={Styles.tabPanel} value={item.url} key={item.url}>
                         <Stack spacing={3}>
                             <Stack spacing={3} direction="row">

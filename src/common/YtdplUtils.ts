@@ -1,13 +1,6 @@
 import {spawn} from "child_process";
 import fs from "fs-extra";
-import _flatten from "lodash/flatten";
-import _get from "lodash/get";
-import _isEmpty from "lodash/isEmpty";
-import _map from "lodash/map";
-import _padStart from "lodash/padStart";
-import _template from "lodash/template";
-import _times from "lodash/times";
-import _toString from "lodash/toString";
+import {flatten, get, isEmpty, map, padStart, template, times, toString} from "lodash-es";
 import moment from "moment";
 
 import {getBinPath} from "./FileSystem";
@@ -41,7 +34,7 @@ export const getOutputFilePath = (track: TrackInfo, album: AlbumInfo, format: Fo
 };
 
 export const getOutputFileParts = (track: TrackInfo, album: AlbumInfo, format: Format, parts: number) => {
-    return _times(parts, (num) => getOutputFile(track, album, format) + " " + _padStart(_toString(num + 1), 3, "0") + "." + getRealFileExtension(format.extension));
+    return times(parts, (num) => getOutputFile(track, album, format) + " " + padStart(toString(num + 1), 3, "0") + "." + getRealFileExtension(format.extension));
 };
 
 const getYtdplParamsForAudio = (format: Format) => {
@@ -49,7 +42,7 @@ const getYtdplParamsForAudio = (format: Format) => {
         "--extract-audio",
         "--audio-format", format.extension,
         format.extension !== "wav" ? "--embed-thumbnail" : "", // wav does not support thumbnail embedding
-        "--audio-quality", _toString(10 - format.audioQuality),
+        "--audio-quality", toString(10 - format.audioQuality),
     ];
 };
 
@@ -63,7 +56,7 @@ const getYtdplParamsForVideo = (format: Format) => {
         [VideoType.Gif]: "webm",
     };
     const selected = format.videoQuality;
-    const [, height] = _map(selected.match(/\d+/g), Number);
+    const [, height] = map(selected.match(/\d+/g), Number);
     const ext = extensionsMapping[format.extension];
 
     return [
@@ -89,10 +82,10 @@ const getCutsPostProcessorArgs = () => {
 const getCutArgs = (track: TrackInfo,  trackCuts: {[key: string]: [number, number][]}): string[] => {
     const cuts = trackCuts[track.id];
 
-    if (_isEmpty(cuts)) {
+    if (isEmpty(cuts)) {
         return [];
     } else {
-        return [..._flatten(_map(cuts, (cut) => ["--download-sections", `*${moment.duration(cut[0], "seconds").format("HH:mm:ss")}-${moment.duration(cut[1], "seconds").format("HH:mm:ss")}`])), "--force-keyframes-at-cuts", "-S", "proto:https"];
+        return [...flatten(map(cuts, (cut) => ["--download-sections", `*${moment.duration(cut[0], "seconds").format("HH:mm:ss")}-${moment.duration(cut[1], "seconds").format("HH:mm:ss")}`])), "--force-keyframes-at-cuts", "-S", "proto:https"];
     }
 };
 
@@ -115,35 +108,35 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
     if (format.type === MediaFormat.Audio) {
         if (isPlaylistTrack(track)) {
             try {
-                const compiled = _template(appOptions.playlistOutputTemplate, {interpolate});
+                const compiled = template(appOptions.playlistOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             } catch {
-                const defaultPlaylistOutputTemplate = _get(StoreSchema.application, "properties.playlistOutputTemplate.default");
-                const compiled = _template(defaultPlaylistOutputTemplate, {interpolate});
+                const defaultPlaylistOutputTemplate = get(StoreSchema.application, "properties.playlistOutputTemplate.default");
+                const compiled = template(defaultPlaylistOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             }
         }
         else if (!isAlbumTrack(track)) {
             try {
-                const compiled = _template(appOptions.trackOutputTemplate, {interpolate});
+                const compiled = template(appOptions.trackOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             } catch {
-                const defaultTrackOutputTemplate = _get(StoreSchema.application, "properties.trackOutputTemplate.default");
-                const compiled = _template(defaultTrackOutputTemplate, {interpolate});
+                const defaultTrackOutputTemplate = get(StoreSchema.application, "properties.trackOutputTemplate.default");
+                const compiled = template(defaultTrackOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             }
         } else {
             try {
-                const compiled = _template(appOptions.albumOutputTemplate, {interpolate});
+                const compiled = template(appOptions.albumOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             } catch {
-                const defaultAlbumOutputTemplate = _get(StoreSchema.application, "properties.albumOutputTemplate.default");
-                const compiled = _template(defaultAlbumOutputTemplate, {interpolate});
+                const defaultAlbumOutputTemplate = get(StoreSchema.application, "properties.albumOutputTemplate.default");
+                const compiled = template(defaultAlbumOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             }
@@ -153,23 +146,23 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
     if (format.type === MediaFormat.Video) {
         if (!isAlbumTrack(track)) {
             try {
-                const compiled = _template(appOptions.videoOutputTemplate, {interpolate});
+                const compiled = template(appOptions.videoOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             } catch {
-                const defaultVideoOutputTemplate = _get(StoreSchema.application, "properties.videoOutputTemplate.default");
-                const compiled = _template(defaultVideoOutputTemplate, {interpolate});
+                const defaultVideoOutputTemplate = get(StoreSchema.application, "properties.videoOutputTemplate.default");
+                const compiled = template(defaultVideoOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             }
         } else {
             try {
-                const compiled = _template(appOptions.playlistOutputTemplate, {interpolate});
+                const compiled = template(appOptions.playlistOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             } catch {
-                const defaultPlaylistOutputTemplate = _get(StoreSchema.application, "properties.playlistOutputTemplate.default");
-                const compiled = _template(defaultPlaylistOutputTemplate, {interpolate});
+                const defaultPlaylistOutputTemplate = get(StoreSchema.application, "properties.playlistOutputTemplate.default");
+                const compiled = template(defaultPlaylistOutputTemplate, {interpolate});
 
                 return `${appOptions.outputDirectory}/${compiled(data)}`;
             }
@@ -310,7 +303,7 @@ export const convertOutputToFormat = (directory: string, filename: string, exten
 export const generateColorPalette = (directory: string, filename: string, format: Format, extension: string, callback: (error?: Error) => void) => {
     const errors: string[] = [];
     const selected = format.videoQuality;
-    const [width] = _map(selected.match(/\d+/g), Number);
+    const [width] = map(selected.match(/\d+/g), Number);
     const cmdArgs = [
         "-y",
         "-i", `${directory}/${filename}.mkv`,
@@ -337,7 +330,7 @@ export const generateColorPalette = (directory: string, filename: string, format
 export const createGifUsingPalette = (directory: string, filename: string, format: Format, callback: (error?: Error) => void) => {
     const errors: string[] = [];
     const selected = format.videoQuality;
-    const [width, height] = _map(selected.match(/\d+/g), Number);
+    const [width, height] = map(selected.match(/\d+/g), Number);
     const gifTopTextLength = format.gifTopText ? format.gifTopText.length : 0;
     const gifBottomTextLength = format.gifBottomText ? format.gifBottomText.length : 0;
     const scalingFactor = 1.7;

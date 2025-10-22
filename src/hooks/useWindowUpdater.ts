@@ -1,9 +1,9 @@
-import _debounce from "lodash/debounce";
+import {debounce} from "lodash-es";
 import {useEffect} from "react";
 
 const useWindowUpdater = (callback: () => void, debounceTime = 100) => {
     useEffect(() => {
-        const onWindowResized = _debounce(
+        const onWindowResized = debounce(
             callback,
             debounceTime,
         );

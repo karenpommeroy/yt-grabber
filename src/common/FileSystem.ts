@@ -1,12 +1,12 @@
 import fs from "fs-extra";
-import _replace from "lodash/replace";
+import {replace} from "lodash-es";
 import path from "path";
 
 import {isDev} from "./Helpers";
 
-export const getBinPath = () => _replace(!isDev() ? path.join(process.resourcesPath, "bin") : path.join(__dirname, "resources", "bin"), /\\/g, "/");
-export const getResourcesPath = () => _replace(!isDev() ? path.join(process.resourcesPath) : path.join(__dirname, "resources"), /\\/g, "/");
-export const getProfilePath = () => _replace(!isDev() ? path.join(process.resourcesPath, "profile") : path.resolve("./public", "profile"), /\\/g, "/");
+export const getBinPath = () => replace(!isDev() ? path.join(process.resourcesPath, "bin") : path.join(__dirname, "resources", "bin"), /\\/g, "/");
+export const getResourcesPath = () => replace(!isDev() ? path.join(process.resourcesPath) : path.join(__dirname, "resources"), /\\/g, "/");
+export const getProfilePath = () => replace(!isDev() ? path.join(process.resourcesPath, "profile") : path.resolve("./public", "profile"), /\\/g, "/");
 
 export const removeIncompleteFiles = (tokens: {dir: string, name: string, ext: string;}, hasParts?: boolean) => {
     const {dir, name, ext} = tokens;

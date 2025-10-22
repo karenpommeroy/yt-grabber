@@ -1,7 +1,7 @@
 import classnames from "classnames";
 import {ipcRenderer, IpcRendererEvent} from "electron";
-import _isFunction from "lodash/isFunction";
-import _join from "lodash/join";
+import isFunction from "lodash-es/isFunction";
+import join from "lodash-es/join";
 import React, {useEffect, useRef} from "react";
 
 import FolderIcon from "@mui/icons-material/Folder";
@@ -35,7 +35,7 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     const onOpenSelectPathDialogCompleted = (event: IpcRendererEvent, data: string) => {
         const parsed = JSON.parse(data);
         
-        if (parsed.paths && _isFunction(onChange)) {
+        if (parsed.paths && isFunction(onChange)) {
             onChange([parsed.paths]);
         }
     };
@@ -45,13 +45,13 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
     };
 
     const handleValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (_isFunction(onChange)) {
+        if (isFunction(onChange)) {
             onChange([event.target.value]);
         }
     };
     
     const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
-        if (_isFunction(onBlur)) {
+        if (isFunction(onBlur)) {
             onBlur([event.target.value]);
         }
     };
@@ -88,7 +88,7 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
             />
             {/* eslint-disable react/no-unknown-property */ }
             {/* @ts-expect-error fix for webkitdirectory */}
-            <input ref={fileInputRef} type="file" webkitdirectory="" directory="" multiple hidden onChange={onSelectFile} accept={mode === "file" ? _join(fileTypes) : undefined} />
+            <input ref={fileInputRef} type="file" webkitdirectory="" directory="" multiple hidden onChange={onSelectFile} accept={mode === "file" ? join(fileTypes) : undefined} />
         </>
     );
 };

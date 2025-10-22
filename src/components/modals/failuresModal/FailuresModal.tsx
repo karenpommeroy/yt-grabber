@@ -1,6 +1,5 @@
-import _filter from "lodash/filter";
-import _size from "lodash/size";
-import React, {useEffect, useState} from "react";
+import {filter, size} from "lodash-es";
+import {useEffect, useState} from "react";
 import {Trans, useTranslation} from "react-i18next";
 
 import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography} from "@mui/material";
@@ -35,7 +34,7 @@ export const FailuresModal = (props: FailuresModalProps) => {
     };
 
     useEffect(() => {
-        setFailuresCount(_size(_filter(trackStatus, "error")));
+        setFailuresCount(size(filter(trackStatus, "error")));
     }, [trackStatus]);
 
     return (

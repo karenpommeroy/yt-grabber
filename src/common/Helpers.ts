@@ -1,10 +1,4 @@
-import _groupBy from "lodash/groupBy";
-import _includes from "lodash/includes";
-import _indexOf from "lodash/indexOf";
-import _isNumber from "lodash/isNumber";
-import _keys from "lodash/keys";
-import _map from "lodash/map";
-import _replace from "lodash/replace";
+import {groupBy, includes, indexOf, isNumber, keys, map, replace} from "lodash-es";
 
 import {VideoType} from "./Media";
 import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
@@ -18,7 +12,7 @@ type NonDataAttributes<T> = Omit<T, keyof DataAttributes<T>>;
 export const isDev = () => process.env.NODE_ENV === "development";
 
 export const formatFileSize = (sizeInBytes: number, decimals = 2) => {
-    if (!_isNumber(sizeInBytes)) return "";
+    if (!isNumber(sizeInBytes)) return "";
     if (sizeInBytes === 0) return "0 Bytes";
 
     const k = 1024;
@@ -33,17 +27,17 @@ export const mapRange = (x: number, inRange: [number, number], outRange: number[
 };
 
 export const escapePathString = (value: string) => {
-    return _replace(value, /\//g, "-");
+    return replace(value, /\//g, "-");
 };
 
 export const resolveMockData = (delay = 1000) => {
     const TracksMock: any[] = [];
-    const groupped = _groupBy(TracksMock as unknown as TrackInfo[], (item) => item.playlist_id ?? item.id);
+    const groupped = groupBy(TracksMock as unknown as TrackInfo[], (item) => item.playlist_id ?? item.id);
 
-    return _map(groupped, (v, k, c) => new Promise<YoutubeInfoResult>((resolve) => {
+    return map(groupped, (v, k, c) => new Promise<YoutubeInfoResult>((resolve) => {
         setTimeout(() => {
             resolve({url: k, value: v});
-        }, delay * (_indexOf(_keys(c), k) + 1));
+        }, delay * (indexOf(keys(c), k) + 1));
     }));
 };
 
@@ -80,7 +74,7 @@ export const getUrlType = (url: string) => {
 };
 
 export const getRealFileExtension = (ext: string) => {
-    return _includes([VideoType.Avi, VideoType.Mov, VideoType.Mpeg, VideoType.Gif], ext) ? VideoType.Mkv : ext;
+    return includes([VideoType.Avi, VideoType.Mov, VideoType.Mpeg, VideoType.Gif], ext) ? VideoType.Mkv : ext;
 };
 
 export const getDataAttributes = (props: Record<string, any>) => {

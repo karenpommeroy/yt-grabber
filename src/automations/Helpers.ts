@@ -1,6 +1,6 @@
 import fs from "fs-extra";
-import _isEmpty from "lodash/isEmpty";
-import {ElementHandle, Page} from "puppeteer";
+import {isEmpty} from "lodash-es";
+import {ElementHandle, Page} from "puppeteer-core";
 
 import {getProfilePath} from "../common/FileSystem";
 import {waitFor} from "../common/Helpers";
@@ -21,7 +21,7 @@ export const clearInput = async (input: ElementHandle<Element>, page: Page) => {
 export const setCookies = async (page: Page) => {
     const cachedCookies = fs.readJSONSync(getProfilePath() + "/cookies.json", {throws: false});
     
-    if (_isEmpty(cachedCookies)) {
+    if (isEmpty(cachedCookies)) {
         await waitFor(3000);
         const pageCookies = await page.cookies();
     

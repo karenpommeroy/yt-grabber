@@ -1,6 +1,5 @@
 import classnames from "classnames";
-import _find from "lodash/find";
-import _map from "lodash/map";
+import {find, map} from "lodash-es";
 import React, {MouseEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
@@ -39,7 +38,7 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
         {id: InputMode.Albums, name: t("albums"), icon: AlbumIcon, color: "warning"},
         {id: InputMode.Songs, name: t("songs"), icon: AudiotrackIcon, color: "primary"},
     ];
-    const [selected, setSelected] = React.useState<InputModeOption>(_find(options, ["id", applicationOptions.inputMode]) as InputModeOption);
+    const [selected, setSelected] = React.useState<InputModeOption>(find(options, ["id", applicationOptions.inputMode]) as InputModeOption);
 
     
     useEffect(() => {
@@ -48,7 +47,7 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
     
     useEffect(() => {
         const unsubscribeInputMode = global.store.onDidChange<any>("application.inputMode", (value: InputMode) => {
-            const nextOption = _find(options, ["id", value]);
+            const nextOption = find(options, ["id", value]);
             
             setSelected(nextOption);
             setApplicationOptions((prev) => ({...prev, inputMode: nextOption.id}));
@@ -61,7 +60,7 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
 
     const handleMenuItemClick = (event: MouseEvent<HTMLLIElement>) => {
         const id = event.currentTarget.dataset.id;
-        const nextOption = _find(options, ["id", id]);
+        const nextOption = find(options, ["id", id]);
         setSelected(nextOption);
         setApplicationOptions((prev) => ({...prev, inputMode: nextOption.id}));
         setOpen(false);
@@ -99,7 +98,7 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
                         <Paper>
                             <ClickAwayListener onClickAway={handleClose}>
                                 <MenuList autoFocusItem>
-                                    {_map(options, (option, index) => (
+                                    {map(options, (option, index) => (
                                         <MenuItem
                                             key={index}
                                             className={Styles.menuItem}

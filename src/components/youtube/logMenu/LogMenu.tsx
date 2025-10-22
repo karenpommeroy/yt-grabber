@@ -1,6 +1,5 @@
 import classnames from "classnames";
-import _isEmpty from "lodash/isEmpty";
-import _map from "lodash/map";
+import {isEmpty, map} from "lodash-es";
 import React, {HTMLAttributes} from "react";
 import {useTranslation} from "react-i18next";
 
@@ -48,14 +47,14 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
         <div className={classnames(Styles.logMenu, className)} data-help="logMenu">
             <Tooltip title={t("errors")} arrow enterDelay={500} leaveDelay={100} enterNextDelay={500}>
                 <div>
-                    <IconButton className={Styles.logButton} color="error" disabled={_isEmpty(errors)} onClick={handleErrorClick}>
+                    <IconButton className={Styles.logButton} color="error" disabled={isEmpty(errors)} onClick={handleErrorClick}>
                         <CancelIcon />
                     </IconButton>
                 </div>
             </Tooltip>
             <Tooltip title={t("warnings")} arrow enterDelay={500} leaveDelay={100} enterNextDelay={500}>
                 <div>
-                    <IconButton className={Styles.logButton} color="warning" disabled={_isEmpty(warnings)} onClick={handleWarningClick}>
+                    <IconButton className={Styles.logButton} color="warning" disabled={isEmpty(warnings)} onClick={handleWarningClick}>
                         <ErrorIcon />
                     </IconButton>
                 </div>
@@ -73,7 +72,7 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
                     }
                 }}
             >
-                {_map(errors, (error, index) =>([
+                {map(errors, (error, index) =>([
                     <MenuItem key={index} dense onClick={handleErrorClose} className={Styles.logEntry}>
                         <ListItemIcon className={Styles.logEntryIcon}>
                             <CancelIcon />
@@ -107,7 +106,7 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
                     }
                 }}
             >
-                {_map(warnings, (warning, index) =>([
+                {map(warnings, (warning, index) =>([
                     <MenuItem key={index} dense onClick={handleWarningClose} className={Styles.logEntry}>
                         <ListItemIcon className={Styles.logEntryIcon}>
                             <ErrorIcon />

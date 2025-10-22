@@ -1,11 +1,6 @@
 import {i18n as i18next} from "i18next";
-import _forEach from "lodash/forEach";
-import _includes from "lodash/includes";
-import _isEmpty from "lodash/isEmpty";
-import _map from "lodash/map";
-import _merge from "lodash/merge";
-import _replace from "lodash/replace";
-import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer";
+import {map, merge} from "lodash-es";
+import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
@@ -65,7 +60,7 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
 
     reporter = new Reporter(onUpdate);
     reporter.start(i18n.t("starting"));
-    browser = await puppeteer.launch(_merge(puppeteerOptions, options));
+    browser = await puppeteer.launch(merge(puppeteerOptions, options));
     [page] = await browser.pages();
 
     await page.setUserAgent(UserAgent);
@@ -79,7 +74,7 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
             await navigateToPage(urlToProcess, page);
 
             const element = await page.waitForSelector(`::-p-xpath(${AlbumsHrefSelector})`, {timeout: 1000});
-            const albumsUrl = await element.evaluate((el) => el.getAttribute("href"));
+            const albumsUrl = await element.evaluate((el: Element) => el.getAttribute("href"));
 
             await navigateToPage(`${params.url}/${albumsUrl}`, page);
             const albumFilterButton = await page.waitForSelector(`::-p-xpath(${AlbumFilterSelector})`, {timeout: 1000});
@@ -87,7 +82,7 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
             albumFilterButton.click();
             await page.waitForNetworkIdle();
 
-            const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+            const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements: Element[]) => map(elements, (el) => el.getAttribute("href")));
 
             for (const item of items) {
                 results.push(`${params.url}/${item}`);
@@ -95,7 +90,7 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
 
             return results;
         } catch (error) {
-            const items = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements) => elements.map((el) => el.getAttribute("href")));
+            const items = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements: Element[]) => map(elements, (el) => el.getAttribute("href")));
 
             for (const item of items) {
                 results.push(`${params.url}/${item}`);

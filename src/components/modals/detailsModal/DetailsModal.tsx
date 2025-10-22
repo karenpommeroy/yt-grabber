@@ -1,4 +1,4 @@
-import _map from "lodash/map";
+import map from "lodash-es/map";
 import React, {KeyboardEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 
@@ -63,7 +63,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
             <DialogTitle textAlign="center">{t("detailsModalTitle")}</DialogTitle>
             <DialogContent dividers className={Styles.content}>
                 <Stack direction="column" spacing={2}>
-                    {_map(value, (v, k) =>
+                    {map(value, (v, k) =>
                         <TextField
                             key={k}
                             value={v ?? ""}

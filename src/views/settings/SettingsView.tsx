@@ -1,13 +1,5 @@
 import {spawn} from "child_process";
-import _filter from "lodash/filter";
-import _first from "lodash/first";
-import _get from "lodash/get";
-import _includes from "lodash/includes";
-import _isEmpty from "lodash/isEmpty";
-import _isNil from "lodash/isNil";
-import _join from "lodash/join";
-import _map from "lodash/map";
-import _omitBy from "lodash/omitBy";
+import {filter, first, get, includes, isEmpty, isNil, join, map, omitBy} from "lodash-es";
 import path from "path";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -18,9 +10,9 @@ import NorthIcon from "@mui/icons-material/North";
 import SouthIcon from "@mui/icons-material/South";
 import {
     Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, InputLabel,
-    MenuItem, Paper, Radio, RadioGroup, Select, SelectChangeEvent, Stack, Switch, TextField,
-    Typography
+    MenuItem, Paper, Radio, RadioGroup, Select, Stack, Switch, TextField, Typography
 } from "@mui/material";
+import {SelectChangeEvent} from "@mui/material/Select";
 
 import {getBinPath} from "../../common/FileSystem";
 import {FormatScope, MultiMatchAction, SortOrder, TabsOrderKey} from "../../common/Media";
@@ -50,13 +42,13 @@ export const SettingsView: React.FC = () => {
     const validateTemplateString = (input: HTMLInputElement) => {
         const allowedKeys = ["artist", "albumTitle", "trackTitle", "trackNo", "releaseYear"];
         const regex = /{{(.*?)}}/g;
-        const matches = _map([...input.value.matchAll(regex)], (m) => m[1]);
+        const matches = map([...input.value.matchAll(regex)], (m) => m[1]);
 
-        const invalidKeys = _filter(matches, (m) => !_includes(allowedKeys, m));
-        if (!_isEmpty(invalidKeys)) {
-            setValidationErrors((prev) => ({...prev, [input.id]: t("invalidTemplateKeys", { invalidKeys: _join(invalidKeys, ", ")})}));
+        const invalidKeys = filter(matches, (m) => !includes(allowedKeys, m));
+        if (!isEmpty(invalidKeys)) {
+            setValidationErrors((prev) => ({...prev, [input.id]: t("invalidTemplateKeys", { invalidKeys: join(invalidKeys, ", ")})}));
         } else {
-            setValidationErrors((prev) => _omitBy(prev, (_, key) => key === input.id));
+            setValidationErrors((prev) => omitBy(prev, (_, key) => key === input.id));
         }
     };
 
@@ -73,38 +65,38 @@ export const SettingsView: React.FC = () => {
     };
 
     const onOutputDirectoryChange = (value: string[]) => {
-        setApplicationOptions((prev) => ({...prev, outputDirectory: _first(value)}));
+        setApplicationOptions((prev) => ({...prev, outputDirectory: first(value)}));
     };
 
     const onOutputDirectoryBlur = (value: string[]) => {
-        const outputDirectory = _isNil(_first(value)) || _isEmpty(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.outputDirectory.default")) : _first(value);
+        const outputDirectory = isNil(first(value)) || isEmpty(first(value)) ? path.resolve(get(StoreSchema.application, "properties.outputDirectory.default")) : first(value);
         setApplicationOptions((prev) => ({...prev, outputDirectory}));
     };
     
     const onChromeExecutablePathChange = (value: string[]) => {
-        setApplicationOptions((prev) => ({...prev, chromeExecutablePath: _first(value)}));
+        setApplicationOptions((prev) => ({...prev, chromeExecutablePath: first(value)}));
     };
 
     const onChromeExecutablePathBlur = (value: string[]) => {
-        const chromeExecutablePath = _isNil(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.chromeExecutablePath.default")) : _first(value);
+        const chromeExecutablePath = isNil(first(value)) ? path.resolve(get(StoreSchema.application, "properties.chromeExecutablePath.default")) : first(value);
         setApplicationOptions((prev) => ({...prev, chromeExecutablePath}));
     };
     
     const onYtdlpExecutablePathChange = (value: string[]) => {
-        setApplicationOptions((prev) => ({...prev, ytdlpExecutablePath: _first(value)}));
+        setApplicationOptions((prev) => ({...prev, ytdlpExecutablePath: first(value)}));
     };
 
     const onYtdlpExecutablePathBlur = (value: string[]) => {
-        const ytdlpExecutablePath = _isNil(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.ytdlpExecutablePath.default")) : _first(value);
+        const ytdlpExecutablePath = isNil(first(value)) ? path.resolve(get(StoreSchema.application, "properties.ytdlpExecutablePath.default")) : first(value);
         setApplicationOptions((prev) => ({...prev, ytdlpExecutablePath}));
     };
 
     const onFFmpegExecutablePathChange = (value: string[]) => {
-        setApplicationOptions((prev) => ({...prev, ffmpegExecutablePath: _first(value)}));
+        setApplicationOptions((prev) => ({...prev, ffmpegExecutablePath: first(value)}));
     };
 
     const onFFmpegExecutablePathBlur = (value: string[]) => {
-        const ffmpegExecutablePath = _isNil(_first(value)) ? path.resolve(_get(StoreSchema.application, "properties.ffmpegExecutablePath.default")) : _first(value);
+        const ffmpegExecutablePath = isNil(first(value)) ? path.resolve(get(StoreSchema.application, "properties.ffmpegExecutablePath.default")) : first(value);
         setApplicationOptions((prev) => ({...prev, ffmpegExecutablePath}));
     };
 
@@ -115,7 +107,7 @@ export const SettingsView: React.FC = () => {
     
     const onAlbumOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        const albumOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.albumOutputTemplate.default") : value;
+        const albumOutputTemplate = isNil(value) || isEmpty(value) ? get(StoreSchema.application, "properties.albumOutputTemplate.default") : value;
         setApplicationOptions((prev) => ({...prev, albumOutputTemplate}));
     };
 
@@ -126,7 +118,7 @@ export const SettingsView: React.FC = () => {
     
     const onPlaylistOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        const playlistOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.playlistOutputTemplate.default") : value;
+        const playlistOutputTemplate = isNil(value) || isEmpty(value) ? get(StoreSchema.application, "properties.playlistOutputTemplate.default") : value;
         setApplicationOptions((prev) => ({...prev, playlistOutputTemplate}));
     };
 
@@ -137,7 +129,7 @@ export const SettingsView: React.FC = () => {
 
     const onVideoOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        const videoOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.videoOutputTemplate.default") : value;
+        const videoOutputTemplate = isNil(value) || isEmpty(value) ? get(StoreSchema.application, "properties.videoOutputTemplate.default") : value;
         setApplicationOptions((prev) => ({...prev, videoOutputTemplate}));
     };
 
@@ -148,7 +140,7 @@ export const SettingsView: React.FC = () => {
     
     const onTrackOutputTemplateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        const trackOutputTemplate = _isNil(value) || _isEmpty(value) ? _get(StoreSchema.application, "properties.trackOutputTemplate.default") : value;
+        const trackOutputTemplate = isNil(value) || isEmpty(value) ? get(StoreSchema.application, "properties.trackOutputTemplate.default") : value;
         setApplicationOptions((prev) => ({...prev, trackOutputTemplate}));
     };
     
@@ -283,7 +275,7 @@ export const SettingsView: React.FC = () => {
                                             disablePortal: true
                                         }}
                                     >
-                                        {_map(tabsOrderKeyOptions, (item) => <MenuItem key={item.value} value={item.value} className={Styles.menuItem}>{item.text}</MenuItem>)}
+                                        {map(tabsOrderKeyOptions, (item) => <MenuItem key={item.value} value={item.value} className={Styles.menuItem}>{item.text}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -316,7 +308,7 @@ export const SettingsView: React.FC = () => {
                             </Stack>
                         </Grid>
                     </Grid>
-                    <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">
+                    <Grid className={Styles.group} container size={6} spacing={2} component={Paper} variant="outlined">
                         <Grid size={12}>
                             <FileField
                                 data-help="outputDirectory"

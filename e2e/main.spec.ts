@@ -5,7 +5,7 @@ import {_electron as electron, ElectronApplication, Page} from "playwright";
 import {expect, test} from "@playwright/test";
 
 let electronApp: ElectronApplication;
-let page: Page
+let page: Page;
 
 test.beforeAll(async () => {
     const latestBuild = findLatestBuild("release");

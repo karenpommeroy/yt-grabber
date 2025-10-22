@@ -5,9 +5,8 @@ import {useInterval} from "usehooks-ts";
 
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import {
-    IconButton, InputAdornment, InputLabelProps, TextField, TextFieldProps
-} from "@mui/material";
+import {IconButton, InputAdornment, TextField, TextFieldProps} from "@mui/material";
+import {InputLabelProps} from "@mui/material/InputLabel";
 
 import Styles from "./NumberField.styl";
 
@@ -113,20 +112,8 @@ export const NumberField = (props: INumberFieldProps) => {
         <NumericFormat
             value={value}
             onValueChange={handleValueChange}
-            customInput={TextField}
-            className={Styles.numberField}
-            fullWidth={fullWidth}
-            label={label}
-            InputLabelProps={$_.defaultTo(inputLabelProps, {className: "upperfirst"})}
-            variant="outlined"
-            decimalScale={decimalScale}
-            fixedDecimalScale={fixedDecimalScale}
-            inputProps={{
-                style: {textAlign: "center", width},
-            }}
-            isAllowed={isAllowed}
-            InputProps={
-                showIncreaseDecreaseButtons ? {
+            slotProps={{
+                input: showIncreaseDecreaseButtons ? {
                     startAdornment: (
                         <InputAdornment position="start">
                             <IconButton
@@ -154,8 +141,20 @@ export const NumberField = (props: INumberFieldProps) => {
                         </InputAdornment>
                     ),
                     readOnly,
-                } : {}
-            }
+                } : {},
+                htmlInput: {
+                    label,
+                    style: {textAlign: "center", width},
+                },
+                inputLabel: $_.defaultTo(inputLabelProps, {className: "upperfirst"})
+            }}
+            customInput={TextField}
+            variant="outlined"
+            fullWidth={fullWidth}
+            className={Styles.numberField}
+            decimalScale={decimalScale}
+            fixedDecimalScale={fixedDecimalScale}
+            isAllowed={isAllowed}
             {...rest}
         />
     );

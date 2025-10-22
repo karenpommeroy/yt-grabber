@@ -1,11 +1,6 @@
 import {i18n as i18next} from "i18next";
-import _forEach from "lodash/forEach";
-import _includes from "lodash/includes";
-import _isEmpty from "lodash/isEmpty";
-import _map from "lodash/map";
-import _merge from "lodash/merge";
-import _replace from "lodash/replace";
-import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer";
+import {merge} from "lodash-es";
+import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
@@ -58,12 +53,12 @@ export const execute = async (parameters: MessageHandlerParams) => {
 };
 
 const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18next, onUpdate: (data: ProgressInfo<GetYoutubeResult>) => void) => {
-     const result: GetYoutubeResult = {warnings: [], errors: [], values: [], sources: params.values};
+    const result: GetYoutubeResult = {warnings: [], errors: [], values: [], sources: params.values};
     await i18n.changeLanguage(params.lang);
 
     reporter = new Reporter(onUpdate);
     reporter.start(i18n.t("starting"));
-    browser = await puppeteer.launch(_merge(puppeteerOptions, options));
+    browser = await puppeteer.launch(merge(puppeteerOptions, options));
     [page] = await browser.pages();
 
     await page.setUserAgent(UserAgent);

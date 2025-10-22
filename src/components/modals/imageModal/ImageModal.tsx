@@ -1,4 +1,3 @@
-import React from "react";
 import {useTranslation} from "react-i18next";
 
 import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle} from "@mui/material";

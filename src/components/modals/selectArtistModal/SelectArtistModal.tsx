@@ -1,6 +1,5 @@
 import {ipcRenderer} from "electron";
-import _map from "lodash/map";
-import _toInteger from "lodash/toInteger";
+import {map, toInteger} from "lodash-es";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
@@ -32,7 +31,7 @@ export const SelectArtistModal = (props: SelectArtistModalProps) => {
     };
 
     const onArtistClick = (event: React.MouseEvent<HTMLLIElement>) => {
-        const index = _toInteger(event.currentTarget.dataset.id);
+        const index = toInteger(event.currentTarget.dataset.id);
         
         if (onClose) {
             onClose(artists[index]);
@@ -40,7 +39,7 @@ export const SelectArtistModal = (props: SelectArtistModalProps) => {
     };
 
     function onOpenArtistInBrowser(event: React.MouseEvent<HTMLButtonElement>) {
-        const index = _toInteger(event.currentTarget.dataset.id);
+        const index = toInteger(event.currentTarget.dataset.id);
         const artist = artists[index];
 
         ipcRenderer.send(Messages.OpenUrlInBrowser, {url: artist.url});
@@ -61,7 +60,7 @@ export const SelectArtistModal = (props: SelectArtistModalProps) => {
             <DialogContent className={Styles.content}>
                 <Typography textAlign="center" variant="body1">{t("multipleMatchingArtistsFound")}:</Typography>
                 <List className={Styles.artistList}>
-                    {_map(artists, (item, index) => 
+                    {map(artists, (item, index) => 
                         <ListItem
                             key={index}
                             data-id={index}

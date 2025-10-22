@@ -1,6 +1,6 @@
 import {IpcMainEvent} from "electron";
 import {i18n as i18next} from "i18next";
-import {LaunchOptions} from "puppeteer";
+import {LaunchOptions} from "puppeteer-core";
 
 import {GetYoutubeParams, GetYoutubeResult} from "../common/Messaging";
 import {ProgressInfo} from "../common/Reporter";
@@ -70,7 +70,7 @@ export abstract class MessageChannel {
 
     public pause = (data: any[]): Promise<any> => {
         return new Promise((resolve) => {
-            this.resume((response: any) => resolve(response))
+            this.resume((response: any) => resolve(response));
             this.messageBus.mainWindow.webContents.send(this.messageKeys.pause, data);
         });
     };

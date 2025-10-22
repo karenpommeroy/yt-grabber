@@ -1,7 +1,5 @@
 import {IpcMainEvent} from "electron";
-import _find from "lodash/find";
-import _forEach from "lodash/forEach";
-import _partialRight from "lodash/partialRight";
+import {find, forEach, partialRight} from "lodash-es";
 
 import {MessageBus} from "./MessageBus";
 import {Messages} from "./Messages";
@@ -29,13 +27,13 @@ export abstract class MultiMessageChannel {
     }
 
     public initialize = () => {
-        _forEach(this.messages, (m) => {
-            this.messageBus.ipcMain.on(m.executeMessageKey, _partialRight(this.execute, m.executeMessageKey));
+        forEach(this.messages, (m) => {
+            this.messageBus.ipcMain.on(m.executeMessageKey, partialRight(this.execute, m.executeMessageKey));
         });
     };
     
     public execute = async (event: IpcMainEvent, params: MultiMessageHandlerParams, messageKey: Messages) => {
-        const messageDef = _find(this.messages, ["executeMessageKey", messageKey]);
+        const messageDef = find(this.messages, ["executeMessageKey", messageKey]);
         const result = await messageDef.messageHandler(params);
 
         this.messageBus.mainWindow.webContents.send(`${messageDef.completedMessageKey}_${params.id}`, result);

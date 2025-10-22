@@ -1,5 +1,5 @@
 import {Schema} from "electron-store";
-import _values from "lodash/values";
+import {values} from "lodash-es";
 
 import {FormatScope, InputMode, MultiMatchAction, SortOrder, TabsOrderKey} from "./Media";
 
@@ -128,12 +128,12 @@ export const StoreSchema: Schema<IStore> = {
             formatScope: {
                 type: "string",
                 default: FormatScope.Global,
-                enum: _values(FormatScope),
+                enum: values(FormatScope),
             },
             multiMatchAction: {
                 type: "string",
                 default: MultiMatchAction.UseFirst,
-                enum: _values(MultiMatchAction),
+                enum: values(MultiMatchAction),
             },
             language: {
                 type: "string"
@@ -161,7 +161,7 @@ export const StoreSchema: Schema<IStore> = {
             inputMode: {
                 type: "string",
                 default: InputMode.Auto,
-                enum: _values(InputMode)
+                enum: values(InputMode)
             },
             tabsOrder: {
                 type: "array",

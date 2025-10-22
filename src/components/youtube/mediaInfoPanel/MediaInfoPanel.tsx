@@ -1,10 +1,6 @@
 import classnames from "classnames";
 import {ipcRenderer} from "electron";
-import _assign from "lodash/assign";
-import _includes from "lodash/includes";
-import _isFunction from "lodash/isFunction";
-import _pick from "lodash/pick";
-import _some from "lodash/some";
+import {assign, includes, isFunction, pick, some} from "lodash-es";
 import moment from "moment";
 import React, {useCallback, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -46,7 +42,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     const [value, setValue] = useState(item);
     
     const onDetailsModalClose = (data: AlbumInfo) => {
-        setValue((prev) => _assign(prev, data));
+        setValue((prev) => assign(prev, data));
         setDetailsModalOpen(false);
     };
 
@@ -55,13 +51,13 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     };
 
     const cancel = () => {
-        if (_isFunction(onCancel)) {
+        if (isFunction(onCancel)) {
             onCancel();
         }
     };
 
     const openOutputFolder = () => {
-        if (_isFunction(onOpenOutput)) {
+        if (isFunction(onOpenOutput)) {
             onOpenOutput();
         }
     };
@@ -79,7 +75,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     }, [imageModalOpen, setImageModalOpen]);
     
     const downloadPlaylist = () => {
-        if (_isFunction(onDownload)) {
+        if (isFunction(onDownload)) {
             onDownload(value.id);
         }
     };
@@ -125,7 +121,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                         <EditIcon />
                                     </Button>
                                 </Tooltip>
-                                {_some(trackStatus, (s) => s.completed) &&
+                                {some(trackStatus, (s) => s.completed) &&
                                     <Tooltip title={t("openOutputDirectory")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                         <Button data-help="openOutputDirectory" className={Styles.openOutput} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={openOutputFolder}>
                                             <LaunchIcon />
@@ -139,7 +135,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                 </Tooltip>
                                 <Tooltip title={t("downloadPlaylist")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                     <div>
-                                        <Button disabled={_includes(queue, "load-single") || _includes(queue, "load-multi")} data-help="downloadPlaylist" className={Styles.download} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={downloadPlaylist}>
+                                        <Button disabled={includes(queue, "load-single") || includes(queue, "load-multi")} data-help="downloadPlaylist" className={Styles.download} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={downloadPlaylist}>
                                             <DownloadIcon />
                                         </Button>
                                     </div>
@@ -168,7 +164,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
             </Grid>
             <DetailsModal
                 id="details-modal"
-                details={_pick(value, ["artist", "title", "releaseYear"])}
+                details={pick(value, ["artist", "title", "releaseYear"])}
                 open={detailsModalOpen}
                 onClose={onDetailsModalClose}
             />

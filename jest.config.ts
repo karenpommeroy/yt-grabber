@@ -6,6 +6,9 @@ const config: Config = {
     transform: {
         "^.+\\.(t|j)sx?$": ["@swc/jest", {}],
     },
+    transformIgnorePatterns: [
+        "node_modules/(?!(lodash-es)/)",
+    ],
     moduleNameMapper: {
         "\\.(css|less|scss|sass|styl)$": "identity-obj-proxy",
         "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/tests/FileMock.ts",

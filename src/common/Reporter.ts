@@ -1,20 +1,18 @@
-
-
-export type ProgressInfo<T extends Object> = {
+export type ProgressInfo<T extends object> = {
     progress: number;
     task: string;
     subtask: string;
     result?: T;
 };
 
-export interface IReporter<T extends Object> {
+export interface IReporter<T extends object> {
     start: (status: string) => void;
     finish: (status: string, result?: T) => void;
     update: (status: string, progress?: number) => void;
     update0: (status: string) => void;
 }
 
-export class Reporter<T extends Object> implements IReporter<T> {
+export class Reporter<T extends object> implements IReporter<T> {
     private progress: number = 0;
     private task: string = "";
     private subtask: string = "";

@@ -1,7 +1,5 @@
 import classnames from "classnames";
-import _isArray from "lodash/isArray";
-import _map from "lodash/map";
-import _split from "lodash/split";
+import {isArray, map, split} from "lodash-es";
 import React from "react";
 import {HashRouter, Route, Routes} from "react-router-dom";
 
@@ -20,13 +18,13 @@ export const App: React.FC = (props: Record<string, any>) => {
     const {anchorEl, help} = useHelp();
 
     const renderLineBreaks = (value: string) => {
-        return _map(_split(value, "\n"), (v, k) => <React.Fragment key={k}>{v}<br /></React.Fragment>);
+        return map(split(value, "\n"), (v, k) => <React.Fragment key={k}>{v}<br /></React.Fragment>);
     };
 
     const renderText = (value: string | string[]) => {
-        const valueArray = _isArray(value) ? value : [value];
+        const valueArray = isArray(value) ? value : [value];
         
-        return _map(valueArray, (v, k) => <p key={k}>{renderLineBreaks(v)}</p>);
+        return map(valueArray, (v, k) => <p key={k}>{renderLineBreaks(v)}</p>);
     };
 
     return (

@@ -1,13 +1,6 @@
-import _compact from "lodash/compact";
-import _every from "lodash/every";
-import _filter from "lodash/filter";
-import _isEmpty from "lodash/isEmpty";
-import _isFunction from "lodash/isFunction";
-import _map from "lodash/map";
-import _replace from "lodash/replace";
-import _truncate from "lodash/truncate";
-import _uniq from "lodash/uniq";
-import _without from "lodash/without";
+import {
+    compact, every, filter, isEmpty, isFunction, map, replace, truncate, uniq, without
+} from "lodash-es";
 import React, {ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
@@ -77,11 +70,11 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     }, []);
 
     const handleDelete = useCallback((valueToDelete: string) => {
-        const newUrls = _without(urls, valueToDelete);
+        const newUrls = without(urls, valueToDelete);
 
-        setUrls((prev) => _without(prev, valueToDelete));
+        setUrls((prev) => without(prev, valueToDelete));
 
-        if (_isFunction(onChange)) {
+        if (isFunction(onChange)) {
             onChange(newUrls);
         }
     }, [urls]);
@@ -95,19 +88,19 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     };
 
     const containsInvalidValues = useMemo(() => {
-        return !_every(urls, isValid);
+        return !every(urls, isValid);
     }, [urls, inputMode]);
 
     const showDownloadFailed = useMemo(() => {
-        return !_isEmpty(_filter(trackStatus, "error"));
+        return !isEmpty(filter(trackStatus, "error"));
     }, [trackStatus]);
 
     const onMultiValueChange = (value: React.ChangeEvent<HTMLInputElement>, newValue: []) => {
-        const newUrls = _uniq(_filter(newValue, isValid));
+        const newUrls = uniq(filter(newValue, isValid));
 
         setUrls(newUrls);
 
-        if (_isFunction(onChange)) {
+        if (isFunction(onChange)) {
             onChange(newUrls);
         }
     };
@@ -117,7 +110,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             return JSON.parse(content);
         }
 
-        return _compact(content.split("\n"));
+        return compact(content.split("\n"));
     };
 
     const onSelectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,10 +121,10 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         const reader = new FileReader();
 
         reader.onload = (e) => {
-            const nextUrls = _uniq(_filter(getEntriesFromFile(e.target?.result as string, file.type), isValid));
+            const nextUrls = uniq(filter(getEntriesFromFile(e.target?.result as string, file.type), isValid));
 
             setUrls(nextUrls);
-            if (_isFunction(onChange)) {
+            if (isFunction(onChange)) {
                 onChange(nextUrls);
             }
         };
@@ -200,7 +193,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                 <Chip
                     variant="filled"
                     color={color as any}
-                    label={_truncate(_replace(option, truncateRegex, ""), {length: valueCount === 2 ? 30 : 20})}
+                    label={truncate(replace(option, truncateRegex, ""), {length: valueCount === 2 ? 30 : 20})}
                     sx={{marginX: .5}}
                     onDelete={() => !loading && handleDelete(option)}
                     onClick={() => copyToClipboard(option)}
@@ -214,7 +207,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     }, [debouncedApplicationOptions]);
 
     return (
-        <Grid className={Styles.inputPanel} container spacing={2} padding={2} paddingBottom={1}>
+        <Grid className={Styles.inputPanel} container spacing={2} paddingX={2} paddingY={1}>
             <Grid size="grow">
                 <Autocomplete
                     multiple
@@ -227,7 +220,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     value={urls}
                     onChange={onMultiValueChange}
                     defaultValue={[]}
-                    renderTags={(value) => _map(value, renderUrlTag)}
+                    renderTags={(value) => map(value, renderUrlTag)}
                     renderInput={(params: AutocompleteRenderInputParams) => (
                         <TextField
                             {...params}
@@ -261,7 +254,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     </Tooltip>
                     <Tooltip title={t("loadInfo")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
-                            <Button data-help="loadInfo" disabled={loading || _isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={handleLoadInfo}>
+                            <Button data-help="loadInfo" disabled={loading || isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={handleLoadInfo}>
                                 <SearchIcon />
                             </Button>
                         </div>
@@ -269,7 +262,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     {showDownloadFailed &&
                         <Tooltip title={t("downloadFailed")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                             <div>
-                                <Button data-help="downloadFailed" disabled={loading || _isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
+                                <Button data-help="downloadFailed" disabled={loading || isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
                                     <ReplayIcon />
                                 </Button>
                             </div>
@@ -278,7 +271,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     {!loading &&
                         <Tooltip title={t("downloadAll")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                             <div>
-                                <Button data-help="downloadAll" disabled={loading || _isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
+                                <Button data-help="downloadAll" disabled={loading || isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
                                     <DownloadIcon />
                                 </Button>
                             </div>

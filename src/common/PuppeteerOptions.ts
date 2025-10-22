@@ -1,4 +1,4 @@
-import {LaunchOptions} from "puppeteer";
+import {LaunchOptions} from "puppeteer-core";
 
 import {getProfilePath} from "./FileSystem";
 
@@ -17,23 +17,23 @@ export const PuppeteerOptions: LaunchOptions = {
     timeout: 15000,
     devtools: false,
     args: [
-        `--disable-infobars`,
+        "--disable-infobars",
         `--window-size=${width},${height}`,
-        `--disable-extensions`,
-        `--mute-audio`,
-        `--disable-background-timer-throttling`,
-        `--no-sandbox`,
-        `--incognito`,
+        "--disable-extensions",
+        "--mute-audio",
+        "--disable-background-timer-throttling",
+        "--no-sandbox",
+        "--incognito",
         "--disable-setuid-sandbox",
         "--disable-autofill-keyboard-accessory-view",
         "--disable-password-generation",
         "--disable-save-password-bubble",
-        `--disable-backgrounding-occluded-windows`,
-        `--disable-renderer-backgrounding`,
-        `--disable-dev-shm-usage`,
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+        "--disable-dev-shm-usage",
         "--disable-prompt-on-repost",
         "--disable-notifications",
-        `--disable-accelerated-2d-canvas`,
+        "--disable-accelerated-2d-canvas",
         "--hide-crash-restore-bubble",
         "--no-zygote",
         "--webview-disable-safebrowsing-support",

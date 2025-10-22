@@ -1,4 +1,4 @@
-import _merge from "lodash/merge";
+import {merge} from "lodash-es";
 import React, {createContext, FC, PropsWithChildren, useContext, useState} from "react";
 
 import {createTheme, ThemeProvider} from "@mui/material/styles";
@@ -17,7 +17,7 @@ export const AppThemeContext = createContext<IAppThemeProps>(defaultState);
 
 export const AppThemeProvider: FC<IAppThemeProviderProps> = (props: IAppThemeProviderProps) => {
     const {children, ...rest} = props;
-    const mergedState = _merge(defaultState, rest);
+    const mergedState = merge(defaultState, rest);
     const [mode] = useState(mergedState.mode);
 
     const theme = React.useMemo(() => {

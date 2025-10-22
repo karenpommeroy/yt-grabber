@@ -1,7 +1,7 @@
-import _map from "lodash/map";
+import {map} from "lodash-es";
 
 export const afterEach = <T extends object>(promises: Promise<T>[], callback: (value: T) => void) => {
-    return _map(promises, async (promise) => {
+    return map(promises, async (promise) => {
         try {
             const result = await promise;
             callback(result);

@@ -18,6 +18,6 @@
       "@tests/*": ["tests/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./webpack.config.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "webpack.config.ts"],
   "exclude": ["node_modules"]
 }

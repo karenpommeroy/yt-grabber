@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import _map from "lodash/map";
+import map from "lodash-es/map";
 import React from "react";
 import {useTranslation} from "react-i18next";
 
@@ -63,7 +63,7 @@ export const ThemePicker = (props: IThemePickerProps) => {
                 }}
                 {...rest}
             >
-                {_map(themeModes, (item) => <MenuItem key={item} value={item} className={Styles.menuItem}>
+                {map(themeModes, (item) => <MenuItem key={item} value={item} className={Styles.menuItem}>
                     {resolveIcon(item)}
                     {resolveText(item)}
                 </MenuItem>)}

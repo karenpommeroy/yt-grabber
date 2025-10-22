@@ -1,13 +1,13 @@
 import i18next from "i18next";
 import i18nextBackend from "i18next-node-fs-backend";
-import _replace from "lodash/replace";
+import {replace} from "lodash-es";
 import path from "path";
 import {initReactI18next} from "react-i18next";
 
 const isMac = process.platform === "darwin";
 const isDev = process.env.NODE_ENV === "development";
 const prependPath = isMac && !isDev ? path.join(process.resourcesPath, "..") :  ".";
-const localePath = _replace(!isDev ? path.join(process.resourcesPath, "locales") : path.join(__dirname, "resources", "locales"), /\\/g, "/");
+const localePath = replace(!isDev ? path.join(process.resourcesPath, "locales") : path.join(__dirname, "resources", "locales"), /\\/g, "/");
 
 i18next.use(i18nextBackend).use(initReactI18next).init({
     backend: {
