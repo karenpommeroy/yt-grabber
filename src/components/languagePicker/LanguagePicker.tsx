@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import $_ from "lodash";
+import {defaultTo, get, isEqual, map, without} from "lodash-es";
 import moment from "moment";
 import path from "path";
 import React, {HTMLAttributes, useState} from "react";
@@ -38,9 +38,9 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
     const { i18n } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-    const langs = $_.get(i18n, "options.supportedLngs");
-    const availableLocales: string[] = !langs ? [] : $_.without(langs, "cimode").sort();
-    const displayMode = $_.defaultTo(
+    const langs = get(i18n, "options.supportedLngs");
+    const availableLocales: string[] = !langs ? [] : without(langs, "cimode").sort();
+    const displayMode = defaultTo(
         mode,
         useMediaQuery((theme: Theme) => theme.breakpoints.down("md"))
             ? ComponentDisplayMode.Minimal
@@ -58,7 +58,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
     const onTriggerClick = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
 
     const onItemClick = async (lang: string) => {
-        if (!$_.isEqual(lang, i18n.language)) {
+        if (!isEqual(lang, i18n.language)) {
             setLoading(true);
             i18n.changeLanguage(lang, () => setLoading(false));
             moment.locale(lang);
@@ -81,7 +81,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
                     open={Boolean(anchorEl)}
                     onClose={onClose}
                 >
-                    {$_.map(availableLocales, (item) => (
+                    {map(availableLocales, (item) => (
                         <LanguagePickerItem
                             key={item}
                             lang={item}

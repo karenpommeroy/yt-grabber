@@ -43,7 +43,7 @@ const createWindow = async () => {
     mainWindow.loadFile(path.join(__dirname, "index.html"));
 
     if (isDev()) {
-        mainWindow.webContents.openDevTools({mode: "detach",});
+        mainWindow.webContents.openDevTools({mode: "detach"});
     } else {
         mainWindow.removeMenu();
         mainWindow.setMenu(null);

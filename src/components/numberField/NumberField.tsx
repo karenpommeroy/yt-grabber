@@ -1,4 +1,4 @@
-import $_ from "lodash";
+import {defaultTo, isUndefined, max as _max, min as _min, toNumber} from "lodash-es";
 import React, {useEffect, useState} from "react";
 import {NumberFormatValues, NumericFormat, NumericFormatProps} from "react-number-format";
 import {useInterval} from "usehooks-ts";
@@ -53,7 +53,7 @@ export const NumberField = (props: INumberFieldProps) => {
         () => {
             if (decreasePressed) onDecreaseClick();
             if (increasePressed) onIncreaseClick();
-            setDelay($_.max([50, delay - 50]));
+            setDelay(_max([50, delay - 50]));
         },
         decreasePressed || increasePressed ? delay : null,
     );
@@ -63,15 +63,15 @@ export const NumberField = (props: INumberFieldProps) => {
     };
 
     const onDecreaseClick = () => {
-        const predicted = $_.toNumber(value) - $_.toNumber(step);
+        const predicted = toNumber(value) - toNumber(step);
 
-        setText(loop && predicted < min ? max : $_.max([predicted, min]));
+        setText(loop && predicted < min ? max : _max([predicted, min]));
     };
 
     const onIncreaseClick = () => {
-        const predicted = $_.toNumber(value) + $_.toNumber(step);
+        const predicted = toNumber(value) + toNumber(step);
         
-        setText(loop && predicted > max ? min : $_.min([predicted, max]));
+        setText(loop && predicted > max ? min : _min([predicted, max]));
     };
 
     const onDecreaseMouseDown = () => {
@@ -93,7 +93,7 @@ export const NumberField = (props: INumberFieldProps) => {
     };
 
     const isAllowed = (values: NumberFormatValues) => {        
-        if ($_.isUndefined(values.floatValue) && !allowEmpty) {
+        if (isUndefined(values.floatValue) && !allowEmpty) {
             return false;
         };
 
@@ -101,7 +101,7 @@ export const NumberField = (props: INumberFieldProps) => {
     };
 
     useEffect(() => {
-        const value = $_.toNumber(text) ?? 0;
+        const value = toNumber(text) ?? 0;
 
         if (onChange) {
             onChange(value);
@@ -146,7 +146,7 @@ export const NumberField = (props: INumberFieldProps) => {
                     label,
                     style: {textAlign: "center", width},
                 },
-                inputLabel: $_.defaultTo(inputLabelProps, {className: "upperfirst"})
+                inputLabel: defaultTo(inputLabelProps, {className: "upperfirst"})
             }}
             customInput={TextField}
             variant="outlined"

@@ -1,4 +1,4 @@
-import $_ from "lodash";
+import {assign, get} from "lodash-es";
 
 import {Theme} from "@mui/material";
 import {grey} from "@mui/material/colors";
@@ -325,5 +325,5 @@ const themes: Record<string, Partial<Theme | any>> = {
 export const getThemeDefinition = (name: string, mode: "light" | "dark") => {
     const theme = themes[name];
 
-    return $_.assign({}, theme, { palette: $_.get(theme, `palette.${mode}`) });
+    return assign({}, theme, { palette: get(theme, `palette.${mode}`) });
 };
