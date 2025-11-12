@@ -30,6 +30,7 @@ Each download can be customized to your needs for easy workflow automation.
 - [Testing](#testing)
 - [License](#license)
 - [Legal Disclaimer](#legal-disclaimer)
+- [Support Disclaimer](#support-disclaimer)
 
 
 ## Features
@@ -118,3 +119,9 @@ This project is licensed under the [MIT License](LICENSE).
 ## Legal Disclaimer
 
 All music files downloaded through this software must be legally owned and purchased by the user. By downloading music via this software, you represent that you have purchased and fully own the rights to any downloaded content or an active subscription to YouTube Music. Downloading or distributing pirated or illegal music copies is strictly prohibited. I claim no ownership rights to any downloaded music files - all such rights remain with the content owner. I accept no liability for the illegal use of any files downloaded through this software.
+
+## Support Disclaimer
+
+In the era of greedy services like Spotify, omnipresent AI slop and other bs it is very difficult, especially for younger, less recognizable creators to make money off of their creations. There are a lot of talented people who struggle with that (and their number is growing).
+If you like certain artists and value their content please show them your support.
+Thank You!
