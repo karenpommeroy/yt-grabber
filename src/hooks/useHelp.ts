@@ -40,7 +40,7 @@ const useHelp = () => {
                 try {
                     dest.style[key as any] = computedStyle.getPropertyValue(key);
                 } catch (error) {
-                    console.log(error);
+                    logger.error("Error copying style property '%s': %O", key, error);
                 }
             }
         };

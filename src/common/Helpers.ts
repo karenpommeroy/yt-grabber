@@ -1,4 +1,5 @@
-import {groupBy, includes, indexOf, isNumber, keys, map, replace} from "lodash-es";
+import {App} from "electron";
+import {forEach, groupBy, includes, indexOf, isNumber, keys, map, replace} from "lodash-es";
 
 import {VideoType} from "./Media";
 import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
@@ -10,6 +11,30 @@ type DataAttributes<T> = {
 type NonDataAttributes<T> = Omit<T, keyof DataAttributes<T>>;
 
 export const isDev = () => process.env.NODE_ENV === "development";
+
+export const isDevApplication = (app: App) => !app.isPackaged;
+
+export const isDebugMode = () => {
+    const args = getProcessArgs();
+    
+    return args["debug-mode"] === true;
+};
+
+export const getProcessArgs = () => {
+    const args = process.argv.slice(1);
+    const filteredArgs: Record<string, string | boolean> = {};
+    
+    forEach(args, (arg) => {
+        if (arg.startsWith("--")) {
+            const argWithoutPrefix = arg.slice(2);
+            const [key, value] = argWithoutPrefix.split("=");
+            
+            filteredArgs[key] = value !== undefined ? value : true;
+        }
+    });
+
+    return filteredArgs;
+};
 
 export const formatFileSize = (sizeInBytes: number, decimals = 2) => {
     if (!isNumber(sizeInBytes)) return "";

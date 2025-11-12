@@ -4,24 +4,32 @@ import electronReload from "electron-reload";
 import Store from "electron-store";
 import path from "path";
 
+import {isDebugMode, isDevApplication} from "./common/Helpers";
+import {createLogger} from "./common/Logger";
 import {MessagingService} from "./messaging/MessagingService";
 
-const isDev = () => !app.isPackaged;
+const logger = createLogger({
+    level: isDebugMode() ? "debug" : "error",
+    logFile: true,
+    logFilePath: "init.log",
+});
 
-if (isDev()) {
+if (isDevApplication(app)) {
     electronReload(__dirname, {
         electron: path.join(__dirname, "..", "node_modules", "electron", "dist", "electron.exe"),
         interval: 2000,
     });
+
+    /* Alternative reload using different electron binary */
+
+    // require("electron-reload")(__dirname, {
+    //     electron: path.join(__dirname, "..", "node_modules", ".bin", "electron.cmd"),
+    //     hardReset: true,
+    //     livenessThreshold: 2000,
+    // });
+
+    logger.debug("Electron reload initialized.");
 }
-
-/* Alternative reload using different electron binary */
-
-// require("electron-reload")(__dirname, {
-//     electron: path.join(__dirname, "..", "node_modules", ".bin", "electron.cmd"),
-//     hardReset: true,
-//     livenessThreshold: 2000,
-// });
 
 let mainWindow: BrowserWindow | null;
 
@@ -41,9 +49,11 @@ const createWindow = async () => {
         },
     });
     mainWindow.loadFile(path.join(__dirname, "index.html"));
+    logger.debug("Main window created.");
 
-    if (isDev()) {
+    if (isDevApplication(app)) {
         mainWindow.webContents.openDevTools({mode: "detach"});
+        logger.debug("DevTools opened.");
     } else {
         mainWindow.removeMenu();
         mainWindow.setMenu(null);
@@ -51,9 +61,12 @@ const createWindow = async () => {
 
     mainWindow.on("closed", () => {
         mainWindow = null;
+        logger.debug("Main window closed.");
     });
     
+
     const messaggingService = new MessagingService(ipcMain, mainWindow);
+    logger.debug("Messaging service initialized.");
 };
 
 app.on("ready", createWindow);
@@ -77,9 +90,9 @@ app.on("before-quit", () => {
 });
 
 app.whenReady().then(() => {
-    if (isDev()) {
+    if (isDevApplication(app)) {
         installExtension(REACT_DEVELOPER_TOOLS)
-            .then((name) => console.log(`Added Extension:  ${name}`))
-            .catch((err) => console.log("An error occurred: ", err));
+            .then((name) => logger.debug("Added extension: %s", name))
+            .catch((err) => logger.error("An error occurred: %s", err));
     }
 });

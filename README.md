@@ -28,6 +28,7 @@ Each download can be customized to your needs for easy workflow automation.
 - [Running](#running)
 - [Packaging](#packaging)
 - [Testing](#testing)
+- [Debugging](#debugging)
 - [License](#license)
 - [Legal Disclaimer](#legal-disclaimer)
 - [Support Disclaimer](#support-disclaimer)
@@ -111,6 +112,12 @@ There are two types of tests avalable:
 To execute unit tests run `npm test` or `yarn test` command (unit tests are also run when packaging the applciation).
 
 To execute end2end tests run `npm playwright test` or `yarn playwright test` command.
+
+## Debugging
+
+Logs are written to `init.log` and `application.log` files.
+By default only errors are logged.
+To get more detailed logs run the application with `--debug-mode` arguments.
 
 ## License
 
