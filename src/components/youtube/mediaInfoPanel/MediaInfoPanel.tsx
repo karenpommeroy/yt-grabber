@@ -1,6 +1,6 @@
 import classnames from "classnames";
 import {ipcRenderer} from "electron";
-import {assign, includes, isFunction, pick, some} from "lodash-es";
+import {assign, cloneDeep, forEach, includes, isFunction, last, map, pick, some} from "lodash-es";
 import moment from "moment";
 import React, {useCallback, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -9,15 +9,17 @@ import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
 import LaunchIcon from "@mui/icons-material/Launch";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import {
     Box, Button, Card, CardContent, CardMedia, Grid, LinearProgress, Tooltip, Typography
 } from "@mui/material";
 
-import {AlbumInfo} from "../../../common/Youtube";
+import {AlbumInfo, PlaylistInfo} from "../../../common/Youtube";
 import {Messages} from "../../../messaging/Messages";
 import {useDataState} from "../../../react/contexts/DataContext";
+import CutModal, {TrackCut} from "../../modals/cutModal/CutModal";
 import DetailsModal from "../../modals/detailsModal/DetailsModal";
 import ImageModal from "../../modals/imageModal/ImageModal";
 import Progress from "../../progress/Progress";
@@ -25,6 +27,7 @@ import Styles from "./MediaInfoPanel.styl";
 
 export type MediaInfoPanelProps = {
     item?: AlbumInfo;
+    playlist?: PlaylistInfo;
     className?: string;
     loading?: boolean;
     progress?: number;
@@ -34,12 +37,14 @@ export type MediaInfoPanelProps = {
 }
 
 export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPanelProps) => {
-    const {item, className, onCancel, onDownload, onOpenOutput, loading, progress = 0} = props;
-    const {trackStatus, queue} = useDataState();
+    const {item, playlist, className, onCancel, onDownload, onOpenOutput, loading, progress = 0} = props;
+    const {trackStatus, setPlaylists, setTrackCuts, queue} = useDataState();
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [cutTrackModalOpen, setCutTrackModalOpen] = useState(false);
     const [imageModalOpen, setImageModalOpen] = useState(false);
     const {t} = useTranslation();
     const [value, setValue] = useState(item);
+    const [tracksSeparated, setTracksSeparated] = useState<boolean>();
     
     const onDetailsModalClose = (data: AlbumInfo) => {
         setValue((prev) => assign(prev, data));
@@ -48,6 +53,52 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
 
     const onImageModalClose = () => {
         setImageModalOpen(false);
+    };
+    
+    const onCutTrackModalCancel = () => {
+        setCutTrackModalOpen(false);
+    };
+
+    const onCutTrackModalClose = (cuts: TrackCut[]) => {        
+        setPlaylists((prev) => {
+            const found = prev.find((p) => p.url === playlist.url);
+            const currentTrack = last(found.tracks);
+
+            return map(prev, (p) => {
+                if (p.url === playlist.url) {
+                    const newTracks = map(cuts, (cutTrack, index) => {
+                        const clonedTrack = cloneDeep(currentTrack);
+                        
+                        return assign({}, clonedTrack, {
+                            id: cutTrack.id,
+                            title: cutTrack.title,
+                            playlist: p.url,
+                            playlist_autonumber: index + 1,
+                            playlist_count: cuts.length,
+                        });
+                    });
+                    const updated = assign({}, found, {album: assign({}, found.album, {tracksNumber: cuts.length}), tracks: newTracks});
+
+                    return updated;
+                }
+
+                return p;
+            });
+        });
+
+        setTrackCuts((prev) => {
+            const newCuts: {[key: string]: [number, number][]} = {};
+            
+            forEach(cuts, (c) => {
+                newCuts[c.id] = [[c.startTime, c.endTime]];
+
+            });
+
+            return {...prev, ...newCuts};
+        });
+
+        setTracksSeparated(true);
+        setCutTrackModalOpen(false);
     };
 
     const cancel = () => {
@@ -68,7 +119,11 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
 
     const editInfo = useCallback(() => {
         setDetailsModalOpen(true);
-    }, [detailsModalOpen, setDetailsModalOpen]);
+    }, [cutTrackModalOpen, setCutTrackModalOpen]);
+
+    const cutTrack = useCallback(() => {
+        setCutTrackModalOpen(true);
+    }, [cutTrackModalOpen, setCutTrackModalOpen]);
 
     const showCoverImage = useCallback(() => {
         setImageModalOpen(true);
@@ -121,6 +176,11 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                         <EditIcon />
                                     </Button>
                                 </Tooltip>
+                                {(tracksSeparated || playlist.tracks.length === 1) && <Tooltip title={t("cut")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
+                                    <Button data-help="cutTrack" className={Styles.cutTrack} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={cutTrack}>
+                                        <FormatListNumberedIcon />
+                                    </Button>
+                                </Tooltip>}
                                 {some(trackStatus, (s) => s.completed) &&
                                     <Tooltip title={t("openOutputDirectory")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                         <Button data-help="openOutputDirectory" className={Styles.openOutput} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={openOutputFolder}>
@@ -174,6 +234,13 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                 open={imageModalOpen}
                 onClose={onImageModalClose}
                 title={value.title}
+            />
+            <CutModal
+                id="cut-modal"
+                duration={value.duration}
+                open={cutTrackModalOpen}
+                onClose={onCutTrackModalClose}
+                onCancel={onCutTrackModalCancel}
             />
         </>
     );

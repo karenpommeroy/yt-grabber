@@ -1,4 +1,5 @@
 {
+    "add": "Dodaj",
     "albumOrAlbums": "Nazwa lub nazwy albumów",
     "albumOutputTemplate": "Szablon wyjściowy (albumy)",
     "albums": "Albumy",
@@ -18,6 +19,7 @@
     "convertingOutput": "Konwertowanie pliku",
     "customYtdlpArgs": "Dodatkowe argumenty dla yt-dlp",
     "cut": "Przytnij",
+    "cutModalTitle": "Wyodrębnianie ścieżek",
     "debugMode": "Tryb debugowania",
     "default": "Domyślna",
     "detailsModalTitle": "Edycja danych",

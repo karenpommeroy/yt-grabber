@@ -1,4 +1,5 @@
 {
+    "add": "Add",
     "albumOrAlbums": "Album/albums",
     "albumOutputTemplate": "Output template (albums)",
     "albums": "Albums",
@@ -18,6 +19,7 @@
     "convertingOutput": "Converting output",
     "customYtdlpArgs": "Custom arguments for yt-dlp",
     "cut": "Cut",
+    "cutModalTitle": "Track Extraction",
     "debugMode": "Debug Mode",
     "default": "Default",
     "detailsModalTitle": "Edit media details",

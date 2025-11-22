@@ -220,6 +220,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                 {map(filter(playlists, (p) => !isEmpty(p.album)), (item) =>
                     <TabPanel className={Styles.tabPanel} value={item.url} key={item.url}>
                         <MediaInfoPanel
+                            playlist={item}
                             item={item.album}
                             loading={isPlaylistLoading(item.album.id)}
                             progress={getTotalProgress(item.album.id)}

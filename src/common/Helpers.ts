@@ -1,5 +1,6 @@
 import {App} from "electron";
 import {forEach, groupBy, includes, indexOf, isNumber, keys, map, replace} from "lodash-es";
+import moment from "moment";
 
 import {VideoType} from "./Media";
 import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
@@ -34,6 +35,41 @@ export const getProcessArgs = () => {
     });
 
     return filteredArgs;
+};
+
+export const formatTime = (value: string) => {
+    const formatted = moment.duration(value, "seconds").format("HH:mm:ss", {trim: "left"});
+    const onlyTwoDigitsRegex = /^\d{2}$/;
+    
+    if (onlyTwoDigitsRegex.test(formatted)) {
+        return `00:${formatted}`;
+    }
+
+    return formatted;
+};
+
+export const unformatTime = (value: string) => {
+    const onlyTwoDigitsRegex = /^\d{2}$/;
+    const atLeastTwoColonsRegex = /^([^:]*:){2}/;
+
+    if (onlyTwoDigitsRegex.test(value)) {
+        return moment.duration(`00:00:${value}`).asSeconds() + "";
+    }
+    if (atLeastTwoColonsRegex.test(value)) {
+        return moment.duration(`${value}`).asSeconds() + "";
+    }
+
+    return moment.duration(`00:${value}`).asSeconds() + "";
+};
+
+export const timeStringToNumber = (value: string) => {
+    const atLeastTwoColonsRegex = /^([^:]*:){2}/;
+
+    if (atLeastTwoColonsRegex.test(value)) {
+        return moment.duration(`${value}`).asSeconds();
+    }
+
+    return moment.duration(`00:${value}`).asSeconds();
 };
 
 export const formatFileSize = (sizeInBytes: number, decimals = 2) => {

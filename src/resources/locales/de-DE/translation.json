@@ -1,4 +1,5 @@
 {
+    "add": "Hinzufügen",
     "albumOrAlbums": "Albumname/Albumnamen",
     "albumOutputTemplate": "Ausgabenvorlage (Alben)",
     "albums": "Alben",
@@ -18,6 +19,7 @@
     "convertingOutput": "Ausgabedatei konvertieren",
     "customYtdlpArgs": "Benutzerdefinierte Argumente für yt-dlp",
     "cut": "Schneiden",
+    "cutModalTitle": "Track Extraktion",
     "debugMode": "Debug-Modus",
     "default": "Default",
     "detailsModalTitle": "Mediendetails bearbeiten",

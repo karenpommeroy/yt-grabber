@@ -21,7 +21,9 @@ import {
     Tooltip, Typography
 } from "@mui/material";
 
-import {formatFileSize} from "../../../common/Helpers";
+import {
+    formatFileSize, formatTime, timeStringToNumber, unformatTime
+} from "../../../common/Helpers";
 import {TrackInfo, TrackStatusInfo} from "../../../common/Youtube";
 import {useDataState} from "../../../react/contexts/DataContext";
 import DetailsModal from "../../modals/detailsModal/DetailsModal";
@@ -49,28 +51,6 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     useEffect(() => {
         setValue(items ?? tracks);
     }, [items, tracks]);
-
-    const formatTime = (value: string) => {
-        const formatted = moment.duration(value, "seconds").format("HH:mm:ss", {trim: "left"});
-        
-        if (/^\d{2}$/.test(formatted)) {
-            return `00:${formatted}`;
-        }
-
-        return formatted;
-    };
-
-    const unformatTime = (value: string) => {
-        if (/^\d{2}$/.test(value)) {
-            return moment.duration(`00:00:${value}`).asSeconds() + "";
-        }
-
-        return moment.duration(`00:${value}`).asSeconds() + "";
-    };
-
-    const timeStringToNumber = (value: string) => {
-        return moment.duration(`00:${value}`).asSeconds();
-    };
 
     const sanitizeTrackCuts = (source: {[key: string]: [number, number][]}) => {
         forEach(source, (v, k) => {
