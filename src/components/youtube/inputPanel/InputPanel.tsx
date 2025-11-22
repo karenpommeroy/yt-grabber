@@ -1,7 +1,9 @@
 import {
     compact, every, filter, isEmpty, isFunction, map, replace, truncate, uniq, without
 } from "lodash-es";
-import React, {ChangeEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {
+    ChangeEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState
+} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
@@ -132,6 +134,12 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         event.target.value = "";
     };
 
+    const onTextFieldKeyUp = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter" && event.ctrlKey) {
+            handleLoadInfo();
+        }
+    };
+
     const onShowAdvancedSearchOptionsChange = (e: React.SyntheticEvent<HTMLDivElement>, isExpanded: boolean) => {
         setApplicationOptions((prev) => ({...prev, showAdvancedSearchOptions: isExpanded}));
     };
@@ -229,6 +237,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                             variant="outlined"
                             label={getInputLabel()}
                             error={containsInvalidValues}
+                            onKeyUp={onTextFieldKeyUp}
                             slotProps={{
                                 input: {
                                     ...params.InputProps,
