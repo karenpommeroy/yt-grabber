@@ -155,6 +155,7 @@ export const NumberField = (props: INumberFieldProps) => {
             decimalScale={decimalScale}
             fixedDecimalScale={fixedDecimalScale}
             isAllowed={isAllowed}
+            label={label}
             {...rest}
         />
     );
