@@ -69,7 +69,7 @@ const getPostProcessorArgs = (track: TrackInfo, album: AlbumInfo) => {
         const title = track.title.replace(/"/g, "\\\"");
         const artist = album.artist.replace(/"/g, "\\\"");
         const albumTitle = album.title.replace(/"/g, "\\\"");
-        return getCutsPostProcessorArgs() + `-metadata title="${title}" -metadata artist="${artist}" -metadata album="${albumTitle}" -metadata track="${track.playlist_autonumber}" -metadata date="${album.releaseYear}" -metadata release_year="${album.releaseYear}"`;
+        return getCutsPostProcessorArgs() + `-metadata title="${title}" -metadata artist="${artist}" -metadata album="${albumTitle}" -metadata track="${track.playlist_autonumber}/${album.tracksNumber}" -metadata date="${album.releaseYear}" -metadata release_year="${album.releaseYear}"`;
     }
 
     return getCutsPostProcessorArgs() + `-metadata title="${track.title}"`;
