@@ -19,6 +19,20 @@ const config: Config = {
         "<rootDir>/jest.setup.ts",
     ],
     testPathIgnorePatterns: ["/node_modules/", "/dist/", "/out/", "/e2e/"],
+    reporters: [
+        "default",
+    ],
+    collectCoverage: true,
+    collectCoverageFrom: [
+        "src/**/*.{ts,tsx}",
+        "!src/**/*.d.ts",
+        "!src/**/index.ts",
+    ],
+    coverageDirectory: "<rootDir>/coverage",
+    coverageReporters: [
+        "json",
+        "lcov",
+    ],
 };
 
 export default config;

@@ -35,7 +35,7 @@ const useMultiClickHandler = (props: IUseMultiClickHandlerProps) => {
         onDoubleClick(data);
     };
 
-    return [handleClick, handleDoubleClick];
+    return {handleClick, handleDoubleClick};
 };
 
 export default useMultiClickHandler;

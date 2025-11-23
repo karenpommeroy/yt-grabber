@@ -10,10 +10,37 @@ import {AppContextProvider} from "../src/react/contexts/AppContext";
 import {AppThemeProvider} from "../src/react/contexts/AppThemeContext";
 import {DataProvider} from "../src/react/contexts/DataContext";
 
+export function RootAriaLabelMuiBugFix(props: {rootSelector: string;}): null {
+    const root = document.querySelector(props.rootSelector);
+
+    React.useEffect(() => {
+        if (!root) {
+            console.error("RootAriaLabelMuiBugFix couldn't find the element.");
+            return;
+        }
+
+        const observer = new MutationObserver(() => {
+            if (root.getAttribute("aria-hidden")) {
+                root.removeAttribute("aria-hidden");
+            }
+        });
+
+        observer.observe(root, {
+            attributeFilter: ["aria-hidden"],
+        });
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [root]);
+
+    return null;
+}
+
 export const Providers: React.FC<{children: React.ReactNode;}> = ({children}) => {
     momentDurationFormat(moment as any);
     moment.updateLocale("en", {week: {dow: 1}});
-    
+
     return (
         <AppContextProvider>
             <DataProvider>
@@ -22,6 +49,7 @@ export const Providers: React.FC<{children: React.ReactNode;}> = ({children}) =>
                         <div id="test-root">
                             {children}
                         </div>
+                        <RootAriaLabelMuiBugFix rootSelector="body > div" />
                     </AppThemeProvider>
                 </I18nextProvider>
             </DataProvider>
@@ -31,9 +59,9 @@ export const Providers: React.FC<{children: React.ReactNode;}> = ({children}) =>
 
 export const render = async (ui: React.ReactElement, options?: Omit<RenderOptions, "wrapper">) => {
     const result = baseRender(ui, {wrapper: Providers, ...options});
-    
-    await waitFor(() => expect(result.container.querySelector("#test-root")).toBeInTheDocument());
 
+    await waitFor(() => expect(result.container.querySelector("#test-root")).toBeInTheDocument());
+    
     return result;
 };
 

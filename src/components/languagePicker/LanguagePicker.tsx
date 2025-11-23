@@ -34,8 +34,8 @@ export type LanguagePickerItemProps = LanguagePickerProps & {
 }
 
 export const LanguagePicker = (props: LanguagePickerProps) => {
-    const { mode, showArrow = true, className, ...rest } = props;
-    const { i18n } = useTranslation();
+    const {mode, showArrow = true, className, ...rest} = props;
+    const {i18n} = useTranslation();
     const [loading, setLoading] = useState(false);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const langs = get(i18n, "options.supportedLngs");
@@ -71,7 +71,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
     return (
         <Box className={classnames(Styles.languagePicker,className)} {...rest}>
             <LanguagePickerTrigger showArrow={showArrow} mode={displayMode} loading={loading} onClick={onTriggerClick} />
-            <ClickAwayListener onClickAway={onClickAway}>
+            {anchorEl && <ClickAwayListener onClickAway={onClickAway}>
                 <Menu
                     anchorEl={anchorEl}
                     disablePortal={true}
@@ -90,7 +90,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
                         />
                     ))}
                 </Menu>
-            </ClickAwayListener>
+            </ClickAwayListener>}
         </Box>
     );
 };
@@ -126,11 +126,11 @@ export const LanguagePickerTrigger = (props: LanguagePickerTriggerProps) => {
 };
 
 export const LanguagePickerItem = (props: LanguagePickerItemProps) => {
-    const { lang, onClick } = props;
-    const { t } = useTranslation();
+    const {lang, onClick} = props;
+    const {t} = useTranslation();
 
     return (
-        <MenuItem key={lang} data-id={lang} onClick={() => onClick(lang)} className={Styles.languagePickerItem}>
+        <MenuItem key={lang} value={lang} onClick={() => onClick(lang)} className={Styles.languagePickerItem}>
             <span
                 className={Styles.icon}
                 style={{

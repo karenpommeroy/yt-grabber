@@ -48,11 +48,6 @@ export const ImageModal = (props: ImageModalProps) => {
                         src={imageUrl}
                         title={title}
                         alt={title}
-                        // bgColor="transparent"
-                        // fit="contain"
-                        // duration={100}
-                        // errorIcon={<BrokenImageIcon className={Styles.imagePlaceholder} color="primary" />}
-                        // showLoading={<CircularProgress />}
                         className={Styles.image}
                     />
                 )}

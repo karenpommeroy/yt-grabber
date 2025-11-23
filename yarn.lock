@@ -1460,7 +1460,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/reporters@npm:30.2.0":
+"@jest/reporters@npm:30.2.0, @jest/reporters@npm:^30.0.2":
   version: 30.2.0
   resolution: "@jest/reporters@npm:30.2.0"
   dependencies:
@@ -1537,7 +1537,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/test-result@npm:30.2.0":
+"@jest/test-result@npm:30.2.0, @jest/test-result@npm:^30.0.2":
   version: 30.2.0
   resolution: "@jest/test-result@npm:30.2.0"
   dependencies:
@@ -1584,7 +1584,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/types@npm:30.2.0":
+"@jest/types@npm:30.2.0, @jest/types@npm:^30.0.1":
   version: 30.2.0
   resolution: "@jest/types@npm:30.2.0"
   dependencies:
@@ -5515,6 +5515,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dateformat@npm:3.0.2":
+  version: 3.0.2
+  resolution: "dateformat@npm:3.0.2"
+  checksum: 10/249cfd55fbed9fb33dca8dd05d62bc72d5f443522083294916db7a26ebe3fc6e3b91aac66ab9d3878479e9c76f39abeb854573283b81994feec1cdcf61d0d76c
+  languageName: node
+  linkType: hard
+
 "debounce-fn@npm:^4.0.0":
   version: 4.0.0
   resolution: "debounce-fn@npm:4.0.0"
@@ -9213,6 +9220,24 @@ __metadata:
     fsevents:
       optional: true
   checksum: 10/a88be6b0b672144aa30fe2d72e630d639c8d8729ee2cef84d0f830eac2005ac021cd8354f8ed8ecd74223f6a8b281efb62f466f5c9e01ed17650e38761051f4c
+  languageName: node
+  linkType: hard
+
+"jest-html-reporter@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "jest-html-reporter@npm:4.3.0"
+  dependencies:
+    "@jest/reporters": "npm:^30.0.2"
+    "@jest/test-result": "npm:^30.0.2"
+    "@jest/types": "npm:^30.0.1"
+    dateformat: "npm:3.0.2"
+    mkdirp: "npm:^1.0.3"
+    strip-ansi: "npm:6.0.1"
+    xmlbuilder: "npm:15.0.0"
+  peerDependencies:
+    jest: 19.x - 30.x
+    typescript: ^3.7.x || ^4.3.x || ^5.x
+  checksum: 10/4cd16891f03880df23a8489091c5d527b13a3aa172ce0f55b65acc1616fa5b9457bac8d566cb4a5e4fe5108dd58c56a40ec41c962f82e174ee4ca1a26a5dab59
   languageName: node
   linkType: hard
 
@@ -13288,7 +13313,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strip-ansi-cjs@npm:strip-ansi@^6.0.1, strip-ansi@npm:^6.0.0, strip-ansi@npm:^6.0.1":
+"strip-ansi-cjs@npm:strip-ansi@^6.0.1, strip-ansi@npm:6.0.1, strip-ansi@npm:^6.0.0, strip-ansi@npm:^6.0.1":
   version: 6.0.1
   resolution: "strip-ansi@npm:6.0.1"
   dependencies:
@@ -14949,6 +14974,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"xmlbuilder@npm:15.0.0":
+  version: 15.0.0
+  resolution: "xmlbuilder@npm:15.0.0"
+  checksum: 10/532f7e7ddd6a1ae063f50e763a54ccb05e6e083fbd280871af8db6868a2ac3b447b07c09f790506c13318e07bec91caef7dfb7569bf55c9e9c2678f52abceca4
+  languageName: node
+  linkType: hard
+
 "xmlbuilder@npm:>=11.0.1, xmlbuilder@npm:^15.1.1":
   version: 15.1.1
   resolution: "xmlbuilder@npm:15.1.1"
@@ -15150,6 +15182,7 @@ __metadata:
     identity-obj-proxy: "npm:^3.0.0"
     jest: "npm:^30.2.0"
     jest-environment-jsdom: "npm:^30.2.0"
+    jest-html-reporter: "npm:^4.3.0"
     jiti: "npm:^2.6.1"
     jsonschema: "npm:^1.5.0"
     lodash-es: "npm:^4.17.21"

@@ -4,7 +4,7 @@ global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 const mockStore = {
-    get: jest.fn().mockReturnValue({language: "en"}),
+    get: jest.fn().mockReturnValue({language: "en-GB"}),
     set: jest.fn(),
     delete: jest.fn(),
     clear: jest.fn(),
@@ -14,7 +14,7 @@ const mockStore = {
 };
 
 Object.defineProperty(process, "resourcesPath", {
-    value: "/mocked/resources/path",
+    value: "./src/resources",
     writable: false,
 });
 

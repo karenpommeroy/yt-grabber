@@ -7,7 +7,7 @@ export const useClickCounter = (callback: () => void, clicks = 3, timeout = 500)
     const onReset = useRef(debounce(() => setClickCount(0), timeout, { leading: false, trailing: true }));
 
     const onClick = useCallback(() => {
-        setClickCount(clickCounter + 1);
+        setClickCount((prev) => prev + 1);
         onReset.current();
     }, [callback]);
 
