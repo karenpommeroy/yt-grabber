@@ -2,29 +2,12 @@ import {renderHook} from "@testing-library/react";
 
 import useWindowUpdater from "./useWindowUpdater";
 
-import type {DebouncedFunc} from "lodash";
-
-jest.mock("lodash-es", () => {
-    const actual = jest.requireActual("lodash-es");
-
-    return {
-        ...actual,
-        debounce: (fn: (...args: unknown[]) => void): DebouncedFunc<(...args: unknown[]) => void> => {
-            const debounced = ((...args: unknown[]) => fn(...args)) as DebouncedFunc<(...args: unknown[]) => void>;
-
-            debounced.cancel = jest.fn();
-            debounced.flush = jest.fn(() => fn());
-
-            return debounced;
-        },
-    };
-});
-
 describe("useWindowUpdater", () => {
     let addEventListenerSpy: jest.SpyInstance;
     let removeEventListenerSpy: jest.SpyInstance;
 
     beforeEach(() => {
+        jest.useFakeTimers();
         addEventListenerSpy = jest.spyOn(window, "addEventListener");
         removeEventListenerSpy = jest.spyOn(window, "removeEventListener");
     });
@@ -33,13 +16,14 @@ describe("useWindowUpdater", () => {
         addEventListenerSpy.mockRestore();
         removeEventListenerSpy.mockRestore();
         jest.clearAllMocks();
+        jest.clearAllTimers();
     });
 
     test("registers resize listener and invokes callback on mount", () => {
         const callback = jest.fn();
 
         renderHook(() => useWindowUpdater(callback, 150));
-
+        jest.advanceTimersByTime(150);
         expect(addEventListenerSpy).toHaveBeenCalledWith("resize", expect.any(Function));
         expect(callback).toHaveBeenCalledTimes(1);
     });
@@ -54,6 +38,7 @@ describe("useWindowUpdater", () => {
 
         callback.mockClear();
         resizeHandler();
+        jest.advanceTimersByTime(150);
 
         expect(callback).toHaveBeenCalledTimes(1);
         expect(callback).toHaveBeenCalledWith();

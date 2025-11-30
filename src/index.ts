@@ -66,7 +66,7 @@ const createWindow = async () => {
     
 
     const messaggingService = new MessagingService(ipcMain, mainWindow);
-    logger.debug("Messaging service initialized.");
+    logger.debug("Messaging service initialized: %s", messaggingService.id);
 };
 
 app.on("ready", createWindow);

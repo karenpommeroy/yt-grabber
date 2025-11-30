@@ -28,7 +28,6 @@ import Styles from "./MediaInfoPanel.styl";
 export type MediaInfoPanelProps = {
     item?: AlbumInfo;
     playlist?: PlaylistInfo;
-    className?: string;
     loading?: boolean;
     progress?: number;
     onCancel?: () => void;
@@ -37,7 +36,7 @@ export type MediaInfoPanelProps = {
 }
 
 export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPanelProps) => {
-    const {item, playlist, className, onCancel, onDownload, onOpenOutput, loading, progress = 0} = props;
+    const {item, playlist, onCancel, onDownload, onOpenOutput, loading, progress = 0} = props;
     const {trackStatus, setPlaylists, setTrackCuts, queue} = useDataState();
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [cutTrackModalOpen, setCutTrackModalOpen] = useState(false);
@@ -137,7 +136,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     
     return (
         <>
-            <Grid className={classnames(className, Styles.mediaInfoPanel)} size={12} data-help="mediaInfo">
+            <Grid className={Styles.mediaInfoPanel} size={12} data-help="mediaInfo">
                 <Card variant="outlined" className={Styles.header}>
                     <div className={Styles.imageWrapper} style={{marginRight: 1}}>
                         <CardMedia
@@ -152,11 +151,11 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                     </div>
                     <Box className={Styles.content}>
                         <CardContent className={Styles.info}>
-                            <div className={classnames(Styles.row, Styles, Styles.title)}>
+                            <div className={classnames(Styles.row, Styles.title)}>
                                 <Typography variant="subtitle2" className={Styles.label}>{t("title")}:</Typography>
                                 <Typography variant="subtitle2" sx={{color: "text.secondary"}} className={classnames(Styles.label, Styles.bold)}>{value.title}</Typography>
                             </div>
-                            <div className={classnames(Styles.row, Styles, Styles.artist)}>
+                            <div className={classnames(Styles.row, Styles.artist)}>
                                 <Typography variant="body1" className={Styles.label}>{t("artist")}:</Typography>
                                 <Typography variant="body1" sx={{color: "text.secondary"}}>{value.artist}</Typography>
                             </div>

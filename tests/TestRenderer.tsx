@@ -9,38 +9,12 @@ import i18n from "../src/i18next";
 import {AppContextProvider} from "../src/react/contexts/AppContext";
 import {AppThemeProvider} from "../src/react/contexts/AppThemeContext";
 import {DataProvider} from "../src/react/contexts/DataContext";
-
-export function RootAriaLabelMuiBugFix(props: {rootSelector: string;}): null {
-    const root = document.querySelector(props.rootSelector);
-
-    React.useEffect(() => {
-        if (!root) {
-            console.error("RootAriaLabelMuiBugFix couldn't find the element.");
-            return;
-        }
-
-        const observer = new MutationObserver(() => {
-            if (root.getAttribute("aria-hidden")) {
-                root.removeAttribute("aria-hidden");
-            }
-        });
-
-        observer.observe(root, {
-            attributeFilter: ["aria-hidden"],
-        });
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [root]);
-
-    return null;
-}
+import {RootAttributeRemover} from "./RootAttributeRemover";
 
 export const Providers: React.FC<{children: React.ReactNode;}> = ({children}) => {
     momentDurationFormat(moment as any);
     moment.updateLocale("en", {week: {dow: 1}});
-
+    
     return (
         <AppContextProvider>
             <DataProvider>
@@ -49,7 +23,7 @@ export const Providers: React.FC<{children: React.ReactNode;}> = ({children}) =>
                         <div id="test-root">
                             {children}
                         </div>
-                        <RootAriaLabelMuiBugFix rootSelector="body > div" />
+                        <RootAttributeRemover rootSelector="body > div" attributeName="aria-hidden"/>
                     </AppThemeProvider>
                 </I18nextProvider>
             </DataProvider>

@@ -4,12 +4,12 @@ import {initReactI18next} from "react-i18next";
 
 import {jest} from "@jest/globals";
 
-describe("i18next configuration", () => {
+describe("i18next", () => {
     beforeEach(() => {
         jest.clearAllMocks();
     });
 
-    it("should initialize i18next with the correct configuration", () => {
+    test("initializes i18next with the correct configuration", () => {
         const initSpy = jest.spyOn(i18next, "init");
 
         i18next

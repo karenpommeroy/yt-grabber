@@ -6,13 +6,9 @@ import {render} from "@tests/TestRenderer";
 import {Messages} from "../../messaging/Messages";
 import FileField from "./FileField";
 
-type IpcRendererMock = {
-    send: jest.Mock;
-    on: jest.Mock;
-    off: jest.Mock;
-};
-
-const ipcRendererMock = ipcRenderer as unknown as IpcRendererMock;
+const ipcRendererOnMock = ipcRenderer.on as jest.Mock;
+const ipcRendererOffMock = ipcRenderer.off as jest.Mock;
+const ipcRendererSendMock = ipcRenderer.send as jest.Mock;
 
 describe("FileField", () => {
     beforeEach(() => {
@@ -22,16 +18,16 @@ describe("FileField", () => {
     test("registers and unregisters dialog completion listener", async () => {
         const {unmount} = await render(<FileField id="test-id" />);
 
-        expect(ipcRendererMock.on).toHaveBeenCalledWith(
+        expect(ipcRendererOnMock).toHaveBeenCalledWith(
             `${Messages.OpenSelectPathDialogCompleted}_test-id`,
             expect.any(Function),
         );
 
-        const listener = ipcRendererMock.on.mock.calls[0][1];
+        const listener = ipcRendererOnMock.mock.calls[0][1];
 
         unmount();
 
-        expect(ipcRendererMock.off).toHaveBeenCalledWith(
+        expect(ipcRendererOffMock).toHaveBeenCalledWith(
             `${Messages.OpenSelectPathDialogCompleted}_test-id`,
             listener,
         );
@@ -67,7 +63,7 @@ describe("FileField", () => {
         const button = shell.getByRole("button");
         fireEvent.click(button);
 
-        expect(ipcRendererMock.send).toHaveBeenCalledWith(
+        expect(ipcRendererSendMock).toHaveBeenCalledWith(
             Messages.OpenSelectPathDialog,
             {directory: true, multiple: true, defaultPath: "D://Downloads", id: "picker-id"},
         );
@@ -78,7 +74,7 @@ describe("FileField", () => {
 
         await render(<FileField id="select-id" onChange={handleChange} />);
 
-        const listener = ipcRendererMock.on.mock.calls[0][1];
+        const listener = ipcRendererOnMock.mock.calls[0][1];
 
         listener({} as any, JSON.stringify({paths: "E://Music"}));
 

@@ -6,16 +6,14 @@ import {render} from "@tests/TestRenderer";
 
 import ThemePicker from "./ThemePicker";
 
-jest.mock("@mui/material/styles", () => ({
-    ...jest.requireActual("@mui/material/styles"),
-    useColorScheme: jest.fn(),
-}));
+jest.mock("@mui/material/styles", () => require("@tests/mocks/mui-material-styles"));
 
 describe("ThemePicker", () => {
     const setMode = jest.fn();
-
+    const useColorSchemeMock = useColorScheme as jest.Mock;
+    
     beforeEach(() => {
-        (useColorScheme as jest.Mock).mockReturnValue({mode: "system", setMode});
+        useColorSchemeMock.mockReturnValue({mode: "system", setMode});
         setMode.mockClear();
     });
 
@@ -32,7 +30,7 @@ describe("ThemePicker", () => {
         const optionTexts = options.map((option) => option.textContent);
 
 
-        expect(optionTexts).toEqual(expect.arrayContaining(["Dark", "Light", "System"]));
+        expect(optionTexts).toEqual(expect.arrayContaining(["modeDark", "modeLight", "modeSystem"]));
     });
 
     test("updates mode when selection changes", async () => {
@@ -43,7 +41,7 @@ describe("ThemePicker", () => {
         fireEvent.mouseDown(trigger);
 
         const listbox = await shell.findByRole("listbox");
-        const option = within(listbox).getByRole("option", {name: "Dark"});
+        const option = within(listbox).getByRole("option", {name: "modeDark"});
 
         fireEvent.click(option);
 

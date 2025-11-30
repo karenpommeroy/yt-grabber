@@ -5,13 +5,8 @@ import {act, renderHook, waitFor} from "@testing-library/react";
 import {useAppContext} from "../react/contexts/AppContext";
 import useHelp from "./useHelp";
 
-jest.mock("../react/contexts/AppContext", () => ({
-    useAppContext: jest.fn(),
-}));
-
-jest.mock("react-i18next", () => ({
-    useTranslation: jest.fn(),
-}));
+jest.mock("../react/contexts/AppContext", () => require("@tests/mocks/react/contexts/AppContext"));
+jest.mock("react-i18next", () => require("@tests/mocks/react-i18next"));
 
 const useAppContextMock = useAppContext as jest.MockedFunction<typeof useAppContext>;
 const useTranslationMock = useTranslation as jest.MockedFunction<typeof useTranslation>;
@@ -19,7 +14,6 @@ const useTranslationMock = useTranslation as jest.MockedFunction<typeof useTrans
 const originalGetComputedStyle = window.getComputedStyle;
 
 beforeAll(() => {
-    global.logger = {error: jest.fn()} as any;
     window.getComputedStyle = jest.fn(() => {
         const styles: Record<string, string> = {color: "rgb(0, 0, 0)"};
 
@@ -50,7 +44,7 @@ describe("useHelp", () => {
             setLoading: jest.fn(),
             setHelp: jest.fn(),
         };
-        const state = {help: true} as any;
+        const state = {help: true};
 
         useAppContextMock.mockImplementation(() => ({state, actions}));
         useTranslationMock.mockReturnValue({t: jest.fn((key: string) => `translated-${key}`)} as any);
@@ -90,8 +84,9 @@ describe("useHelp", () => {
             setLoading: jest.fn(),
             setHelp: jest.fn(),
         };
-        const state = {help: true} as any;
-        useAppContextMock.mockImplementation(() => ({state, actions}));
+        const state = {help: true};
+        
+        useAppContextMock. mockImplementation(() => ({state, actions}));
         useTranslationMock.mockReturnValue({t: jest.fn((key: string) => `translated-${key}`)} as any);
 
         const {result} = renderHook(() => useHelp());

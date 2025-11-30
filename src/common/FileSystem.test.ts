@@ -4,29 +4,14 @@ import path from "path";
 import {getBinPath, getProfilePath, getResourcesPath, removeIncompleteFiles} from "./FileSystem";
 import {isDev} from "./Helpers";
 
-jest.mock("fs-extra", () => ({
-    __esModule: true,
-    default: {
-        existsSync: jest.fn(),
-        readdirSync: jest.fn(),
-        removeSync: jest.fn(),
-    },
-}));
-
-jest.mock("./Helpers", () => {
-    const actual = jest.requireActual("./Helpers");
-
-    return {
-        ...actual,
-        isDev: jest.fn(),
-    };
-});
+jest.mock("fs-extra", () => require("@tests/mocks/fs-extra"));
+jest.mock("./Helpers", () => require("@tests/mocks/common/Helpers"));
 
 describe("FileSystem", () => {
     const resourcesPath = ((process as any).resourcesPath ?? "/mocked/resources/path") as string;
     const mockedIsDev = isDev as jest.MockedFunction<typeof isDev>;
     const existsSyncMock = fs.existsSync as jest.Mock;
-    const readdirSyncMock = fs.readdirSync as jest.Mock;;
+    const readdirSyncMock = fs.readdirSync as jest.Mock;
     const removeSyncMock = fs.removeSync as jest.Mock;
 
     beforeEach(() => {

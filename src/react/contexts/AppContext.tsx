@@ -5,7 +5,7 @@ import {actions} from "../actions/AppActions";
 import reducer from "../reducers/AppReducer";
 import {createDefaultState, IAppState} from "../states/AppState";
 
-interface IAppContext {
+export interface IAppContext {
     state: IAppState;
     actions: {
         setLocation: (location: string) => void;

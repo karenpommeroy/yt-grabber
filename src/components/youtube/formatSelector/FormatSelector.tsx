@@ -1,5 +1,6 @@
 import {
-    assign, capitalize, filter, find, first, get, includes, isNumber, last, map, uniq, values
+    assign, capitalize, filter, find, first, get, includes, isEmpty, isNumber, last, map, uniq,
+    values
 } from "lodash-es";
 import React, {ChangeEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -187,7 +188,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                     </Select>
                 </FormControl>
             </Grid>
-            {selectedMediaType === MediaFormat.Video &&
+            {selectedMediaType === MediaFormat.Video && !isEmpty(resolutions) && selectedResolution &&
                 <Grid size="grow">
                     <FormControl fullWidth disabled={disabled} data-help="resolution">
                         <InputLabel id="resolution-label">{t("resolution")}</InputLabel>

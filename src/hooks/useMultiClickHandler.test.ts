@@ -23,20 +23,9 @@ const createDeferred = <T = void>(): Deferred<T> => {
     return {promise, resolve, reject};
 };
 
-jest.mock("./useCancellablePromises", () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-
-jest.mock("../common/CancellablePromise", () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
-
-jest.mock("../common/Delay", () => ({
-    __esModule: true,
-    default: jest.fn(),
-}));
+jest.mock("./useCancellablePromises", () => require("@tests/mocks/hooks/useCancellablePromises"));
+jest.mock("../common/CancellablePromise", () => require("@tests/mocks/common/CancellablePromise"));
+jest.mock("../common/Delay", () => require("@tests/mocks/common/Delay"));
 
 describe("useMultiClickHandler", () => {
     const useCancellablePromisesMock = useCancellablePromises as jest.MockedFunction<typeof useCancellablePromises>;

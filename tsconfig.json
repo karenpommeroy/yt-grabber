@@ -15,9 +15,10 @@
     "sourceMap": true,
     "typeRoots": ["./src/@types"],
     "paths": {
-      "@tests/*": ["tests/*"]
+      "@tests/*": ["tests/*"],
+      "@app/*": ["src/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "webpack.config.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "webpack.config.ts", "jest.setup.ts"],
   "exclude": ["node_modules"]
 }

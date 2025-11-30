@@ -1,6 +1,6 @@
 import classnames from "classnames";
+import {isEmpty} from "lodash-es";
 import map from "lodash-es/map";
-import React from "react";
 import {useTranslation} from "react-i18next";
 
 import SystemModeIcon from "@mui/icons-material/ComputerRounded";
@@ -50,7 +50,7 @@ export const ThemePicker = (props: IThemePickerProps) => {
     return (
         <FormControl fullWidth className={classnames(Styles.themePicker, className)}>
             <InputLabel id="theme-mode-picker-label">{t("themeMode")}</InputLabel>
-            <Select
+            {mode && !isEmpty(themeModes) && <Select
                 SelectDisplayProps={{
                     className: Styles.select
                 }}
@@ -67,7 +67,7 @@ export const ThemePicker = (props: IThemePickerProps) => {
                     {resolveIcon(item)}
                     {resolveText(item)}
                 </MenuItem>)}
-            </Select>
+            </Select>}
         </FormControl>
     );
 };

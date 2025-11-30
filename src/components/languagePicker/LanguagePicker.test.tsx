@@ -5,11 +5,9 @@ import {render} from "@tests/TestRenderer";
 
 import LanguagePicker from "./LanguagePicker";
 
-describe("LanguagePicker", () => {
-    beforeEach(() => {
-        
-    });
+jest.unmock("react-i18next");
 
+describe("LanguagePicker", () => {
     test("renders picker with default options", async () => {
         const shell = await render(<LanguagePicker data-testid="language-picker" />);
 

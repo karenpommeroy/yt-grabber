@@ -1,33 +1,19 @@
 import {TextDecoder, TextEncoder} from "util";
 
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as typeof global.TextDecoder;
+import electronMock from "@tests/mocks/electron";
+import storeMock from "@tests/mocks/electron-store";
+import reactI18nMock from "@tests/mocks/react-i18next";
 
-const mockStore = {
-    get: jest.fn().mockReturnValue({language: "en-GB"}),
-    set: jest.fn(),
-    delete: jest.fn(),
-    clear: jest.fn(),
-    has: jest.fn().mockReturnValue(true),
-    onDidAnyChange: jest.fn().mockReturnValue(jest.fn()),
-    onDidChange: jest.fn().mockReturnValue(jest.fn())
-};
+global.TextEncoder = TextEncoder as typeof global.TextEncoder;
+global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 Object.defineProperty(process, "resourcesPath", {
     value: "./src/resources",
     writable: false,
 });
 
-jest.mock("electron", () => ({
-    ipcRenderer: {
-        send: jest.fn(),
-        on: jest.fn(),
-        off: jest.fn(),
-    },
-}));
+jest.mock("react-i18next", () => reactI18nMock);
+jest.mock("electron", () => electronMock);
+jest.mock("electron-store", () => storeMock);
 
-jest.mock("electron-store", () => {
-    return jest.fn(() => mockStore);
-});
-
-(global as any).store = mockStore;
+(global as any).store = storeMock();

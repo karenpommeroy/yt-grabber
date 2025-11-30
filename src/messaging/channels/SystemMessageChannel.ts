@@ -37,7 +37,7 @@ export class SystemMessageChannel extends MultiMessageChannel {
             {
                 executeMessageKey: Messages.OpenSelectPathDialog,
                 completedMessageKey: Messages.OpenSelectPathDialogCompleted,
-                messageHandler: (params: any) => new Promise(async (resolve, reject) => {
+                messageHandler: (params: any) => new Promise((resolve, reject) => {
                     try {
                         const {directory, multiple, defaultPath} = params;
                         const properties: OpenDialogOptions["properties"] = [
@@ -45,9 +45,10 @@ export class SystemMessageChannel extends MultiMessageChannel {
                             multiple ? "multiSelections" : undefined,
                         ];
             
-                        const result = await dialog.showOpenDialog(this.messageBus.mainWindow, {properties, defaultPath});
+                        dialog.showOpenDialog(this.messageBus.mainWindow, {properties, defaultPath}).then((result) => {
+                            resolve(JSON.stringify({paths: result.canceled ? undefined : result.filePaths[0]}));
+                        });
                         
-                        resolve(JSON.stringify({paths: result.canceled ? undefined : result.filePaths[0]}));
                     } catch (error) {
                         console.error(error);
                     }

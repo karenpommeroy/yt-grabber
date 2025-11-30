@@ -38,7 +38,7 @@ const fileFormat = format.printf(({level, message, timestamp, ...meta}) => {
     
     return `${timestamp} [${level.toUpperCase()}]: ${message} ${metaString}`;
 });
-const consoleFormat = format.printf(({level, message, timestamp, ...meta}) => {
+export const consoleFormat = format.printf(({level, message, timestamp, ...meta}) => {
     const metaString = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : "";
     const symbols = Object.getOwnPropertySymbols(meta);
     const splatSymbol = symbols.find(sym => sym.description === "splat");

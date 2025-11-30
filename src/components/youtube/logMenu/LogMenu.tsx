@@ -1,4 +1,3 @@
-import classnames from "classnames";
 import {isEmpty, map} from "lodash-es";
 import React, {HTMLAttributes} from "react";
 import {useTranslation} from "react-i18next";
@@ -15,7 +14,7 @@ import Styles from "./LogMenu.styl";
 export type LogMenuProps = HTMLAttributes<HTMLDivElement>;
 
 export const LogMenu: React.FC<LogMenuProps> = (props) => {
-    const {className, hidden} = props;
+    const {hidden} = props;
     const {errors, warnings} = useDataState();
     const [errorAnchorEl, setErrorAnchorEl] = React.useState<null | HTMLElement>(null);
     const [warningAnchorEl, setWarningAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -44,7 +43,7 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
     if (hidden) return null;
 
     return (
-        <div className={classnames(Styles.logMenu, className)} data-help="logMenu">
+        <div className={Styles.logMenu} data-help="logMenu">
             <Tooltip title={t("errors")} arrow enterDelay={500} leaveDelay={100} enterNextDelay={500}>
                 <div>
                     <IconButton className={Styles.logButton} color="error" disabled={isEmpty(errors)} onClick={handleErrorClick}>

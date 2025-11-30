@@ -5,10 +5,7 @@ import {render} from "@tests/TestRenderer";
 
 import NumberField from "./NumberField";
 
-jest.mock("usehooks-ts", () => ({
-    useInterval: jest.fn(),
-}));
-
+jest.mock("usehooks-ts", () => require("@tests/mocks/usehooks-ts"));
 type NumberFieldProps = React.ComponentProps<typeof NumberField>;
 
 type ControlledNumberFieldProps = Omit<NumberFieldProps, "value" | "onChange" | "variant"> & {

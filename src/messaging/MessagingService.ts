@@ -11,6 +11,8 @@ import {Messages} from "./Messages";
 import {MultiMessageChannel} from "./MultiMessageChannel";
 
 export class MessagingService {
+    public id: number;
+    
     private messageBus: MessageBus;
     private channels = new Map<string, MessageChannel | MultiMessageChannel>();
 
@@ -21,5 +23,6 @@ export class MessagingService {
         this.channels.set(Messages.GetYoutubeAlbums, new YoutubeAlbumsMessageChannel(this.messageBus));
         this.channels.set(Messages.GetYoutubeTracks, new YoutubeTracksMessageChannel(this.messageBus));
         this.channels.set(Messages.OpenUrlInBrowser, new SystemMessageChannel(this.messageBus));
+        this.id = Date.now();
     }
 }

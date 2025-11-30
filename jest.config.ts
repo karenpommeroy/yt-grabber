@@ -11,8 +11,9 @@ const config: Config = {
     ],
     moduleNameMapper: {
         "\\.(css|less|scss|sass|styl)$": "identity-obj-proxy",
-        "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/tests/FileMock.ts",
-        "^@tests/(.*)$": "<rootDir>/tests/$1"
+        "\\.(jpg|jpeg|png|gif|svg)$": "<rootDir>/tests/mocks/FileMock.ts",
+        "^@tests/(.*)$": "<rootDir>/tests/$1",
+        "^@app/(.*)$": "<rootDir>/src/$1",
     },
     setupFilesAfterEnv: [
         "@testing-library/jest-dom",

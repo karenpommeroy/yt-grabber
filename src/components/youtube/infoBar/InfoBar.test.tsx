@@ -4,23 +4,8 @@ import {useAppContext} from "../../../react/contexts/AppContext";
 import {useDataState} from "../../../react/contexts/DataContext";
 import InfoBar from "./InfoBar";
 
-jest.mock("../../../react/contexts/AppContext", () => {
-    const actual = jest.requireActual("../../../react/contexts/AppContext");
-    
-    return {
-        ...actual,
-        useAppContext: jest.fn(() => ({state: {loading: false}}))
-    };
-});
-
-jest.mock("../../../react/contexts/DataContext", () => {
-    const actual = jest.requireActual("../../../react/contexts/DataContext");
-    
-    return {
-        ...actual,
-        useDataState: jest.fn(() => ({})),
-    };
-});
+jest.mock("../../../react/contexts/AppContext", () => require("@tests/mocks/react/contexts/AppContext"));
+jest.mock("../../../react/contexts/DataContext", () => require("@tests/mocks/react/contexts/DataContext"));
 
 describe("InfoBar component", () => {
     beforeEach(() => {

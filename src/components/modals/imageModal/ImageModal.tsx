@@ -33,7 +33,7 @@ export const ImageModal = (props: ImageModalProps) => {
             {...rest}
         >
             <DialogTitle textAlign="center">{title}</DialogTitle>
-            <DialogContent className={Styles.content}>
+            <DialogContent className={Styles.dialogContent}>
                 {imageUrl && (
                     <Box
                         component="img"

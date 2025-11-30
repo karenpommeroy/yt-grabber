@@ -1,4 +1,3 @@
-import classnames from "classnames";
 import {find, map} from "lodash-es";
 import React, {MouseEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -26,7 +25,7 @@ export type InputModeOption = {
 }
 
 export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
-    const {disabled, className} = props;
+    const {disabled} = props;
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef<HTMLButtonElement>(null);
     const {t} = useTranslation();
@@ -79,7 +78,7 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
     };
 
     return (
-        <div className={classnames(Styles.inputModePicker, className)} data-help="selectInputMode">
+        <div className={Styles.inputModePicker} data-help="selectInputMode">
             <Tooltip title={t("selectInputMode")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                 <Button disabled={disabled} className={Styles.button} variant="contained" color={selected?.color as any} disableElevation onClick={handleToggle} ref={anchorRef}>
                     {selected && <selected.icon className={Styles.icon} />}
