@@ -37,7 +37,7 @@
     "edit": "Edytuj",
     "errors": "Błędy",
     "exceptionGetYoutubeUrls": "GetYoutubeUrls: Błąd",
-    "exceptionGetYoutubeUrlsText": "Wystąpił błąd podczas wczytywania danych z YouTube",
+    "exceptionGetYoutubeUrlsText": "Wystąpił błąd podczas wczytywania danych z YouTube: {{error}}",
     "exceptionTimeout": "Błąd czasu oczekiwania",
     "exceptionTimeoutText": "Przekroczono limit czasu podczas wczytywania danych z YouTube",
     "extractingAudio": "Wyodrębnianie dźwięku",

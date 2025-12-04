@@ -37,7 +37,7 @@
     "edit": "Bearbeiten",
     "errors": "Fehler",
     "exceptionGetYoutubeUrls": "GetYoutubeUrls: Fehler",
-    "exceptionGetYoutubeUrlsText": "Beim Laden der Ressourcen von YouTube ist ein Fehler aufgetreten",
+    "exceptionGetYoutubeUrlsText": "Beim Laden der Ressourcen von YouTube ist ein Fehler aufgetreten: {{error}}",
     "exceptionTimeout": "Timeout-Fehler",
     "exceptionTimeoutText": "Beim Laden von Ressourcen von YouTube ist eine Zeitüberschreitung aufgetreten",
     "extractingAudio": "Audio Extrahieren",

@@ -1,5 +1,5 @@
 import {i18n as i18next} from "i18next";
-import {map, merge} from "lodash-es";
+import {merge} from "lodash-es";
 import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
@@ -55,7 +55,6 @@ export const execute = async (parameters: MessageHandlerParams) => {
 
 const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18next, onUpdate: (data: ProgressInfo<GetYoutubeResult>) => void) => {
     const result: GetYoutubeResult = {warnings: [], errors: [], values: [], sources: params.values};
-    
     await i18n.changeLanguage(params.lang);
 
     reporter = new Reporter(onUpdate);
@@ -81,8 +80,7 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
 
             albumFilterButton.click();
             await page.waitForNetworkIdle();
-
-            const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements: Element[]) => map(elements, (el) => el.getAttribute("href")));
+            const items = await page.$$eval(`xpath/${AlbumLinkSelector}`, (elements: Element[]) => elements.map((el) => el.getAttribute("href")));
 
             for (const item of items) {
                 results.push(`${params.url}/${item}`);
@@ -90,7 +88,7 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
 
             return results;
         } catch (error) {
-            const items = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements: Element[]) => map(elements, (el) => el.getAttribute("href")));
+            const items = await page.$$eval(`xpath/${AlbumsDirectLinkSelector}`, (elements: Element[]) => elements.map((el) => el.getAttribute("href")));
 
             for (const item of items) {
                 results.push(`${params.url}/${item}`);

@@ -166,6 +166,12 @@ export const HomeView: React.FC = () => {
 
     const onGetYoutubeCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeResult>) => {
         if (!data.result) return;
+        
+        if (!isEmpty(data.result.errors)) {
+            for (const error of data.result.errors) {
+                logger.error(`${error.title}: ${error.description}`);
+            }
+        }
 
         setPlaylists((prev) => [...filter(prev, (p) => !includes(data.result.sources, p.url)), ...map(data.result.values, (v) => ({url: v, album: {}, tracks: []} as PlaylistInfo))]);
         try {

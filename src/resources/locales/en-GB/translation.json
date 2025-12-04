@@ -37,7 +37,7 @@
     "edit": "Edit",
     "errors": "Errors",
     "exceptionGetYoutubeUrls": "GetYoutubeUrls: Error",
-    "exceptionGetYoutubeUrlsText": "Error occured while loading resources from youtube",
+    "exceptionGetYoutubeUrlsText": "Error occured while loading resources from youtube: {{error}}",
     "exceptionTimeout": "Timeout error",
     "exceptionTimeoutText": "Timeout occured while loading resources from youtube",
     "extractingAudio": "Extracting Audio",

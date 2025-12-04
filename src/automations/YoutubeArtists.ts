@@ -1,5 +1,5 @@
 import {i18n as i18next} from "i18next";
-import {map, merge} from "lodash-es";
+import {merge} from "lodash-es";
 import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
