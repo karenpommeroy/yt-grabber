@@ -82,6 +82,23 @@ describe("SettingsView", () => {
         ));
     });
 
+    test("toggles download albums flag", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const albumsCheckbox = shell.getByLabelText("downloadAlbums") as HTMLInputElement;
+        expect(albumsCheckbox.checked).toBe(true);
+
+        fireEvent.click(albumsCheckbox);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({downloadAlbums: false})
+        ));
+    });
+
     test("shows validation error for invalid template tokens", async () => {
         const shell = await render(<SettingsView />);
         const templateInput = shell.getByLabelText("albumOutputTemplate") as HTMLInputElement;
@@ -168,6 +185,22 @@ describe("SettingsView", () => {
         ));
     });
 
+    test("updates chrome executable path and writes to store", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const chromeInput = shell.getByLabelText("chromeExecutablePath") as HTMLInputElement;
+        fireEvent.change(chromeInput, {target: {value: "C:/chrome.exe"}});
+        fireEvent.blur(chromeInput, {target: {value: "C:/chrome.exe"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({chromeExecutablePath: "C:/chrome.exe"}),
+        ), {timeout: 2000});
+    });
+
     test("resets output directory to default when cleared", async () => {
         const shell = await render(<SettingsView />);
 
@@ -215,6 +248,21 @@ describe("SettingsView", () => {
         await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
             "application",
             expect.objectContaining({mergeParts: false}),
+        ));
+    });
+
+    test("updates concurrency value", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const concurrencyInput = shell.getByLabelText("concurrency") as HTMLInputElement;
+        fireEvent.change(concurrencyInput, {target: {value: "8"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({concurrency: 8}),
         ));
     });
 

@@ -30,6 +30,7 @@ const config: Config = {
         "!src/**/index.ts",
     ],
     coverageDirectory: "<rootDir>/coverage",
+    coverageProvider: "v8",
     coverageReporters: [
         "json",
         "lcov",
