@@ -1,0 +1,50 @@
+name: Run Unit Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack (Yarn 4.x support)
+        run: corepack enable
+
+      - name: Prepare Yarn version
+        run: corepack prepare yarn@4.4.1 --activate
+
+      - name: Cache Yarn PnP
+        uses: actions/cache@v4
+        with:
+          path: .yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies (Yarn PnP)
+        run: yarn install --immutable
+
+      - name: Run unit tests
+        run: yarn test --ci --coverage
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: 6353cc14-1536-4b0c-bf9c-a0aad51ceff5
+          files: ./coverage/lcov.info
