@@ -44,8 +44,8 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const valueCount = urls?.length ?? 0;
-    const [fromYear, setFromYear] = useState<string>();
-    const [untilYear, setUntilYear] = useState<string>();
+    const [fromYear, setFromYear] = useState<string>("");
+    const [untilYear, setUntilYear] = useState<string>("");
     const [inputMode, setInputMode] = useState<InputMode>(global.store.get("application.inputMode"));
 
     const truncateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)/;
@@ -288,9 +288,11 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     }
                     {loading &&
                         <Tooltip title={t("cancelAll")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
-                            <Button data-help="cancellAll" variant="contained" disableElevation color="secondary" onClick={onCancel}>
-                                <ClearIcon />
-                            </Button>
+                            <div>
+                                <Button data-help="cancellAll" variant="contained" disableElevation color="secondary" onClick={onCancel}>
+                                    <ClearIcon />
+                                </Button>
+                            </div>
                         </Tooltip>
                     }
                 </Stack>

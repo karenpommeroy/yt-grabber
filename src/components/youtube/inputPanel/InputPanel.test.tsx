@@ -37,11 +37,11 @@ const setupData = (overrides: Partial<ReturnType<typeof useDataState>> = {}) => 
         urls: ["https://youtu.be/abc123def45"],
         setUrls: jest.fn(),
         ...overrides,
-    } as any);
+    });
 };
 
 describe("InputPanel", () => {
-    test("ctrl+enter triggers load info", async () => {
+    test("ctrl and enter triggers load info", async () => {
         setupStore();
         const setUrls = jest.fn();
         setupData({urls: ["https://youtu.be/abc123def45"], setUrls});
@@ -52,7 +52,7 @@ describe("InputPanel", () => {
         const input = shell.getByLabelText(/artistOrArtists/i);
         fireEvent.keyUp(input, {key: "Enter", ctrlKey: true});
 
-        await waitFor(() => expect(onLoadInfo).toHaveBeenCalledWith(["https://youtu.be/abc123def45"], undefined, undefined));
+        await waitFor(() => expect(onLoadInfo).toHaveBeenCalledWith(["https://youtu.be/abc123def45"], "", ""));
     });
 
     test("loads info with years on click", async () => {
@@ -110,7 +110,6 @@ describe("InputPanel", () => {
 
         expect(onDownloadFailed).toHaveBeenCalled();
     });
-
     test("shows cancel when loading", async () => {
         setupStore();
         setupData();

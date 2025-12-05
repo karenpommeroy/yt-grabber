@@ -235,8 +235,10 @@ describe("HomeView", () => {
         const handlers = getInputPanelHandlers();
 
         ipcRendererSendMock.mockClear();
-        handlers.onCancel();
-
+        act(() => {
+            handlers.onCancel();
+        });
+        
         expect(ipcRendererSendMock).toHaveBeenNthCalledWith(1, Messages.GetYoutubeUrlsCancel);
         expect(ipcRendererSendMock).toHaveBeenNthCalledWith(2, Messages.GetYoutubeArtistsCancel);
         expect(ipcRendererSendMock).toHaveBeenNthCalledWith(3, Messages.GetYoutubeAlbumsCancel);
