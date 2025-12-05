@@ -35,8 +35,13 @@ export const render = async (ui: React.ReactElement, options?: Omit<RenderOption
     const result = baseRender(ui, {wrapper: Providers, ...options});
 
     await waitFor(() => expect(result.container.querySelector("#test-root")).toBeInTheDocument());
-    
+
     return result;
 };
+
+export const renderModal = <P extends object>(Component: React.ComponentType<P>, componentProps: P) => {
+    return render(<Component {...componentProps} />);
+};
+
 
 export default render;

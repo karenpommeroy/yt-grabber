@@ -16,14 +16,17 @@ export const RootAttributeRemover = (props:RootAttributeRemoverProps): null => {
         if (!root) {
             throw new Error("RootAttributeRemover couldn't find the element.");
         }
-
         const observer = new MutationObserver(() => {
             if (!root.getAttribute(attributeName)) return;
-
+            
             root.removeAttribute(attributeName);
         });
-
+        
         observer.observe(root, {attributeFilter: [attributeName]});
+
+        if (root.getAttribute(attributeName)) {
+            root.removeAttribute(attributeName);
+        }
 
         return () => {
             observer.disconnect();

@@ -32,7 +32,7 @@ export const execute = async (parameters: MessageHandlerParams) => {
             abortPromise,
         ]);
     } catch (error: any) {
-        const result: GetYoutubeResult = {errors: [], sources: params.values};
+        const result: GetYoutubeResult = {warnings: [], errors: [], sources: params.values};
         if (error.message === "aborted") {
             throw error;
         }

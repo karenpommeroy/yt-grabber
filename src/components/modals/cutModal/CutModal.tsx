@@ -116,7 +116,10 @@ export const CutModal: React.FC<CutModalProps> = (props: CutModalProps) => {
 
     const handleKeyUp = (e: KeyboardEvent) => {
         if (e.key === "Enter") {
-            onClose(entries);
+            handleClose();
+        }
+        if (e.key === "Escape") {
+            handleCancel();
         }
     };
 

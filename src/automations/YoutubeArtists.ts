@@ -182,7 +182,7 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
             await page.waitForNetworkIdle();
             
         } catch (e) {
-            console.log("Albums already filtered");
+            console.warn("Albums already filtered");
         } finally {
             const selector =  fromYear || untilYear ? getYtMusicAlbumLinkSelectorFilteredByDate(fromYear, untilYear) : AlbumLinkSelector;
             const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
@@ -223,7 +223,7 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
             await page.waitForNetworkIdle();
             
         } catch (e) {
-            console.log("Singles already filtered");
+            console.warn("Singles already filtered");
         } finally {
             const selector =  fromYear || untilYear ? getYtMusicSingleLinkSelectorFilteredByDate(fromYear, untilYear) : SingleLinkSelector;
             const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));

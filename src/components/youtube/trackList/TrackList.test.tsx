@@ -90,4 +90,54 @@ describe("TrackList", () => {
         const nextCuts = updater({});
         expect(nextCuts[baseTrack.id]).toEqual([[0, baseTrack.duration]]);
     });
+
+    test("adds and deletes track cuts via popover controls", async () => {
+        const setTrackCuts = jest.fn();
+
+        setupDataState({
+            trackCuts: {[baseTrack.id]: [[0, baseTrack.duration]]},
+            setTrackCuts,
+            tracks: [baseTrack],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+        const cutButton = shell.container.querySelector("[data-help=\"cut\"]") as HTMLButtonElement;
+
+        fireEvent.click(cutButton);
+
+        const addButton = document.body.querySelector(".trackCutPopup button:not([data-index])") as HTMLButtonElement;
+        fireEvent.click(addButton);
+
+        const addUpdater = setTrackCuts.mock.calls[0][0] as (prev: Record<string, [number, number][]>) => Record<string, [number, number][]>;
+        const addedCuts = addUpdater({[baseTrack.id]: [[0, baseTrack.duration]]});
+        expect(addedCuts[baseTrack.id]).toHaveLength(2);
+
+        const deleteButton = document.body.querySelector(".trackCutPopup button[data-index=\"0\"]") as HTMLButtonElement;
+        fireEvent.click(deleteButton);
+
+        const deleteUpdater = setTrackCuts.mock.calls[1][0] as (prev: Record<string, [number, number][]>) => Record<string, [number, number][]>;
+        const afterDelete = deleteUpdater({[baseTrack.id]: [[0, baseTrack.duration]]});
+        expect(afterDelete[baseTrack.id]).toBeUndefined();
+    });
+
+    test("renders completed track info with find file action", async () => {
+        const onOpenFile = jest.fn();
+        setupDataState({
+            tracks: [baseTrack],
+            trackStatus: [{
+                trackId: baseTrack.id,
+                percent: 100,
+                completed: true,
+                totalSize: 123456,
+            } as TrackStatusInfo],
+        });
+
+        const shell = await render(<TrackList queue={[]} onOpenFile={onOpenFile} />);
+        const findButton = shell.container.querySelector("[data-help=\"findInFileSystem\"]") as HTMLButtonElement;
+
+        expect(findButton).toBeInTheDocument();
+        fireEvent.click(findButton);
+
+        expect(onOpenFile).toHaveBeenCalledWith(baseTrack.id);
+    });
 });

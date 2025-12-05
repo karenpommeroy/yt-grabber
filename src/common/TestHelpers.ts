@@ -1,10 +1,13 @@
+import {i18n, TFunction} from "i18next";
 import {map} from "lodash-es";
 
 import {MessageBus} from "../messaging/MessageBus";
 import {useDataState} from "../react/contexts/DataContext";
 import {
-    AudioType, Format, FormatScope, MediaFormat, MultiMatchAction, SortOrder, TabsOrderKey
+    AudioType, Format, FormatScope, InputMode, MediaFormat, MultiMatchAction, SortOrder,
+    TabsOrderKey
 } from "./Media";
+import {GetYoutubeParams} from "./Messaging";
 import {ApplicationOptions} from "./Store";
 import {AlbumInfo, FormatInfo, PlaylistInfo, TrackInfo, TrackStatusInfo} from "./Youtube";
 
@@ -15,9 +18,9 @@ type PageStub = Pick<Page, "goto"> & InstanceType<typeof Page> & {
     setCookie: jest.Mock;
 };
 
-type MockedDataState = Record<string, unknown> &{
-    errors: Array<{url: string; message: string}>;
-    warnings: Array<{url: string; message: string}>;
+type MockedDataState = Record<string, unknown> & {
+    errors: Array<{url: string; message: string;}>;
+    warnings: Array<{url: string; message: string;}>;
     trackStatus: TrackStatusInfo[];
     queue: string[];
     formats: Record<string, Format>;
@@ -26,7 +29,7 @@ type MockedDataState = Record<string, unknown> &{
     setTrackCuts: jest.Mock;
     setFormats: jest.Mock;
     tracks: TrackInfo[];
-    trackCuts: {[key: string]: [number, number][]};
+    trackCuts: {[key: string]: [number, number][];};
     setTracks: jest.Mock;
     setTrackStatus: jest.Mock;
 };
@@ -34,18 +37,25 @@ type MockedDataState = Record<string, unknown> &{
 export const createApplicationOptions = (overrides: Partial<ApplicationOptions> = {}): ApplicationOptions => {
     return {
         youtubeUrl: "https://music.youtube.com",
-        outputDirectory: "C:/downloads",
+        outputDirectory: "./downloads",
         ytdlpExecutablePath: "C:/yt/yt-dlp.exe",
         ffmpegExecutablePath: "C:/ffmpeg.exe",
         gifsicleExecutablePath: "C:/gifsicle.exe",
         chromeExecutablePath: "C:/chrome.exe",
-        albumOutputTemplate: "{{artist}}/{{trackTitle}}",
+        albumOutputTemplate: "{{artist}}/[{{releaseYear}}] {{albumTitle}}/{{trackNo}} - {{trackTitle}}",
         playlistOutputTemplate: "{{albumTitle}}/{{trackTitle}}",
         videoOutputTemplate: "{{artist}} - {{trackTitle}}",
         trackOutputTemplate: "{{artist}} - {{trackTitle}}",
         customYtdlpArgs: "",
         concurrency: 5,
         quality: 8,
+        language: "en-GB",
+        debugMode: false,
+        inputMode: InputMode.Auto,
+        showAdvancedSearchOptions: false,
+        playlistCheckMaxItemsCount: 3,
+        playlistCountThreshold: 10,
+        urls: [],
         formatScope: FormatScope.Global,
         multiMatchAction: MultiMatchAction.UseFirst,
         tabsOrder: [TabsOrderKey.Default, SortOrder.Asc],
@@ -55,11 +65,11 @@ export const createApplicationOptions = (overrides: Partial<ApplicationOptions> 
         mergeParts: true,
         ...overrides,
     };
-};  
+};
 
-export const createApplicationOptionsMock = (overrides: Partial<{formatScope: FormatScope}> = {}) => {
+export const createApplicationOptionsMock = (overrides: Partial<{formatScope: FormatScope;}> = {}) => {
     const mockedStoreGet = store.get as jest.Mock;
-    
+
     mockedStoreGet.mockImplementation((key: string) => {
         if (key === "application") {
             return {formatScope: FormatScope.Global, ...overrides};
@@ -124,19 +134,19 @@ export const createFormatInfo = (overrides: Partial<FormatInfo> = {}): FormatInf
 
 export const createAlbumInfo = (overrides: Partial<AlbumInfo> = {}): AlbumInfo => ({
     id: "album-1",
-    artist: "Artist",
-    title: "Album",
-    releaseYear: 1999,
-    tracksNumber: 1,
-    duration: 300,
-    thumbnail: "thumbnail.jpg",
-    url: "https://example.com",
+    artist: "Album Artist",
+    title: "Album Title",
+    releaseYear: 2023,
+    tracksNumber: 12,
+    duration: 3600,
+    thumbnail: "https://example.com/album.jpg",
+    url: "https://example.com/playlist",
     ...overrides,
 });
 
 export const createPlaylistInfo = (overrides: Partial<PlaylistInfo> = {}): PlaylistInfo => {
     const {url = "album-1", album, tracks} = overrides;
-    
+
     return {
         url,
         album: createAlbumInfo(album),
@@ -146,13 +156,29 @@ export const createPlaylistInfo = (overrides: Partial<PlaylistInfo> = {}): Playl
 
 export const createTrackInfo = (overrides: Partial<TrackInfo> = {}): TrackInfo => ({
     id: "track-1",
-    title: "track",
+    title: "Track Title",
     duration: 300,
-    artist: "artist",
-    album: "album",
-    creators: ["artist"],
-    timestamp: Date.now(),
+    album: "Test Album",
+    artist: "Track Artist",
+    channel: "Channel",
+    creators: ["Track Artist"],
+    thumbnail: "https://example.com/thumb.jpg",
     release_year: 2000,
+    uploader: "Uploader",
+    original_url: "https://example.com/track",
+    playlist: "",
+    playlist_title: "Playlist Title",
+    playlist_id: "playlist-1",
+    playlist_autonumber: 1,
+    playlist_count: 5,
+    playlist_uploader: "Playlist Uploader",
+    playlist_uploader_id: "Playlist Uploader Id",
+    playlist_channel: "Playlist Channel",
+    playlist_channel_id: "Playlist Channel Id",
+    formats: [],
+    timestamp: 1_600_000_000,
+    filesize_approx: 0,
+    thumbnails: [],
     ...overrides,
 } as TrackInfo);
 
@@ -179,4 +205,37 @@ export const setupDataState = (overrides: Partial<MockedDataState> = {}) => {
     useDataStateMock.mockReturnValue(state as any);
 
     return state;
+};
+
+export const createPageMock = () => ({
+    setUserAgent: jest.fn().mockResolvedValue(undefined),
+    waitForSelector: jest.fn(),
+    waitForNetworkIdle: jest.fn().mockResolvedValue(undefined),
+    $$: jest.fn().mockResolvedValue([]),
+    $$eval: jest.fn(),
+    close: jest.fn().mockResolvedValue(undefined),
+    keyboard: {press: jest.fn()},
+});
+
+export const createBrowserMock = (page: ReturnType<typeof createPageMock>) => ({
+    pages: jest.fn().mockResolvedValue([page]),
+    close: jest.fn().mockResolvedValue(undefined),
+});
+
+export const createI18n = (): i18n => ({
+    t: ((key: string) => key) as TFunction,
+    changeLanguage: jest.fn().mockResolvedValue(undefined),
+} as unknown as i18n);
+
+export const createElements = (hrefs: string[]) => hrefs.map((href) => ({
+    getAttribute: () => href,
+}));
+
+export const createYoutubeParams = (overwrites?: GetYoutubeParams): GetYoutubeParams => {
+    return {
+        values: ["https://music.youtube.com/channel/UC123"],
+        lang: "en",
+        url: "https://music.youtube.com",
+        ...overwrites
+    };
 };

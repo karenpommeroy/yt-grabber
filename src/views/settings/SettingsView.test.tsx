@@ -1,10 +1,11 @@
 import {spawn} from "child_process";
+import path from "path";
 import versionInfo from "win-version-info";
 
 import {act, fireEvent, waitFor} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
-import {SortOrder, TabsOrderKey} from "../../common/Media";
+import {FormatScope, MultiMatchAction, SortOrder, TabsOrderKey} from "../../common/Media";
 import {ApplicationOptions} from "../../common/Store";
 import {createApplicationOptions} from "../../common/TestHelpers";
 import {useAppContext} from "../../react/contexts/AppContext";
@@ -90,6 +91,18 @@ describe("SettingsView", () => {
         await waitFor(() => expect(shell.getByText("invalidTemplateKeys")).toBeInTheDocument());
     });
 
+    test("clears template validation error when tokens are valid", async () => {
+        const shell = await render(<SettingsView />);
+        const templateInput = shell.getByLabelText("albumOutputTemplate") as HTMLInputElement;
+
+        fireEvent.change(templateInput, {target: {value: "{{invalid}}"}});
+        await waitFor(() => expect(shell.getByText("invalidTemplateKeys")).toBeInTheDocument());
+
+        fireEvent.change(templateInput, {target: {value: "{{artist}}/{{albumTitle}}"}});
+
+        await waitFor(() => expect(shell.queryByText("invalidTemplateKeys")).not.toBeInTheDocument());
+    });
+
     test("refreshes yt-dlp version after update completes", async () => {
         versionInfoMock.mockImplementationOnce(() => ({FileVersion: "2023.01"}))
             .mockImplementationOnce(() => ({FileVersion: "2024.02"}))
@@ -113,7 +126,7 @@ describe("SettingsView", () => {
         const updateButton = shell.getByRole("button", {name: "update"});
         fireEvent.click(updateButton);
 
-        expect(spawnMock).toHaveBeenCalledWith(applicationOptions.ytdlpExecutablePath, ["-U"], {shell: true});
+        expect(spawnMock).toHaveBeenCalledWith(store.get("application.ytdlpExecutablePath"), ["-U"], {shell: true});
         expect(closeHandler).toBeDefined();
 
         await act(async () => {
@@ -121,5 +134,149 @@ describe("SettingsView", () => {
         });
 
         await waitFor(() => expect(shell.getByText("ytdlpVersion: 2024.02")).toBeInTheDocument());
+    });
+
+    test("toggles tabs order sort and persists", async () => {
+        applicationOptions = createApplicationOptions({tabsOrder: [TabsOrderKey.Artist, SortOrder.Asc]});
+        storeSetMock("application.tabsOrder", [TabsOrderKey.Artist, SortOrder.Asc]);
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const toggleButton = shell.container.querySelector("[data-help=\"tabsOrder\"] button") as HTMLButtonElement;
+        fireEvent.click(toggleButton);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({tabsOrder: [TabsOrderKey.Artist, SortOrder.Desc]}),
+        ));
+    });
+
+    test("updates youtube url and writes to store", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const urlInput = shell.getByLabelText("youtubeUrl") as HTMLInputElement;
+        fireEvent.change(urlInput, {target: {value: "https://example.com/channel"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({youtubeUrl: "https://example.com/channel"}),
+        ));
+    });
+
+    test("resets output directory to default when cleared", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const outputInput = shell.getByLabelText("outputDirectory") as HTMLInputElement;
+        fireEvent.change(outputInput, {target: {value: ""}});
+        fireEvent.blur(outputInput, {target: {value: ""}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({outputDirectory: path.resolve("./output")}),
+        ));
+    });
+
+    test("persists overwrite setting toggles", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const overwriteSwitch = shell.getByLabelText("alwaysOverwrite") as HTMLInputElement;
+        expect(overwriteSwitch.checked).toBe(false);
+
+        fireEvent.click(overwriteSwitch);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({alwaysOverwrite: true}),
+        ));
+    });
+
+    test("persists merge parts setting", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const mergeSwitch = shell.getByLabelText("mergeParts") as HTMLInputElement;
+        expect(mergeSwitch.checked).toBe(true);
+
+        fireEvent.click(mergeSwitch);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({mergeParts: false}),
+        ));
+    });
+
+    test("updates format scope selection", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const tabScopeRadio = shell.getByLabelText("formatScopeTab") as HTMLInputElement;
+        fireEvent.click(tabScopeRadio);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({formatScope: FormatScope.Tab}),
+        ));
+    });
+
+    test("updates multi match action selection", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const askRadio = shell.getByLabelText("multiMatchActionAsk") as HTMLInputElement;
+        fireEvent.click(askRadio);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({multiMatchAction: MultiMatchAction.Ask}),
+        ));
+    });
+
+    test("updates custom yt-dlp args and persists", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const argsInput = shell.getByLabelText("customYtdlpArgs") as HTMLInputElement;
+        fireEvent.change(argsInput, {target: {value: "--proxy socks5://localhost:1080"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({customYtdlpArgs: "--proxy socks5://localhost:1080"}),
+        ));
+    });
+
+    test("changes tabs order key and persists", async () => {
+        applicationOptions = createApplicationOptions({tabsOrder: [TabsOrderKey.Default, SortOrder.Asc]});
+        mockStoreGet();
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const selectInput = shell.container.querySelector("[data-help=\"tabsOrderField\"] input") as HTMLInputElement;
+        fireEvent.change(selectInput, {target: {value: TabsOrderKey.Artist}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({tabsOrder: [TabsOrderKey.Artist, SortOrder.Asc]}),
+        ));
     });
 });
