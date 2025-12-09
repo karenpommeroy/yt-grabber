@@ -40,7 +40,7 @@ export const execute = async (parameters: MessageHandlerParams) => {
             abortPromise,
         ]);
     } catch (error: any) {
-        const result: GetYoutubeResult = {errors: [], sources: params.values};
+        const result: GetYoutubeResult = {errors: [], warnings: [], values: [], sources: params.values};
         
         if (error.message === "aborted") {
             throw error;
@@ -68,7 +68,7 @@ const run = async (
     onUpdate: (data: ProgressInfo<GetYoutubeResult>) => void,
     onPause?: (data: YoutubeArtist[]) => Promise<YoutubeArtist>
 ) => {
-    const result: GetYoutubeResult = {warnings: [], errors: [], values: [], sources: params.values};
+    const result: GetYoutubeResult = {errors: [], warnings: [], values: [], sources: params.values};
     await i18n.changeLanguage(params.lang);
     
     reporter = new Reporter(onUpdate);

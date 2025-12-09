@@ -111,7 +111,12 @@ describe("Helpers", () => {
 
     test("getRealFileExtension normalises video formats", () => {
         expect(getRealFileExtension(VideoType.Mov)).toBe(VideoType.Mkv);
+        expect(getRealFileExtension(VideoType.Avi)).toBe(VideoType.Mkv);
+        expect(getRealFileExtension(VideoType.Mpeg)).toBe(VideoType.Mkv);
+        expect(getRealFileExtension(VideoType.Gif)).toBe(VideoType.Mkv);
         expect(getRealFileExtension(VideoType.Mp4)).toBe(VideoType.Mp4);
+        expect(getRealFileExtension(VideoType.Mkv)).toBe(VideoType.Mkv);
+        expect(getRealFileExtension("test")).toBe("test");
     });
 
     test("getDataAttributes picks only data prefixed keys", () => {

@@ -168,6 +168,70 @@ describe("YoutubeAlbums automation", () => {
         consoleErrorSpy.mockRestore();
     });
 
+    test("treats detached navigation as warning", async () => {
+        const page = createPageMock();
+        const browser = createBrowserMock(page);
+        launchMock.mockResolvedValue(browser);
+        setCookiesMock.mockResolvedValue(undefined);
+        navigateToPageMock.mockRejectedValue(new Error("Navigating frame was detached"));
+
+        const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+        await execute({
+            params: createYoutubeParams(baseYoutubeParams),
+            options: {},
+            i18n: createI18n(),
+            onUpdate: jest.fn(),
+            signal: new globalThis.AbortController().signal,
+        });
+
+        const [, result] = reporterFinishMock.mock.calls[0];
+
+        expect(result.errors ?? []).toEqual([]);
+        expect(result.warnings).toEqual([
+            {
+                title: "exceptionGetYoutubeUrls",
+                description: "exceptionGetYoutubeUrlsText",
+            },
+        ]);
+        expect(result.values ?? []).toEqual([]);
+        expect(page.close).toHaveBeenCalledTimes(1);
+        expect(browser.close).toHaveBeenCalledTimes(1);
+
+        consoleErrorSpy.mockRestore();
+    });
+
+    test("reports generic errors", async () => {
+        const page = createPageMock();
+        const browser = createBrowserMock(page);
+        const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+        launchMock.mockResolvedValue(browser);
+        setCookiesMock.mockResolvedValue(undefined);
+        navigateToPageMock.mockRejectedValue(new Error("boom"));
+
+        await execute({
+            params: createYoutubeParams(baseYoutubeParams),
+            options: {},
+            i18n: createI18n(),
+            onUpdate: jest.fn(),
+            signal: new AbortController().signal,
+        });
+
+        const [, result] = reporterFinishMock.mock.calls[0];
+
+        expect(result.errors).toEqual([
+            {
+                title: "exceptionGetYoutubeUrls",
+                description: "exceptionGetYoutubeUrlsText",
+            },
+        ]);
+        expect(result.warnings ?? []).toEqual([]);
+        expect(page.close).toHaveBeenCalledTimes(1);
+        expect(browser.close).toHaveBeenCalledTimes(1);
+        consoleErrorSpy.mockRestore();
+    });
+
     test("aborts execution when signal fires", async () => {
         const page = createPageMock();
         page.waitForSelector.mockImplementation(() => Promise.resolve({}));

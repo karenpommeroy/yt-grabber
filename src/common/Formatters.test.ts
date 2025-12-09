@@ -90,6 +90,36 @@ describe("Formatters", () => {
             expect(info.id).toBe("track-id");
             expect(info.releaseYear).toBe(2015);
         });
+
+        test("builds album info for non-playlist album track", () => {
+            store.get.mockImplementation((key: string) => {
+                if (key === "application") {
+                    return {playlistCountThreshold: 100};
+                }
+
+                return {};
+            });
+
+            const track = buildTrack({
+                playlist_count: 5,
+                playlist: "Album Name",
+                album: "Album Title",
+                creators: ["Album Artist"],
+            });
+
+            const info = getAlbumInfo([track], "https://example.com/album");
+
+            expect(info).toEqual({
+                id: "playlist-id",
+                artist: "Album Artist",
+                title: "Album Title",
+                releaseYear: 2020,
+                tracksNumber: 5,
+                duration: 120,
+                thumbnail: "https://example.com/thumb.jpg",
+                url: "https://example.com/album",
+            });
+        });
     });
 
     describe("isPlaylistTrack", () => {

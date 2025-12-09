@@ -1,6 +1,6 @@
 import {transports} from "winston";
 
-import {consoleFormat, createLogger} from "./Logger";
+import {consoleFormat, createLogger, fileFormat} from "./Logger";
 
 import type {TransformableInfo} from "logform";
 
@@ -70,5 +70,35 @@ describe("consoleFormat", () => {
         const highlightPattern = new RegExp(`\u001b\\[[0-9;]*m${escapeRegExp(highlighted)}\u001b\\[[0-9;]*m`);
 
         expect(message).toMatch(highlightPattern);
+    });
+});
+
+describe("fileFormat", () => {
+    const formatSymbol = Symbol.for("message");
+    const render = (info: TransformableInfo & Record<string | symbol, unknown>) => {
+        const payload = fileFormat.transform({...info}) as TransformableInfo & Record<symbol, string>;
+        return payload?.[formatSymbol] ?? "";
+    };
+
+    test("should format message without meta", () => {
+        const message = render({
+            level: "info",
+            message: "Test message",
+            timestamp: "12:00:00:000",
+        });
+
+        expect(message).toBe("12:00:00:000 [INFO]: Test message ");
+    });
+
+    test("should format message with meta information", () => {
+        const message = render({
+            level: "warn",
+            message: "Warning message",
+            timestamp: "12:00:00:000",
+            file: "test.ts",
+            line: 42,
+        });
+
+        expect(message).toBe("12:00:00:000 [WARN]: Warning message  {\"file\":\"test.ts\",\"line\":42}");
     });
 });

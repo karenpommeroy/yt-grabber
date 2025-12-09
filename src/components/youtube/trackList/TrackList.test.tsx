@@ -17,6 +17,16 @@ const baseTrack = createTrackInfo({
     thumbnails: [{url: "thumb-alt.jpg", width: 100, height: 100, id: "thumb"}],
 });
 
+const secondTrack = createTrackInfo({
+    id: "track-2",
+    title: "Second Song",
+    duration: 240,
+    original_url: "https://example.com/track-2",
+    playlist_autonumber: 2,
+    thumbnail: "thumb2.jpg",
+    thumbnails: [{url: "thumb2-alt.jpg", width: 100, height: 100, id: "thumb2"}],
+});
+
 describe("TrackList", () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -139,5 +149,127 @@ describe("TrackList", () => {
         fireEvent.click(findButton);
 
         expect(onOpenFile).toHaveBeenCalledWith(baseTrack.id);
+    });
+
+    test("opens cut popover when track already has cuts", async () => {
+        const setTrackCuts = jest.fn();
+        setupDataState({
+            trackCuts: {[baseTrack.id]: [[10, 60]]},
+            setTrackCuts,
+            tracks: [baseTrack],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+        const cutButton = shell.container.querySelector("[data-help=\"cut\"]") as HTMLButtonElement;
+
+        fireEvent.click(cutButton);
+
+        const popover = document.body.querySelector(".trackCutPopup");
+        expect(popover).toBeInTheDocument();
+        expect(setTrackCuts).not.toHaveBeenCalled();
+    });
+
+    test("closes cut popover and sanitizes cuts", async () => {
+        const setTrackCuts = jest.fn();
+        setupDataState({
+            trackCuts: {[baseTrack.id]: [[10, 60], [0, baseTrack.duration]]},
+            setTrackCuts,
+            tracks: [baseTrack, secondTrack],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+        const cutButton = shell.container.querySelector("[data-help=\"cut\"]") as HTMLButtonElement;
+
+        fireEvent.click(cutButton);
+
+        const popoverBackdrop = document.body.querySelector(".MuiBackdrop-root") as HTMLElement;
+        fireEvent.click(popoverBackdrop);
+
+        await waitFor(() => expect(setTrackCuts).toHaveBeenCalled());
+        const sanitizeUpdater = setTrackCuts.mock.calls[0][0] as (prev: Record<string, [number, number][]>) => Record<string, [number, number][]>;
+        const sanitized = sanitizeUpdater({
+            [baseTrack.id]: [[10, 60], [0, baseTrack.duration]],
+            [secondTrack.id]: [[0, secondTrack.duration]],
+        });
+        expect(sanitized[baseTrack.id]).toEqual([[10, 60]]);
+        expect(sanitized[secondTrack.id]).toEqual([]);
+    });
+
+    test("renders track with error status", async () => {
+        setupDataState({
+            tracks: [baseTrack],
+            trackStatus: [{
+                trackId: baseTrack.id,
+                percent: 0,
+                error: true,
+                status: "Download failed",
+                totalSize: 0,
+            } as TrackStatusInfo],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+
+        expect(shell.getByText("Download failed")).toBeInTheDocument();
+    });
+
+    test("renders track with in-progress status", async () => {
+        setupDataState({
+            tracks: [baseTrack],
+            trackStatus: [{
+                trackId: baseTrack.id,
+                percent: 45,
+                status: "Downloading...",
+                totalSize: 5000000,
+            } as TrackStatusInfo],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+
+        expect(shell.getByText("Downloading...")).toBeInTheDocument();
+        expect(shell.getByText("4.77 MB")).toBeInTheDocument();
+    });
+
+    test("renders track with multiple cuts showing tooltip text", async () => {
+        setupDataState({
+            trackCuts: {[baseTrack.id]: [[0, 30], [60, 120]]},
+            tracks: [baseTrack],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+
+        expect(shell.container.querySelector(".cutIcon")).toBeInTheDocument();
+    });
+
+    test("renders track without playlist autonumber", async () => {
+        const trackWithoutNumber = createTrackInfo({
+            ...baseTrack,
+            playlist_autonumber: undefined,
+        });
+        setupDataState({
+            tracks: [trackWithoutNumber],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+
+        expect(shell.getByText("Test Song")).toBeInTheDocument();
+        expect(shell.container.querySelector(".numberColumn")).not.toBeInTheDocument();
+    });
+
+    test("uses fallback thumbnail from thumbnails array", async () => {
+        const trackWithoutThumbnail = createTrackInfo({
+            id: "track-no-thumb",
+            title: "No Thumbnail Track",
+            duration: 120,
+            thumbnail: undefined,
+            thumbnails: [{url: "fallback-thumb.jpg", width: 100, height: 100, id: "fb"}],
+        });
+        setupDataState({
+            tracks: [trackWithoutThumbnail],
+        });
+
+        const shell = await render(<TrackList queue={[]} />);
+        const avatar = shell.container.querySelector(".image") as HTMLElement;
+
+        expect(avatar).toBeInTheDocument();
     });
 });

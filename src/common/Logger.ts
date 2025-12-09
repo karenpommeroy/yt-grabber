@@ -33,7 +33,7 @@ const colorizer = format.colorize({
 });
 
 const timeFormat = format.timestamp({format: "HH:mm:ss:SSS"});
-const fileFormat = format.printf(({level, message, timestamp, ...meta}) => {
+export const fileFormat = format.printf(({level, message, timestamp, ...meta}) => {
     const metaString = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : "";
     
     return `${timestamp} [${level.toUpperCase()}]: ${message} ${metaString}`;
