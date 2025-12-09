@@ -177,4 +177,80 @@ describe("PlaylistTabs", () => {
         expect(ipcRenderer.send).toHaveBeenCalledWith(Messages.OpenSystemPath, {filepath: "C:/music/track-1.mp3"});
         expect(ipcRenderer.send).toHaveBeenCalledWith(Messages.OpenSystemPath, {dirpath: path.dirname("C:/music/track-1.mp3")});
     });
+
+    test("handles OpenSystemPathCompleted IPC event", async () => {
+        const dataState = createDataState();
+        useDataStateMock.mockReturnValue(dataState);
+
+        const capturedHandlers: Record<string, (...args: any[]) => any> = {};
+        (ipcRenderer.on as jest.Mock).mockImplementation((channel: string, handler: (...args: any[]) => any) => {
+            capturedHandlers[channel] = handler;
+            return ipcRenderer;
+        });
+
+        await render(<PlaylistTabs queue={[]} />);
+
+        expect(capturedHandlers[Messages.OpenSystemPathCompleted]).toBeDefined();
+
+        const result = capturedHandlers[Messages.OpenSystemPathCompleted](
+            {} as any,
+            JSON.stringify({filepath: "/test/path/file.mp3"})
+        );
+
+        expect(result).toEqual({filepath: "/test/path/file.mp3"});
+    });
+
+    test("handles OpenUrlInBrowserCompleted IPC event", async () => {
+        const dataState = createDataState();
+        useDataStateMock.mockReturnValue(dataState);
+
+        const capturedHandlers: Record<string, (...args: any[]) => any> = {};
+        (ipcRenderer.on as jest.Mock).mockImplementation((channel: string, handler: (...args: any[]) => any) => {
+            capturedHandlers[channel] = handler;
+            return ipcRenderer;
+        });
+
+        await render(<PlaylistTabs queue={[]} />);
+
+        expect(capturedHandlers[Messages.OpenUrlInBrowserCompleted]).toBeDefined();
+
+        const result = capturedHandlers[Messages.OpenUrlInBrowserCompleted](
+            {} as any,
+            JSON.stringify({url: "https://opened.url"})
+        );
+
+        expect(result).toEqual({url: "https://opened.url"});
+    });
+
+    test("unregisters IPC handlers on unmount", async () => {
+        const dataState = createDataState();
+        useDataStateMock.mockReturnValue(dataState);
+
+        const shell = await render(<PlaylistTabs queue={[]} />);
+
+        shell.unmount();
+
+        expect(ipcRenderer.off).toHaveBeenCalledWith(Messages.OpenSystemPathCompleted, expect.any(Function));
+        expect(ipcRenderer.off).toHaveBeenCalledWith(Messages.OpenUrlInBrowserCompleted, expect.any(Function));
+    });
+
+    test("renders skeleton loading state for playlist with empty album", async () => {
+        // Playlist with empty album object (loading state)
+        const loadingPlaylist = {
+            url: "loading-playlist",
+            album: {} as any,
+            tracks: [] as TrackInfo[],
+        };
+        const dataState = createDataState({
+            playlists: [loadingPlaylist],
+            activeTab: loadingPlaylist.url,
+        });
+        useDataStateMock.mockReturnValue(dataState);
+
+        const shell = await render(<PlaylistTabs queue={[]} />);
+
+        // Should render skeleton elements for loading playlist
+        const skeletons = shell.container.querySelectorAll(".MuiSkeleton-root");
+        expect(skeletons.length).toBeGreaterThan(0);
+    });
 });

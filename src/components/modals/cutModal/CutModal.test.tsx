@@ -83,4 +83,89 @@ describe("CutModal", () => {
         fireEvent.keyUp(shell.getByRole("dialog"), {key: "Escape"});
         expect(handleCancel).toHaveBeenCalledTimes(1);
     });
+
+    test("updates start time when from input changes", async () => {
+        const handleClose = jest.fn();
+        const shell = await renderModal(CutModal, {...baseProps, onClose: handleClose});
+
+        const fromInput = shell.getByLabelText("from") as HTMLInputElement;
+        fireEvent.change(fromInput, {target: {value: "01:30"}});
+
+        const okButton = shell.getByText("ok").closest("button") as HTMLButtonElement;
+        const titleInput = shell.getByLabelText("title") as HTMLInputElement;
+        fireEvent.change(titleInput, {target: {value: "Test"}});
+        fireEvent.click(okButton);
+
+        expect(handleClose).toHaveBeenCalledWith(
+            expect.arrayContaining([expect.objectContaining({startTime: 90})])
+        );
+    });
+
+    test("updates end time when to input changes", async () => {
+        const handleClose = jest.fn();
+        const shell = await renderModal(CutModal, {...baseProps, onClose: handleClose});
+
+        const toInput = shell.getByLabelText("to") as HTMLInputElement;
+        fireEvent.change(toInput, {target: {value: "02:00"}});
+
+        const titleInput = shell.getByLabelText("title") as HTMLInputElement;
+        fireEvent.change(titleInput, {target: {value: "Test"}});
+
+        const okButton = shell.getByText("ok").closest("button") as HTMLButtonElement;
+        fireEvent.click(okButton);
+
+        expect(handleClose).toHaveBeenCalledWith(
+            expect.arrayContaining([expect.objectContaining({endTime: 120})])
+        );
+    });
+
+    test("updates start time only for matching entry when multiple entries exist", async () => {
+        const handleClose = jest.fn();
+        const shell = await renderModal(CutModal, {...baseProps, onClose: handleClose});
+
+        const addButton = shell.getByText("add").closest("button") as HTMLButtonElement;
+        fireEvent.click(addButton);
+
+        const fromInputs = shell.getAllByLabelText("from") as HTMLInputElement[];
+        fireEvent.change(fromInputs[1], {target: {value: "03:00"}});
+
+        const titleInputs = shell.getAllByLabelText("title") as HTMLInputElement[];
+        fireEvent.change(titleInputs[0], {target: {value: "Part 1"}});
+        fireEvent.change(titleInputs[1], {target: {value: "Part 2"}});
+
+        const okButton = shell.getByText("ok").closest("button") as HTMLButtonElement;
+        fireEvent.click(okButton);
+
+        expect(handleClose).toHaveBeenCalledWith(
+            expect.arrayContaining([
+                expect.objectContaining({title: "Part 1", startTime: 0}),
+                expect.objectContaining({title: "Part 2", startTime: 180}),
+            ])
+        );
+    });
+
+    test("updates end time only for matching entry when multiple entries exist", async () => {
+        const handleClose = jest.fn();
+        const shell = await renderModal(CutModal, {...baseProps, onClose: handleClose});
+
+        const addButton = shell.getByText("add").closest("button") as HTMLButtonElement;
+        fireEvent.click(addButton);
+
+        const toInputs = shell.getAllByLabelText("to") as HTMLInputElement[];
+        fireEvent.change(toInputs[0], {target: {value: "02:30"}});
+
+        const titleInputs = shell.getAllByLabelText("title") as HTMLInputElement[];
+        fireEvent.change(titleInputs[0], {target: {value: "Part 1"}});
+        fireEvent.change(titleInputs[1], {target: {value: "Part 2"}});
+
+        const okButton = shell.getByText("ok").closest("button") as HTMLButtonElement;
+        fireEvent.click(okButton);
+
+        expect(handleClose).toHaveBeenCalledWith(
+            expect.arrayContaining([
+                expect.objectContaining({title: "Part 1", endTime: 150}),
+                expect.objectContaining({title: "Part 2", endTime: 300}),
+            ])
+        );
+    });
 });

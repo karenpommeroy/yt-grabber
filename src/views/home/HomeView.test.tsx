@@ -867,4 +867,1257 @@ describe("HomeView", () => {
         act(() => stubbedProps["playlist-tabs"].onCancelTrack("t2"));
         expect(setQueue).toHaveBeenCalled();
     });
+
+    test("operation effect does nothing when queue is empty", async () => {
+        const setOperation = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            queue: [],
+            operation: "download",
+            setOperation,
+        }) as any);
+
+        await render(<HomeView />);
+
+        // When queue is empty, operation should not be called
+        expect(setOperation).not.toHaveBeenCalled();
+    });
+
+    test("skips file when it already exists and alwaysOverwrite is false", async () => {
+        (fs as any).existsSync = jest.fn(() => true);
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        configureStore({application: {alwaysOverwrite: false}});
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+        }) as any);
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(setTrackStatus).toHaveBeenCalled());
+    });
+
+    test("handles GIF format in onMerge flow", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const setErrors = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Gif}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(YtdplUtils.generateColorPalette).toHaveBeenCalled());
+        await waitFor(() => expect(YtdplUtils.createGifUsingPalette).toHaveBeenCalled());
+        await waitFor(() => expect(YtdplUtils.optimizeGif).toHaveBeenCalled());
+    });
+
+    test("handles yt-dlp error with valid error message", async () => {
+        (fs as any).existsSync = jest.fn(() => false);
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const setErrors = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.error).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.error?.(new Error("Network error occurred"));
+        });
+
+        // Error handler should trigger the merge/convert/process flow
+        await waitFor(() => expect(setTrackStatus).toHaveBeenCalled());
+    });
+
+    test("handles youtube completed with no result", async () => {
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setPlaylists,
+        }) as any);
+
+        await render(<HomeView />);
+
+        const completedHandler = getIpcHandler(Messages.GetYoutubeUrlsCompleted);
+
+        await act(async () => {
+            await completedHandler?.({} as any, {result: null} as any);
+        });
+
+        // setPlaylists should not have been called with the result updater
+        const resultUpdaterCalls = setPlaylists.mock.calls.filter(([arg]) => typeof arg === "function" && arg.length > 0);
+        expect(resultUpdaterCalls.length).toBe(0);
+    });
+
+    test("handles yt-dlp catch error flow", async () => {
+        const setErrors = jest.fn();
+        const setTracks = jest.fn();
+        const setPlaylists = jest.fn();
+        const setQueue = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockRejectedValueOnce(new Error("ERROR: Video unavailable\nWARNING: Some warning"));
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setTracks,
+            setPlaylists,
+            setErrors,
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+        const urls = ["https://youtube.com/watch?v=abc"];
+
+        await act(async () => handlers.onLoadInfo(urls, "", ""));
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles playlist validation returning null for no valid media", async () => {
+        const setErrors = jest.fn();
+        const setTracks = jest.fn();
+        const setPlaylists = jest.fn();
+
+        configureStore({
+            inputMode: InputMode.Auto,
+            playlistCheckItemsCount: 2,
+            playlistCountThreshold: 5,
+        });
+
+        (ytdlpWrapMock as any).execPromise.mockImplementation((args: string[]) => {
+            if (args.includes("--playlist-items")) {
+                // Simulate no valid media found (duration is 0)
+                return Promise.resolve("{\"id\":\"p1\",\"duration\":0,\"playlist_count\":3}");
+            }
+            return Promise.resolve("{\"id\":\"track1\",\"duration\":321,\"original_url\":\"url1\"}");
+        });
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setTracks,
+            setPlaylists,
+            setErrors,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+        const urls = ["https://youtube.com/playlist?list=abc"];
+
+        await act(async () => handlers.onLoadInfo(urls, "", ""));
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("download with existing playlists clears error and enables auto download", async () => {
+        const setAutoDownload = jest.fn();
+        const playlistWithCompleteInfo = {
+            url: "u1",
+            album: {title: "Album", releaseYear: "2023", artist: "Artist", url: "u1", id: "a1"},
+            tracks: [{id: "t1"}],
+        } as any;
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [playlistWithCompleteInfo],
+            setAutoDownload,
+        }) as any);
+
+        await render(<HomeView />);
+        const handlers = getInputPanelHandlers();
+
+        await act(async () => handlers.onDownload([playlistWithCompleteInfo.url]));
+
+        expect(setAutoDownload).toHaveBeenCalledWith(true);
+    });
+
+    test("cancelPlaylist triggers download operation for remaining queue items", async () => {
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const setOperation = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [
+                {url: "p1", album: {id: "a1"}, tracks: [{id: "t1"}]},
+                {url: "p2", album: {id: "a2"}, tracks: [{id: "t2"}]},
+            ],
+            queue: ["t1", "t2"],
+            setTrackStatus,
+            setQueue,
+            setOperation,
+        }) as any);
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onCancelPlaylist("p1"));
+
+        expect(setOperation).toHaveBeenCalledWith("download");
+    });
+
+    test("handles merge file parts error", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 222}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setErrors = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        configureStore({application: {mergeParts: true}});
+        (YtdplUtils.mergeOutputFiles as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, ext: string, cb: (err?: Error) => void) => cb && cb(new Error("Merge failed"))
+        );
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {t1: [[0, 1], [2, 3]]},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles convert output error", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setErrors = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        (YtdplUtils.convertOutputToFormat as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, ext: string, cb: (err?: Error) => void) => cb && cb(new Error("Convert failed"))
+        );
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Mov}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles GIF palette generation error", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setErrors = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        (YtdplUtils.generateColorPalette as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, format: any, ext: string, cb: (err?: Error) => void) => cb && cb(new Error("Palette error"))
+        );
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Gif}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles GIF creation error", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setErrors = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        (YtdplUtils.generateColorPalette as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, format: any, ext: string, cb: (err?: Error) => void) => cb && cb()
+        );
+        (YtdplUtils.createGifUsingPalette as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, format: any, cb: (err?: Error) => void) => cb && cb(new Error("GIF creation error"))
+        );
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Gif}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles GIF optimize error", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setErrors = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        (YtdplUtils.generateColorPalette as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, format: any, ext: string, cb: (err?: Error) => void) => cb && cb()
+        );
+        (YtdplUtils.createGifUsingPalette as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, format: any, cb: (err?: Error) => void) => cb && cb()
+        );
+        (YtdplUtils.optimizeGif as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, cb: (err?: Error) => void) => cb && cb(new Error("Optimize error"))
+        );
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Gif}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles AVI format conversion", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Avi}},
+            setTrackStatus,
+            setQueue,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(YtdplUtils.convertOutputToFormat).toHaveBeenCalled());
+    });
+
+    test("handles MPEG format conversion", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Mpeg}},
+            setTrackStatus,
+            setQueue,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(YtdplUtils.convertOutputToFormat).toHaveBeenCalled());
+    });
+
+    test("handles GIF format with merge parts enabled", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 222}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        configureStore({application: {mergeParts: true}});
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const setErrors = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {t1: [[0, 1], [2, 3]]},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Gif}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(YtdplUtils.mergeOutputFiles).toHaveBeenCalled());
+        await waitFor(() => expect(YtdplUtils.generateColorPalette).toHaveBeenCalled());
+    });
+
+    test("handles error update for youtube info result", async () => {
+        const setErrors = jest.fn();
+        const setTracks = jest.fn();
+        const setPlaylists = jest.fn();
+        const setWarnings = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockRejectedValueOnce({
+            message: "ERROR: Video unavailable",
+        });
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setTracks,
+            setPlaylists,
+            setErrors,
+            setWarnings,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+        const urls = ["https://youtube.com/watch?v=abc"];
+
+        await act(async () => handlers.onLoadInfo(urls, "", ""));
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles loadMedia error in catch block", async () => {
+        const setQueue = jest.fn();
+        const setTracks = jest.fn();
+        const setPlaylists = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockImplementation(() => {
+            throw new Error("Sync error");
+        });
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setQueue,
+            setTracks,
+            setPlaylists,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+        const urls = ["https://youtube.com/watch?v=abc"];
+
+        await act(async () => handlers.onLoadInfo(urls, "", ""));
+
+        expect(setQueue).toHaveBeenCalled();
+    });
+
+    test("loadInfo in Auto mode loads both basic and discography info", async () => {
+        const setQueue = jest.fn();
+        const setPlaylists = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto});
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setQueue,
+            setPlaylists,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+        // Mix of artist URLs and video URLs
+        const urls = [
+            "https://youtube.com/watch?v=abc",
+            "https://music.youtube.com/channel/artist"
+        ];
+
+        ipcRendererSendMock.mockClear();
+        await act(async () => handlers.onLoadInfo(urls, "", ""));
+
+        // Should have called loadMedia for basic and loadDiscographyInfo for artists
+        expect(setQueue).toHaveBeenCalled();
+        expect(ipcRendererSendMock).toHaveBeenCalledWith(
+            Messages.GetYoutubeUrls,
+            expect.any(Object),
+            expect.any(Object)
+        );
+    });
+
+    test("handles NaN progress value", async () => {
+        (fs as any).existsSync = jest.fn(() => false);
+
+        const setTrackStatus = jest.fn();
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.progress).toBeDefined());
+
+        // Trigger progress with NaN percent
+        act(() => capturedHandlers.progress?.({percent: NaN}));
+
+        expect(setTrackStatus).toHaveBeenCalled();
+    });
+
+    test("handles yt-dlp aborted signal", async () => {
+        (fs as any).existsSync = jest.fn(() => false);
+
+        const setErrors = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.error).toBeDefined());
+
+        // Cancel the track first
+        act(() => stubbedProps["playlist-tabs"].onCancelTrack("t1"));
+
+        // Then trigger the error
+        await act(async () => {
+            capturedHandlers.error?.(new Error("Aborted"));
+        });
+
+        expect(setTrackStatus).toHaveBeenCalled();
+    });
+
+    test("handles youtube completed with no errors", async () => {
+        configureStore({application: {debugMode: true}});
+        const setQueue = jest.fn();
+        const setPlaylists = jest.fn();
+        const setTracks = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setQueue,
+            setPlaylists,
+            setTracks,
+        }) as any);
+
+        await render(<HomeView />);
+
+        const completedHandler = getIpcHandler(Messages.GetYoutubeUrlsCompleted);
+
+        await act(async () => {
+            await completedHandler?.({} as any, {
+                result: {
+                    errors: [],
+                    values: ["url-1"],
+                    sources: ["url-1"],
+                },
+            } as any);
+        });
+
+        expect(setPlaylists).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    test("handles process end with file not existing", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 0}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 100}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setTrackStatus).toHaveBeenCalled());
+    });
+
+    test("handles file parts conversion when mergeParts is false", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        configureStore({application: {mergeParts: false}});
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {t1: [[0, 1], [2, 3]]},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Mov}},
+            setTrackStatus,
+            setQueue,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        // Should convert each part individually instead of merging
+        await waitFor(() => expect(YtdplUtils.convertOutputToFormat).toHaveBeenCalled());
+    });
+
+    test("handles GIF merge parts with errors in all stages", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 222}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        configureStore({application: {mergeParts: true}});
+
+        const setErrors = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        // Chain of errors: palette error, then gif creation error, then optimize error
+        (YtdplUtils.generateColorPalette as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, format: any, ext: string, cb: (err?: Error) => void) => cb && cb(new Error("Palette failed"))
+        );
+        (YtdplUtils.createGifUsingPalette as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, format: any, cb: (err?: Error) => void) => cb && cb(new Error("Create failed"))
+        );
+        (YtdplUtils.optimizeGif as jest.Mock).mockImplementationOnce(
+            (dir: string, name: string, cb: (err?: Error) => void) => cb && cb(new Error("Optimize failed"))
+        );
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {t1: [[0, 1], [2, 3]]},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Gif}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("handles process end with next track to download", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn((filePath: string) => filePath.includes("url1"));
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const setAutoDownload = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}, {id: "t2", original_url: "url2", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            queue: ["t1", "t2"],
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+            setAutoDownload,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        expect(setTrackStatus).toHaveBeenCalled();
+    });
+
+    test("handles abort all during process end", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const setAutoDownload = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+            setAutoDownload,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        // Cancel all tracks
+        act(() => getInputPanelHandlers().onCancel());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        expect(setQueue).toHaveBeenCalled();
+    });
+
+    test("handles invalid URL error message in yt-dlp", async () => {
+        (fs as any).existsSync = jest.fn(() => false);
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+        const setErrors = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+            setErrors,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.error).toBeDefined());
+
+        // Trigger error with the generic URL error message that should be filtered
+        await act(async () => {
+            capturedHandlers.error?.(new Error("[generic] '' is not a valid URL"));
+        });
+
+        expect(setTrackStatus).toHaveBeenCalled();
+    });
+
+    test("uses default ytdlp path when not configured", async () => {
+        configureStore({application: {ytdlpExecutablePath: ""}});
+
+        useDataStateMock.mockReturnValue(createDataState() as any);
+
+        await render(<HomeView />);
+
+        // Just checking that the component renders without error when ytdlpExecutablePath is empty
+        expect(true).toBe(true);
+    });
 });

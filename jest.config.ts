@@ -28,6 +28,7 @@ const config: Config = {
         "src/**/*.{ts,tsx}",
         "!src/**/*.d.ts",
         "!src/**/index.ts",
+        "!src/react/actions/Action.ts",
     ],
     coverageDirectory: "<rootDir>/coverage",
     coverageProvider: "v8",

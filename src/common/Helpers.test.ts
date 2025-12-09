@@ -109,6 +109,19 @@ describe("Helpers", () => {
         expect(getUrlType(otherUrl)).toBe(UrlType.Other);
     });
 
+    test("URL helpers return false for non-matching urls", () => {
+        const otherUrl = "https://example.com";
+
+        expect(isPlaylist(otherUrl)).toBe(false);
+        expect(isArtist(otherUrl)).toBe(false);
+        expect(isTrack(otherUrl)).toBe(false);
+    });
+
+    test("isPlaylist detects watch url with list param", () => {
+        const watchWithList = "https://music.youtube.com/watch?v=abc123&list=PL456";
+        expect(isPlaylist(watchWithList)).toBe(true);
+    });
+
     test("getRealFileExtension normalises video formats", () => {
         expect(getRealFileExtension(VideoType.Mov)).toBe(VideoType.Mkv);
         expect(getRealFileExtension(VideoType.Avi)).toBe(VideoType.Mkv);
@@ -124,9 +137,26 @@ describe("Helpers", () => {
         expect(attrs).toEqual({"data-test": "value", "data-extra": 5});
     });
 
+    test("getDataAttributes returns empty object when no data attributes", () => {
+        const attrs = getDataAttributes({id: "1", className: "cls"});
+        expect(attrs).toEqual({});
+    });
+
     test("splitDataAttributes separates data and other props", () => {
         const [dataProps, restProps] = splitDataAttributes({id: "1", "data-test": "value", className: "cls"});
         expect(dataProps).toEqual({"data-test": "value"});
         expect(restProps).toEqual({id: "1", className: "cls"});
+    });
+
+    test("splitDataAttributes handles only data attributes", () => {
+        const [dataProps, restProps] = splitDataAttributes({"data-id": "1", "data-name": "test"});
+        expect(dataProps).toEqual({"data-id": "1", "data-name": "test"});
+        expect(restProps).toEqual({});
+    });
+
+    test("splitDataAttributes handles only non-data attributes", () => {
+        const [dataProps, restProps] = splitDataAttributes({id: "1", name: "test"});
+        expect(dataProps).toEqual({});
+        expect(restProps).toEqual({id: "1", name: "test"});
     });
 });

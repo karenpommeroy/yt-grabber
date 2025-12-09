@@ -1,6 +1,6 @@
 import {ChangeEvent} from "react";
 
-import {fireEvent, waitFor} from "@testing-library/react";
+import {act, fireEvent, waitFor} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
 import {useAppContext} from "../../react/contexts/AppContext";
@@ -9,19 +9,24 @@ import DevelopmentView from "./DevelopmentView";
 jest.mock("usehooks-ts", () => require("@tests/mocks/usehooks-ts"));
 jest.mock("../../react/contexts/AppContext", () => require("@tests/mocks/react/contexts/AppContext"));
 
+let capturedOnChangeHandlers: {[key: string]: (value: number) => void} = {};
+
 jest.mock("../../components/numberField/NumberField", () => ({
     __esModule: true,
-    default: ({label, value, onChange, id}: any) => (
-        <label htmlFor={id}>
-            {label}
-            <input
-                id={id}
-                data-testid={id}
-                value={value ?? ""}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(Number(event.target.value))}
-            />
-        </label>
-    ),
+    default: ({label, value, onChange, id}: any) => {
+        capturedOnChangeHandlers[id] = onChange;
+        return (
+            <label htmlFor={id}>
+                {label}
+                <input
+                    id={id}
+                    data-testid={id}
+                    value={value ?? ""}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(Number(event.target.value))}
+                />
+            </label>
+        );
+    },
 }));
 
 describe("DevelopmentView", () => {
@@ -153,5 +158,239 @@ describe("DevelopmentView", () => {
         fireEvent.click(closeButton);
 
         expect(setLocation).toHaveBeenCalledWith("/");
+    });
+
+    test("handles playlistCountThreshold change with previous state", async () => {
+        const applicationOptions = {
+            debugMode: true,
+            playlistCountThreshold: 5,
+            playlistCheckMaxItemsCount: 3,
+        };
+        const puppeteerOptions = {headless: false};
+
+        store.get.mockImplementation((key: string) => {
+            if (key === "application") {
+                return {...applicationOptions};
+            }
+
+            if (key === "options") {
+                return {...puppeteerOptions};
+            }
+
+            return {};
+        });
+
+        const shell = await render(<DevelopmentView />);
+
+        const playlistThresholdInput = shell.getByTestId("playlistCountThreshold") as HTMLInputElement;
+        fireEvent.change(playlistThresholdInput, {target: {value: "15"}});
+
+        await waitFor(() => {
+            expect(store.set).toHaveBeenCalledWith(
+                "application",
+                expect.objectContaining({
+                    debugMode: true,
+                    playlistCountThreshold: 15,
+                    playlistCheckMaxItemsCount: 3,
+                }),
+            );
+        });
+    });
+
+    test("handles playlistCheckMaxItemsCount change with previous state", async () => {
+        const applicationOptions = {
+            debugMode: true,
+            playlistCountThreshold: 10,
+            playlistCheckMaxItemsCount: 2,
+        };
+        const puppeteerOptions = {headless: false};
+
+        store.get.mockImplementation((key: string) => {
+            if (key === "application") {
+                return {...applicationOptions};
+            }
+
+            if (key === "options") {
+                return {...puppeteerOptions};
+            }
+
+            return {};
+        });
+
+        const shell = await render(<DevelopmentView />);
+
+        const playlistItemsInput = shell.getByTestId("playlistCheckMaxItemsCount") as HTMLInputElement;
+        fireEvent.change(playlistItemsInput, {target: {value: "8"}});
+
+        await waitFor(() => {
+            expect(store.set).toHaveBeenCalledWith(
+                "application",
+                expect.objectContaining({
+                    debugMode: true,
+                    playlistCountThreshold: 10,
+                    playlistCheckMaxItemsCount: 8,
+                }),
+            );
+        });
+    });
+
+    test("renders with debugMode enabled and headless false", async () => {
+        const applicationOptions = {
+            debugMode: true,
+            playlistCountThreshold: 25,
+            playlistCheckMaxItemsCount: 7,
+        };
+        const puppeteerOptions = {headless: false};
+
+        store.get.mockImplementation((key: string) => {
+            if (key === "application") {
+                return {...applicationOptions};
+            }
+
+            if (key === "options") {
+                return {...puppeteerOptions};
+            }
+
+            return {};
+        });
+
+        const shell = await render(<DevelopmentView />);
+
+        const debugSwitch = shell.getByRole("switch", {name: "debugMode"});
+        expect(debugSwitch).toBeChecked();
+
+        const showBrowserSwitch = shell.getByRole("switch", {name: "showBrowser"});
+        expect(showBrowserSwitch).toBeChecked();
+    });
+
+    test("directly invokes playlistCountThreshold onChange handler", async () => {
+        const applicationOptions = {
+            debugMode: false,
+            playlistCountThreshold: 10,
+            playlistCheckMaxItemsCount: 5,
+        };
+        const puppeteerOptions = {headless: true};
+
+        store.get.mockImplementation((key: string) => {
+            if (key === "application") {
+                return {...applicationOptions};
+            }
+
+            if (key === "options") {
+                return {...puppeteerOptions};
+            }
+
+            return {};
+        });
+
+        capturedOnChangeHandlers = {};
+        await render(<DevelopmentView />);
+
+        expect(capturedOnChangeHandlers.playlistCountThreshold).toBeDefined();
+
+        act(() => {
+            capturedOnChangeHandlers.playlistCountThreshold(30);
+        });
+
+        await waitFor(() => {
+            expect(store.set).toHaveBeenCalledWith(
+                "application",
+                expect.objectContaining({playlistCountThreshold: 30}),
+            );
+        });
+    });
+
+    test("directly invokes playlistCheckMaxItemsCount onChange handler", async () => {
+        const applicationOptions = {
+            debugMode: false,
+            playlistCountThreshold: 10,
+            playlistCheckMaxItemsCount: 5,
+        };
+        const puppeteerOptions = {headless: true};
+
+        store.get.mockImplementation((key: string) => {
+            if (key === "application") {
+                return {...applicationOptions};
+            }
+
+            if (key === "options") {
+                return {...puppeteerOptions};
+            }
+
+            return {};
+        });
+
+        capturedOnChangeHandlers = {};
+        await render(<DevelopmentView />);
+
+        expect(capturedOnChangeHandlers.playlistCheckMaxItemsCount).toBeDefined();
+
+        act(() => {
+            capturedOnChangeHandlers.playlistCheckMaxItemsCount(9);
+        });
+
+        await waitFor(() => {
+            expect(store.set).toHaveBeenCalledWith(
+                "application",
+                expect.objectContaining({playlistCheckMaxItemsCount: 9}),
+            );
+        });
+    });
+
+    test("verifies state callback merges with previous state correctly", async () => {
+        const applicationOptions = {
+            debugMode: true,
+            playlistCountThreshold: 15,
+            playlistCheckMaxItemsCount: 8,
+            urls: ["https://test.url"],
+        };
+        const puppeteerOptions = {headless: false};
+
+        store.get.mockImplementation((key: string) => {
+            if (key === "application") {
+                return {...applicationOptions};
+            }
+
+            if (key === "options") {
+                return {...puppeteerOptions};
+            }
+
+            return {};
+        });
+
+        capturedOnChangeHandlers = {};
+        await render(<DevelopmentView />);
+
+        act(() => {
+            capturedOnChangeHandlers.playlistCountThreshold(99);
+        });
+
+        await waitFor(() => {
+            expect(store.set).toHaveBeenCalledWith(
+                "application",
+                expect.objectContaining({
+                    debugMode: true,
+                    playlistCountThreshold: 99,
+                    playlistCheckMaxItemsCount: 8,
+                }),
+            );
+        });
+
+        store.set.mockClear();
+
+        act(() => {
+            capturedOnChangeHandlers.playlistCheckMaxItemsCount(1);
+        });
+
+        await waitFor(() => {
+            expect(store.set).toHaveBeenCalledWith(
+                "application",
+                expect.objectContaining({
+                    debugMode: true,
+                    playlistCountThreshold: 99,
+                    playlistCheckMaxItemsCount: 1,
+                }),
+            );
+        });
     });
 });

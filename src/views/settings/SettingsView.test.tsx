@@ -327,4 +327,188 @@ describe("SettingsView", () => {
             expect.objectContaining({tabsOrder: [TabsOrderKey.Artist, SortOrder.Asc]}),
         ));
     });
+
+    test("updates video output template and validates", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const templateInput = shell.getByLabelText("videoOutputTemplate") as HTMLInputElement;
+        fireEvent.change(templateInput, {target: {value: "{{artist}}/{{trackTitle}}"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({videoOutputTemplate: "{{artist}}/{{trackTitle}}"}),
+        ));
+    });
+
+    test("shows validation error for invalid video output template tokens", async () => {
+        const shell = await render(<SettingsView />);
+
+        const templateInput = shell.getByLabelText("videoOutputTemplate") as HTMLInputElement;
+        fireEvent.change(templateInput, {target: {value: "{{badToken}}"}});
+
+        await waitFor(() => expect(shell.getByText("invalidTemplateKeys")).toBeInTheDocument());
+    });
+
+    test("resets video output template to default when cleared on blur", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const templateInput = shell.getByLabelText("videoOutputTemplate") as HTMLInputElement;
+        fireEvent.change(templateInput, {target: {value: ""}});
+        fireEvent.blur(templateInput);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({videoOutputTemplate: "{{artist}} - {{trackTitle}}"}),
+        ));
+    });
+
+    test("updates yt-dlp executable path and resets to default on empty blur", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const ytdlpInput = shell.getByLabelText("ytdlpExecutablePath") as HTMLInputElement;
+        fireEvent.change(ytdlpInput, {target: {value: "D:/custom/yt-dlp.exe"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({ytdlpExecutablePath: "D:/custom/yt-dlp.exe"}),
+        ));
+
+        storeSetMock.mockClear();
+        fireEvent.change(ytdlpInput, {target: {value: ""}});
+        fireEvent.blur(ytdlpInput);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({ytdlpExecutablePath: expect.any(String)}),
+        ));
+    });
+
+    test("updates ffmpeg executable path and resets to default on empty blur", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const ffmpegInput = shell.getByLabelText("ffmpegExecutablePath") as HTMLInputElement;
+        fireEvent.change(ffmpegInput, {target: {value: "D:/custom/ffmpeg.exe"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({ffmpegExecutablePath: "D:/custom/ffmpeg.exe"}),
+        ));
+
+        storeSetMock.mockClear();
+        fireEvent.change(ffmpegInput, {target: {value: ""}});
+        fireEvent.blur(ffmpegInput);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({ffmpegExecutablePath: expect.any(String)}),
+        ));
+    });
+
+    test("resets album output template to default when cleared on blur", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const templateInput = shell.getByLabelText("albumOutputTemplate") as HTMLInputElement;
+        fireEvent.change(templateInput, {target: {value: ""}});
+        fireEvent.blur(templateInput);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({albumOutputTemplate: "{{artist}}/[{{releaseYear}}] {{albumTitle}}/{{trackNo}} - {{trackTitle}}"}),
+        ));
+    });
+
+    test("updates playlist output template and resets to default on blur", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const templateInput = shell.getByLabelText("playlistOutputTemplate") as HTMLInputElement;
+        fireEvent.change(templateInput, {target: {value: "{{artist}}/{{trackTitle}}"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({playlistOutputTemplate: "{{artist}}/{{trackTitle}}"}),
+        ));
+
+        storeSetMock.mockClear();
+        fireEvent.change(templateInput, {target: {value: ""}});
+        fireEvent.blur(templateInput);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({playlistOutputTemplate: "{{albumTitle}}/{{trackTitle}}"}),
+        ));
+    });
+
+    test("updates track output template and resets to default on blur", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const templateInput = shell.getByLabelText("trackOutputTemplate") as HTMLInputElement;
+        fireEvent.change(templateInput, {target: {value: "{{artist}}/{{trackTitle}}"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({trackOutputTemplate: "{{artist}}/{{trackTitle}}"}),
+        ));
+
+        storeSetMock.mockClear();
+        fireEvent.change(templateInput, {target: {value: ""}});
+        fireEvent.blur(templateInput);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({trackOutputTemplate: "{{artist}} - {{trackTitle}}"}),
+        ));
+    });
+
+    test("updates audio quality value", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const qualityInput = shell.getByLabelText("audioQuality") as HTMLInputElement;
+        fireEvent.change(qualityInput, {target: {value: "5"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({quality: 5}),
+        ));
+    });
+
+    test("toggles tabs order from desc to asc", async () => {
+        applicationOptions = createApplicationOptions({tabsOrder: [TabsOrderKey.Artist, SortOrder.Desc]});
+        mockStoreGet();
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const toggleButton = shell.container.querySelector("[data-help=\"tabsOrder\"] button") as HTMLButtonElement;
+        fireEvent.click(toggleButton);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({tabsOrder: [TabsOrderKey.Artist, SortOrder.Asc]}),
+        ));
+    });
 });

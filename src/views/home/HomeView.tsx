@@ -460,33 +460,30 @@ export const HomeView: React.FC = () => {
 
         abortControllers[trackId] = controller;
 
-        new Promise<boolean>((resolve) => {
-            resolve(!appOptions.alwaysOverwrite && fs.existsSync(trackPath));
-        }).then((result) => {
-            if (result) {
-                onProcessEnd({trackId});
-            } else {
-                ytDlpWrap.exec([track.original_url, ...getYtdplRequestParams(track, album, trackCuts, format, global.store.get("application.customYtdlpArgs"))], {shell: false, windowsHide: false, detached: false}, controller.signal)
-                    .on("progress", (progress) => updateProgress(track.id, progress, format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
-                    .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
-                    .on("error", (error) => {
-                        let errorMsg: string = undefined;
+        const shouldSkip = !appOptions.alwaysOverwrite && fs.existsSync(trackPath);
+        if (shouldSkip) {
+            onProcessEnd({trackId});
+        } else {
+            ytDlpWrap.exec([track.original_url, ...getYtdplRequestParams(track, album, trackCuts, format, global.store.get("application.customYtdlpArgs"))], {shell: false, windowsHide: false, detached: false}, controller.signal)
+                .on("progress", (progress) => updateProgress(track.id, progress, format.type === MediaFormat.Audio ? [10, 90] : [10, 85]))
+                .on("ytDlpEvent", (eventType) => updateProgressStatus(track.id, eventType))
+                .on("error", (error) => {
+                    let errorMsg: string = undefined;
 
-                        if (error.message && !includes(error.message, "[generic] '' is not a valid URL")) {
-                            errorMsg = error.message;
-                        }
+                    if (error.message && !includes(error.message, "[generic] '' is not a valid URL")) {
+                        errorMsg = error.message;
+                    }
 
-                        onMerge({trackId: track.id, error: errorMsg, parts})
-                            .then(onConvert)
-                            .then(onProcessEnd);
-                    })
-                    .on("close", () => {
-                        onMerge({trackId: track.id, parts})
-                            .then(onConvert)
-                            .then(onProcessEnd);
-                    });
-            }
-        });
+                    onMerge({trackId: track.id, error: errorMsg, parts})
+                        .then(onConvert)
+                        .then(onProcessEnd);
+                })
+                .on("close", () => {
+                    onMerge({trackId: track.id, parts})
+                        .then(onConvert)
+                        .then(onProcessEnd);
+                });
+        }
     };
 
     const downloadFailed = () => {

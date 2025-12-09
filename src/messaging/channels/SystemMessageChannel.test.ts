@@ -71,4 +71,40 @@ describe("SystemMessageChannel", () => {
             JSON.stringify({paths: "D:/music"}),
         );
     });
+
+    test("shows file in folder when filepath is provided", async () => {
+        jest.useFakeTimers();
+        const channel = createChannel();
+        const params: MultiMessageHandlerParams = {id: "string", filepath: "C:/tmp/file.txt"};
+
+        const execPromise = channel.execute({} as IpcMainEvent, params, Messages.OpenSystemPath);
+        jest.advanceTimersByTime(500);
+        await execPromise;
+
+        expect(shell.showItemInFolder).toHaveBeenCalledWith("C:/tmp/file.txt");
+        expect(messageBus.mainWindow.setAlwaysOnTop).toHaveBeenCalledWith(false);
+        jest.useRealTimers();
+    });
+
+    test("handles error in open dialog handler", async () => {
+        const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+        const channel = createChannel();
+        const error = new Error("Dialog failed");
+        (dialog.showOpenDialog as jest.Mock).mockImplementation(() => {
+            throw error;
+        });
+        const params: MultiMessageHandlerParams = {
+            id: "string",
+            directory: true,
+            multiple: false,
+            defaultPath: "D:/",
+        };
+
+        channel.execute({} as IpcMainEvent, params, Messages.OpenSelectPathDialog);
+
+        await new Promise((r) => setTimeout(r, 10));
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(error);
+        consoleErrorSpy.mockRestore();
+    });
 });
