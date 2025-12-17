@@ -668,20 +668,22 @@ export const HomeView: React.FC = () => {
                 return resolve(result);
             }
             if (!shouldMerge) {
-                setTrackStatus((prev) => map(prev, (item) => item.trackId === result.trackId ? {...item, percent: 90} : item));
                 const filepath = getOutputFile(track, album, format) + "." + getRealFileExtension(format.extension);
                 const fileInfo = path.parse(filepath);
+                const filename = fileInfo.name;
                 
+                setTrackStatus((prev) => map(prev, (item) => item.trackId === result.trackId ? {...item, percent: 90} : item));
+
                 if (format.extension === VideoType.Gif) {
-                    return generateColorPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error: Error) => {
+                    return generateColorPalette(fileInfo.dir, filename, format, format.extension, (error: Error) => {
                         if (error) {
                             setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                         }
-                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, (error: Error) => {
+                        createGifUsingPalette(fileInfo.dir, filename, format, (error: Error) => {
                             if (error) {
                                 setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                             }
-                            optimizeGif(fileInfo.dir, fileInfo.name, (error: Error) => {
+                            optimizeGif(fileInfo.dir, filename, (error: Error) => {
                                 if (error) {
                                     setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                                 }
@@ -712,19 +714,20 @@ export const HomeView: React.FC = () => {
             mergeFileParts(track, album, format, result.parts, (filepath) => {
                 const totalSize = fs.statSync(filepath).size;
                 const fileInfo = path.parse(filepath);
+                const filename = fileInfo.name;
 
                 setTrackStatus((prev) => map(prev, (item) => item.trackId === result.trackId ? {...item, totalSize, percent: 90} : item));
                 
                 if (format.extension === VideoType.Gif) {
-                    generateColorPalette(fileInfo.dir, fileInfo.name, format, format.extension, (error) => {
+                    generateColorPalette(fileInfo.dir, filename, format, format.extension, (error) => {
                         if (error) {
                             setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                         }
-                        createGifUsingPalette(fileInfo.dir, fileInfo.name, format, (error) => {
+                        createGifUsingPalette(fileInfo.dir, filename, format, (error) => {
                             if (error) {
                                 setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                             }
-                            optimizeGif(fileInfo.dir, fileInfo.name, (error) => {
+                            optimizeGif(fileInfo.dir, filename, (error) => {
                                 if (error) {
                                     setErrors((prev) => [...prev, {url: track.original_url, message: error.message}]);
                                 }

@@ -3,8 +3,8 @@ import "moment-duration-format";
 import {
     escapePathString, formatFileSize, formatTime, getDataAttributes, getProcessArgs,
     getRealFileExtension, getUrlType, isArtist, isDebugMode, isDev, isDevApplication, isPlaylist,
-    isTrack, mapRange, resolveMockData, splitDataAttributes, timeStringToNumber, unformatTime,
-    waitFor
+    isTrack, mapRange, resolveMockData, sanitizeFilePath, splitDataAttributes, timeStringToNumber,
+    unformatTime, waitFor
 } from "./Helpers";
 import {VideoType} from "./Media";
 import {UrlType} from "./Youtube";
@@ -80,6 +80,43 @@ describe("Helpers", () => {
 
     test("escapePathString replaces slashes", () => {
         expect(escapePathString("folder/sub")).toBe("folder-sub");
+    });
+
+    describe("sanitizeFilePath", () => {
+        test("replaces Windows-illegal characters with default replacement", () => {
+            expect(sanitizeFilePath("./output/a<b>c:d:e:f:g|h?i*j#k")).toBe("./output/a-b-c-d-e-f-g-h-i-j-k");
+        });
+
+        test("replaces ASCII control characters", () => {
+            expect(sanitizeFilePath("./output/a\u0000b\u001Fc.mkv")).toBe("./output/a-b-c.mkv");
+        });
+
+        test("collapses consecutive replacement characters", () => {
+            expect(sanitizeFilePath("a??b***c")).toBe("./a-b-c");
+            expect(sanitizeFilePath("a####b")).toBe("./a-b");
+        });
+
+        test("trims and removes trailing dots", () => {
+            expect(sanitizeFilePath("  hello world...  ")).toBe("./hello world.  ");
+            expect(sanitizeFilePath("file.")).toBe("./file");
+        });
+
+        test("prefixes reserved Windows device names", () => {
+            expect(sanitizeFilePath("con")).toBe("./-con");
+            expect(sanitizeFilePath("NUL")).toBe("./-NUL");
+            expect(sanitizeFilePath("Com1")).toBe("./-Com1");
+            expect(sanitizeFilePath("lpt9")).toBe("./-lpt9");
+        });
+
+        test("returns fallback when result becomes empty", () => {
+            expect(sanitizeFilePath("")).toBe("");
+            expect(sanitizeFilePath("./output/???***###")).toBe("./output/unnamed");
+            expect(sanitizeFilePath("./output/   ...   ")).toBe("./output/unnamed.   ");
+        });
+
+        test("supports custom replacement character", () => {
+            expect(sanitizeFilePath("./output/a:b?c", "_")).toBe("./output/a_b_c");
+        });
     });
 
     test("resolveMockData returns empty promises list", () => {

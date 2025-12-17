@@ -5,7 +5,7 @@ import moment from "moment";
 
 import {getBinPath} from "./FileSystem";
 import {isAlbumTrack, isPlaylistTrack} from "./Formatters";
-import {escapePathString, getRealFileExtension} from "./Helpers";
+import {escapePathString, getRealFileExtension, sanitizeFilePath} from "./Helpers";
 import {Format, MediaFormat, VideoType} from "./Media";
 import StoreSchema from "./Store";
 import {AlbumInfo, TrackInfo} from "./Youtube";
@@ -110,12 +110,12 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
             try {
                 const compiled = template(appOptions.playlistOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             } catch {
                 const defaultPlaylistOutputTemplate = get(StoreSchema.application, "properties.playlistOutputTemplate.default");
                 const compiled = template(defaultPlaylistOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             }
         }
         else if (!isAlbumTrack(track)) {
@@ -127,18 +127,18 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
                 const defaultTrackOutputTemplate = get(StoreSchema.application, "properties.trackOutputTemplate.default");
                 const compiled = template(defaultTrackOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             }
         } else {
             try {
                 const compiled = template(appOptions.albumOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             } catch {
                 const defaultAlbumOutputTemplate = get(StoreSchema.application, "properties.albumOutputTemplate.default");
                 const compiled = template(defaultAlbumOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             }
         }
     }
@@ -148,23 +148,23 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
             try {
                 const compiled = template(appOptions.videoOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             } catch {
                 const defaultVideoOutputTemplate = get(StoreSchema.application, "properties.videoOutputTemplate.default");
                 const compiled = template(defaultVideoOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             }
         } else {
             try {
                 const compiled = template(appOptions.playlistOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             } catch {
                 const defaultPlaylistOutputTemplate = get(StoreSchema.application, "properties.playlistOutputTemplate.default");
                 const compiled = template(defaultPlaylistOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             }
         }
     }

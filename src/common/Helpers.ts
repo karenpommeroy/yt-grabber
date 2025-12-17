@@ -1,6 +1,7 @@
 import {App} from "electron";
 import {forEach, groupBy, includes, indexOf, isNumber, keys, map, replace} from "lodash-es";
 import moment from "moment";
+import path from "path";
 
 import {VideoType} from "./Media";
 import {TrackInfo, UrlType, YoutubeInfoResult} from "./Youtube";
@@ -89,6 +90,52 @@ export const mapRange = (x: number, inRange: [number, number], outRange: number[
 
 export const escapePathString = (value: string) => {
     return replace(value, /\//g, "-");
+};
+
+export const sanitizeFilePath = (filePath: string, replacement = "-"): string => {
+    if (!filePath) return filePath;
+
+    const directory = path.dirname(filePath);  
+    const fileName = path.parse(filePath).name;
+    const fileExt = path.parse(filePath).ext;
+
+    const replaceAsciiControlChars = (input: string) => {
+        let out = "";
+        for (let i = 0; i < input.length; i++) {
+            const code = input.charCodeAt(i);
+            out += code >= 0x00 && code <= 0x1F ? replacement : input[i];
+        }
+        return out;
+    };
+
+    const illegalCharsRegex = /[<>:"/\\|?*#]/g;
+
+    let sanitized = replaceAsciiControlChars(fileName)
+        .replace(illegalCharsRegex, replacement)
+        .replace(new RegExp(`${escapeRegExp(replacement)}+`, "g"), replacement)
+        .trim()
+        .replace(/\.+$/, "");
+
+    const withoutReplacements = sanitized.replace(new RegExp(escapeRegExp(replacement), "g"), "");
+    if (!withoutReplacements) {
+        sanitized = "";
+    }
+
+    const reservedNames = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/i;
+    
+    if (reservedNames.test(sanitized)) {
+        sanitized = `${replacement}${sanitized}`;
+    }
+
+    if (!sanitized) {
+        sanitized = "unnamed";
+    }
+
+    return `${directory}/${sanitized}${fileExt.length > 1 ? fileExt : ""}`;
+};
+
+export const escapeRegExp = (str: string): string => {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 };
 
 export const resolveMockData = (delay = 1000) => {
