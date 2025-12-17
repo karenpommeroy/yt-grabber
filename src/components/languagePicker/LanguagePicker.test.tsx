@@ -1,6 +1,6 @@
 import i18next from "i18next";
 
-import {fireEvent, within} from "@testing-library/react";
+import {fireEvent, waitFor, within} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
 import LanguagePicker from "./LanguagePicker";
@@ -63,5 +63,35 @@ describe("LanguagePicker", () => {
         expect(menu2).not.toBeInTheDocument();
 
         changeLanguageSpy.mockRestore();
+    });
+
+    test("closes menu on click away", async () => {
+        const shell = await render(<LanguagePicker data-testid="language-picker" />);
+
+        const trigger = shell.getByRole("button");
+        fireEvent.click(trigger);
+
+        await shell.findByRole("menu");
+        expect(shell.getByRole("menu")).toBeInTheDocument();
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        fireEvent.click(document.body);
+
+        await waitFor(() => expect(shell.queryByRole("menu")).not.toBeInTheDocument());
+    });
+
+    test("does not close menu when clicking the trigger (anchorEl)", async () => {
+        const shell = await render(<LanguagePicker data-testid="language-picker" />);
+
+        const trigger = shell.getByRole("button");
+        fireEvent.click(trigger);
+
+        await shell.findByRole("menu");
+        expect(shell.getByRole("menu")).toBeInTheDocument();
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        fireEvent.click(trigger);
+
+        await waitFor(() => expect(shell.getByRole("menu")).toBeInTheDocument());
     });
 });
