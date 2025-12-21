@@ -38,6 +38,7 @@ export const App: React.FC = (props: Record<string, any>) => {
                     <Route path="/development" element={<DevelopmentView />} />
                 </Routes>
                 <Popper
+                    data-testid="help-popup"
                     className={Styles.helpPopup}
                     open={Boolean(anchorEl)}
                     anchorEl={anchorEl}

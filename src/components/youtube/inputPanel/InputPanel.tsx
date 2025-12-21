@@ -63,6 +63,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
 
     useEffect(() => {
         const unsubscribeInputMode = global.store.onDidChange<any>("application.inputMode", (newInputMode: InputMode) => {
+            setApplicationOptions((prev) => ({...prev, inputMode: newInputMode}));
             setInputMode(newInputMode);
         });
 
@@ -215,9 +216,10 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     }, [debouncedApplicationOptions]);
 
     return (
-        <Grid className={Styles.inputPanel} container spacing={2} paddingX={2} paddingY={1}>
+        <Grid data-testid="input-panel" className={Styles.inputPanel} container spacing={2} paddingX={2} paddingY={1}>
             <Grid size="grow">
                 <Autocomplete
+                    data-testid="input-field"
                     multiple
                     freeSolo
                     fullWidth
@@ -253,17 +255,17 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             </Grid>
             <Grid>
                 <Stack direction="row" spacing={1} height={54}>
-                    <InputModePicker disabled={loading} />
+                    <InputModePicker data-testid="input-mode-button" disabled={loading} />
                     <Tooltip title={t("loadFromFile")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
-                            <Button data-help="loadFromFile" disabled={loading} variant="contained" disableElevation color="secondary" onClick={() => handleOpenFromFile()}>
+                            <Button data-testid="load-from-file-button" data-help="loadFromFile" disabled={loading} variant="contained" disableElevation color="secondary" onClick={() => handleOpenFromFile()}>
                                 <FolderIcon />
                             </Button>
                         </div>
                     </Tooltip>
                     <Tooltip title={t("loadInfo")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
-                            <Button data-help="loadInfo" disabled={loading || isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={handleLoadInfo}>
+                            <Button data-testid="load-info-button" data-help="loadInfo" disabled={loading || isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={handleLoadInfo}>
                                 <SearchIcon />
                             </Button>
                         </div>
@@ -271,7 +273,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     {showDownloadFailed &&
                         <Tooltip title={t("downloadFailed")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                             <div>
-                                <Button data-help="downloadFailed" disabled={loading || isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
+                                <Button data-testid="download-failed-button" data-help="downloadFailed" disabled={loading || isEmpty(urls)} variant="contained" disableElevation color="secondary" onClick={onDownloadFailed}>
                                     <ReplayIcon />
                                 </Button>
                             </div>
@@ -280,7 +282,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     {!loading &&
                         <Tooltip title={t("downloadAll")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                             <div>
-                                <Button data-help="downloadAll" disabled={loading || isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
+                                <Button data-testid="download-all-button" data-help="downloadAll" disabled={loading || isEmpty(urls) || containsInvalidValues} variant="contained" disableElevation color="secondary" onClick={() => onDownload(urls)}>
                                     <DownloadIcon />
                                 </Button>
                             </div>
@@ -289,7 +291,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     {loading &&
                         <Tooltip title={t("cancelAll")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                             <div>
-                                <Button data-help="cancellAll" variant="contained" disableElevation color="secondary" onClick={onCancel}>
+                                <Button data-testid="cancel-all-button" data-help="cancellAll" variant="contained" disableElevation color="secondary" onClick={onCancel}>
                                     <ClearIcon />
                                 </Button>
                             </div>
@@ -300,6 +302,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             {global.store.get("application.inputMode") === InputMode.Artists &&
                 <Grid size={12}>
                     <Accordion
+                        data-testid="advanced-search-options-panel"
                         elevation={0}
                         className={Styles.accordion}
                         data-help="showAdvancedSearchOptions"
@@ -315,8 +318,8 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                                 <FormControl className={Styles.textInputGroup} data-help="downloadReleaseDate">
                                     <FormLabel component="legend">{t("releaseDate")}</FormLabel>
                                     <FormGroup row className={Styles.controlGroup}>
-                                        <TextField data-help="downloadReleaseDateFrom" label={t("fromYear")} variant="outlined" value={fromYear} onChange={onFromYearChanged} />
-                                        <TextField data-help="downloadReleaseDateUntil" label={t("untilYear")} variant="outlined" value={untilYear} onChange={onUntilYearChanged}/>
+                                        <TextField data-testid="release-date-from-field" data-help="downloadReleaseDateFrom" label={t("fromYear")} variant="outlined" value={fromYear} onChange={onFromYearChanged} />
+                                        <TextField data-testid="release-date-until-field" data-help="downloadReleaseDateUntil" label={t("untilYear")} variant="outlined" value={untilYear} onChange={onUntilYearChanged}/>
                                     </FormGroup>
                                 </FormControl>
                                 <FormControl data-help="downloadReleaseType">
@@ -327,6 +330,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                                             label={t("downloadAlbums")}
                                             control={
                                                 <Checkbox
+                                                    data-testid="download-albums-checkbox"
                                                     checked={applicationOptions.downloadAlbums}
                                                     onChange={onDownloadAlbumsChange}
                                                 />
@@ -337,6 +341,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                                             label={t("downloadSinglesAndEps")}
                                             control={
                                                 <Checkbox
+                                                    data-testid="download-singles-checkbox"
                                                     checked={applicationOptions.downloadSinglesAndEps}
                                                     onChange={onDownloadSinglesAndEpsChange}
                                                 />

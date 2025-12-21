@@ -1,5 +1,5 @@
 import {find, map} from "lodash-es";
-import React, {MouseEvent, useEffect, useState} from "react";
+import React, {HTMLAttributes, MouseEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useDebounceValue} from "usehooks-ts";
 
@@ -8,14 +8,16 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import TheaterComedyIcon from "@mui/icons-material/TheaterComedy";
 import YouTubeIcon from "@mui/icons-material/YouTube";
-import {Button, ButtonProps, Grow, MenuItem, MenuList, Paper, Popper, Tooltip} from "@mui/material";
+import {Button, Grow, MenuItem, MenuList, Paper, Popper, Tooltip} from "@mui/material";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 
 import {InputMode} from "../../../common/Media";
 import {ApplicationOptions} from "../../../common/Store";
 import Styles from "./InputModePicker.styl";
 
-export type InputModePickerProps = ButtonProps;
+export type InputModePickerProps =  HTMLAttributes<HTMLDivElement> & {
+    disabled?: boolean;
+};
 
 export type InputModeOption = {
     id: InputMode;
@@ -25,7 +27,7 @@ export type InputModeOption = {
 }
 
 export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
-    const {disabled} = props;
+    const {disabled, ...rest} = props;
     const [open, setOpen] = React.useState(false);
     const anchorRef = React.useRef<HTMLButtonElement>(null);
     const {t} = useTranslation();
@@ -78,7 +80,7 @@ export const InputModePicker: React.FC<InputModePickerProps> = (props) => {
     };
 
     return (
-        <div className={Styles.inputModePicker} data-help="selectInputMode">
+        <div className={Styles.inputModePicker} data-help="selectInputMode" {...rest}>
             <Tooltip title={t("selectInputMode")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                 <div className={Styles.buttonWrapper}>
                     <Button disabled={disabled} className={Styles.button} variant="contained" color={selected?.color as any} disableElevation onClick={handleToggle} ref={anchorRef}>

@@ -45,6 +45,7 @@ export const FailuresModal = (props: FailuresModalProps) => {
             disableEscapeKeyDown={false}
             onClose={onCancel}
             className={Styles.failuresModal}
+            data-testid="failures-modal"
             {...rest}
         >
             <DialogTitle textAlign="center">{t("failuresEncountered")}</DialogTitle>

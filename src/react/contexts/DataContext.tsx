@@ -51,7 +51,7 @@ const DataContext = createContext<DataState | undefined>(undefined);
 
 export function DataProvider(props: any) {
     const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
-    const [playlists, setPlaylists] = useState<PlaylistInfo[]>([]);
+    const [playlists, setPlaylists] = useState<PlaylistInfo[]>();
     const [tracks, setTracks] = useState<TrackInfo[]>([]);
     const [trackStatus, setTrackStatus] = useState<TrackStatusInfo[]>([]);
     const [trackCuts, setTrackCuts] = useState<{[key: string]: [number, number][]}>({});

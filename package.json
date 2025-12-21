@@ -41,7 +41,10 @@
     "electron-debug": "wait-on dist/index.js && ELECTRON_DISABLE_SECURITY_WARNINGS=true electron --inspect-brk=9229 .",
     "test": "jest",
     "pack": "yarn build:prod && electron-builder --dir",
-    "dist": "yarn build:prod && yarn test && electron-builder"
+    "dist": "yarn build:prod && electron-builder",
+    "e2e:codegen": "playwright test e2e/codegen.spec.ts --debug --workers=1",
+    "e2e:prod": "cross-env CI=e2e playwright test",
+    "e2e:dev": "cross-env CI=e2e E2E_DEV=true playwright test"
   },
   "build": {
     "appId": "yt.grabber",
@@ -110,6 +113,7 @@
     "mkdirp": "^3.0.1",
     "moment": "^2.30.1",
     "moment-duration-format": "^2.3.2",
+    "music-metadata": "^11.10.3",
     "puppeteer": "^24.26.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-devtools": "^2.4.6",

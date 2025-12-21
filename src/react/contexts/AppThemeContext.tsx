@@ -11,7 +11,9 @@ export interface IAppThemeProps {
 
 export interface IAppThemeProviderProps extends IAppThemeProps, PropsWithChildren {}
 
-const defaultState = {};
+const defaultState: IAppThemeProps = {
+    mode: "dark",
+};
 
 export const AppThemeContext = createContext<IAppThemeProps>(defaultState);
 

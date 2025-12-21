@@ -58,7 +58,7 @@ describe("DataContext", () => {
             );
             
             expect(capturedState).toBeDefined();
-            expect(capturedState!.playlists).toEqual([]);
+            expect(capturedState!.playlists).toEqual(undefined);
             expect(capturedState!.tracks).toEqual([]);
             expect(capturedState!.trackStatus).toEqual([]);
             expect(capturedState!.trackCuts).toEqual({});

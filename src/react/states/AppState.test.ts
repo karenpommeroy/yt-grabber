@@ -8,7 +8,7 @@ describe("AppState", () => {
         expect(state).toEqual({
             location: "/",
             theme: "purple-rain",
-            mode: ColorMode.Light,
+            mode: ColorMode.Dark,
             loading: false,
             help: false,
         });

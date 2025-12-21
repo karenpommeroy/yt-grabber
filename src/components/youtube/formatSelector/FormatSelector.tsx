@@ -163,6 +163,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                 <FormControl fullWidth disabled={disabled} data-help="mediaType">
                     <InputLabel id="media-type-label">{t("mediaType")}</InputLabel>
                     <Select<MediaFormat>
+                        data-testid="media-type-select"
                         labelId="media-type-label"
                         value={selectedMediaType}
                         label={t("mediaType")}
@@ -171,7 +172,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                         }}
                         onChange={handleMediaTypeChange}
                     >
-                        {map(values(MediaFormat), (f) => <MenuItem key={f} value={f}>{capitalize(f)}</MenuItem>)}
+                        {map(values(MediaFormat), (f) => <MenuItem key={f} aria-label={f} value={f}>{capitalize(f)}</MenuItem>)}
                     </Select>
                 </FormControl>
             </Grid>
@@ -179,12 +180,16 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                 <FormControl fullWidth disabled={disabled} data-help="format">
                     <InputLabel id="format-label">{t("format")}</InputLabel>
                     <Select<string>
+                        data-testid="media-format-select"
                         labelId="format-label"
                         value={selectedFormat}
                         label={t("format")}
                         onChange={handleFormatChange}
+                        MenuProps={{
+                            disablePortal: true
+                        }}
                     >
-                        {map(extensions, (item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                        {map(extensions, (item) => <MenuItem aria-label={item} key={item} value={item}>{item}</MenuItem>)}
                     </Select>
                 </FormControl>
             </Grid>
@@ -193,12 +198,16 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                     <FormControl fullWidth disabled={disabled} data-help="resolution">
                         <InputLabel id="resolution-label">{t("resolution")}</InputLabel>
                         <Select<string>
+                            data-testid="media-resolution-select"
                             labelId="resolution-label"
                             value={selectedResolution}
                             label={t("resolution")}
                             onChange={handleResolutionChange}
+                            MenuProps={{
+                                disablePortal: true
+                            }}
                         >
-                            {map(resolutions, (item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+                            {map(resolutions, (item) => <MenuItem aria-label={item} key={item} value={item}>{item}</MenuItem>)}
                         </Select>
                     </FormControl>
                 </Grid>
@@ -206,6 +215,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
             {selectedMediaType === MediaFormat.Audio &&
                 <Grid size="grow">
                     <NumberField
+                        data-testid="media-quality-field"
                         data-help="audioQuality"
                         disabled={disabled}
                         fullWidth
@@ -225,6 +235,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
             {selectedMediaType === MediaFormat.Video && selectedFormat === VideoType.Gif &&
                 <Grid size={12}>
                     <Accordion
+                        data-testid="gif-text-options-panel"
                         elevation={0}
                         className={Styles.accordion}
                         data-help="gifTextOptions"
@@ -237,10 +248,10 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                         <AccordionDetails className={Styles.accordionDetails}>
                             <Stack direction="column" spacing={1} paddingX={0} paddingY={2} paddingBottom={0}>  
                                 <FormControl className={Styles.textInputGroup} data-help="gifTopText">
-                                    <TextField label={t("gifTopText")} variant="outlined" value={gifTopText} onChange={onGifTopTextChanged} />
+                                    <TextField data-testid="gif-top-text-field" label={t("gifTopText")} variant="outlined" value={gifTopText} onChange={onGifTopTextChanged} />
                                 </FormControl>
                                 <FormControl className={Styles.textInputGroup} data-help="gifBottomText">
-                                    <TextField label={t("gifBottomText")} variant="outlined" value={gifBottomText} onChange={onGifBottomTextChanged} />
+                                    <TextField data-testid="gif-bottom-text-field" label={t("gifBottomText")} variant="outlined" value={gifBottomText} onChange={onGifBottomTextChanged} />
                                 </FormControl>
                             </Stack>
                         </AccordionDetails>

@@ -41,7 +41,7 @@ describe("AppContext", () => {
             expect(capturedContext).toBeDefined();
             expect(capturedContext!.state.location).toBe("/");
             expect(capturedContext!.state.theme).toBe("purple-rain");
-            expect(capturedContext!.state.mode).toBe(ColorMode.Light);
+            expect(capturedContext!.state.mode).toBe(ColorMode.Dark);
             expect(capturedContext!.state.loading).toBe(false);
             expect(capturedContext!.state.help).toBe(false);
         });
@@ -109,13 +109,13 @@ describe("AppContext", () => {
                 </AppContextProvider>
             );
 
-            expect(capturedContext!.state.mode).toBe(ColorMode.Light);
+            expect(capturedContext!.state.mode).toBe(ColorMode.Dark);
 
             act(() => {
-                capturedContext!.actions.setMode(ColorMode.Dark);
+                capturedContext!.actions.setMode(ColorMode.Light);
             });
 
-            expect(capturedContext!.state.mode).toBe(ColorMode.Dark);
+            expect(capturedContext!.state.mode).toBe(ColorMode.Light);
         });
 
         it("should update loading via setLoading", () => {

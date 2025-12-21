@@ -136,7 +136,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
     
     return (
         <>
-            <Grid className={Styles.mediaInfoPanel} size={12} data-help="mediaInfo">
+            <Grid className={Styles.mediaInfoPanel} size={12} data-help="mediaInfo" data-testid="media-info-panel">
                 <Card variant="outlined" className={Styles.header}>
                     <div className={Styles.imageWrapper} style={{marginRight: 1}}>
                         <CardMedia
@@ -171,30 +171,30 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                         {!loading &&
                             <Box className={Styles.actions} padding={2} gap={2}>
                                 <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="editInfo" className={Styles.edit} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={editInfo}>
+                                    <Button data-help="editInfo" data-testid="edit-button" className={Styles.edit} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={editInfo}>
                                         <EditIcon />
                                     </Button>
                                 </Tooltip>
                                 {(tracksSeparated || playlist.tracks.length === 1) && <Tooltip title={t("cut")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="cutTrack" className={Styles.cutTrack} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={cutTrack}>
+                                    <Button data-help="cutTrack" data-testid="cut-button" className={Styles.cutTrack} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={cutTrack}>
                                         <FormatListNumberedIcon />
                                     </Button>
                                 </Tooltip>}
                                 {some(trackStatus, (s) => s.completed) &&
                                     <Tooltip title={t("openOutputDirectory")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button data-help="openOutputDirectory" className={Styles.openOutput} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={openOutputFolder}>
+                                        <Button data-help="openOutputDirectory" data-testid="open-output-dir-button" className={Styles.openOutput} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={openOutputFolder}>
                                             <LaunchIcon />
                                         </Button>
                                     </Tooltip>
                                 }
                                 <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="openInBrowser" className={Styles.openInBrowser} size="large" fullWidth disableElevation variant="contained" color="primary" onClick={onOpenInBrowser}>
+                                    <Button data-help="openInBrowser" data-testid="open-in-browser-button" className={Styles.openInBrowser} size="large" fullWidth disableElevation variant="contained" color="primary" onClick={onOpenInBrowser}>
                                         <YouTubeIcon />
                                     </Button>
                                 </Tooltip>
                                 <Tooltip title={t("downloadPlaylist")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                     <div>
-                                        <Button disabled={includes(queue, "load-single") || includes(queue, "load-multi")} data-help="downloadPlaylist" className={Styles.download} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={downloadPlaylist}>
+                                        <Button data-testid="download-playlist-button" disabled={includes(queue, "load-single") || includes(queue, "load-multi")} data-help="downloadPlaylist" className={Styles.download} size="large" fullWidth variant="contained" color="secondary" disableElevation onClick={downloadPlaylist}>
                                             <DownloadIcon />
                                         </Button>
                                     </div>
@@ -204,24 +204,25 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                         {loading &&
                             <Grid container className={Styles.loading}>
                                 <Grid>
-                                    <Button data-help="cancelDownloadPlaylist" variant="contained" size="large" color="secondary" disableElevation startIcon={<CloseIcon />} onClick={cancel}>{t("cancel")}</Button>
+                                    <Button data-testid="cancel-download-playlist-button" data-help="cancelDownloadPlaylist" variant="contained" size="large" color="secondary" disableElevation startIcon={<CloseIcon />} onClick={cancel}>{t("cancel")}</Button>
                                 </Grid>
                                 <Grid>
                                     <Box className={Styles.progressIndicator} padding={2} gap={1}>
-                                        <Progress size={60} thickness={6.5} color="primary" value={progress} />
+                                        <Progress data-testid="progress-circle" size={60} thickness={6.5} color="primary" value={progress} />
                                     </Box>
                                 </Grid>
                             </Grid>
                         }
                         {loading &&
                             <Box className={Styles.progress}>
-                                <LinearProgress className={Styles.progressBar} variant="determinate" color="primary" value={progress} />
+                                <LinearProgress data-testid="progress-bar" className={Styles.progressBar} variant="determinate" color="primary" value={progress} />
                             </Box>
                         }
                     </Box>
                 </Card>
             </Grid>
             <DetailsModal
+                data-testid="playlist-details-modal"
                 id="details-modal"
                 details={pick(value, ["artist", "title", "releaseYear"])}
                 open={detailsModalOpen}

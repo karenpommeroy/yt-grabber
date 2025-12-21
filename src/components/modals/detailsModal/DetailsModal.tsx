@@ -81,7 +81,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
                 </Stack>
             </DialogContent>
             <DialogActions sx={{justifyContent: "center"}}>
-                <Button variant="contained" disableElevation color="secondary" onClick={handleClose}>
+                <Button data-testid="close-button" variant="contained" disableElevation color="secondary" onClick={handleClose}>
                     {t("ok")}
                 </Button>
             </DialogActions>

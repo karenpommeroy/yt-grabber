@@ -6,7 +6,7 @@ export const useAppContext = jest.fn(() => ({
     state: {
         location: "/",
         theme: "purple-rain",
-        mode: "light",
+        mode: "dark",
         loading: false,
         help: false
     },

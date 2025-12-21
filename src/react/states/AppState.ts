@@ -13,7 +13,7 @@ export const createDefaultState = () => {
     return StateCreator.create<IAppState>({
         location: "/",
         theme: "purple-rain",
-        mode: ColorMode.Light,
+        mode: ColorMode.Dark,
         loading: false,
         help: false,
     });

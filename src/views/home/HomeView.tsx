@@ -905,7 +905,7 @@ export const HomeView: React.FC = () => {
                     />
                 </Grid>
                 <Grid className={Styles.footer} container>
-                    <InfoBar />
+                    <InfoBar data-testid="info-bar" />
                 </Grid>
             </Box>
             <SelectArtistModal

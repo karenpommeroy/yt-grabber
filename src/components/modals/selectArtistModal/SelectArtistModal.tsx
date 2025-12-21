@@ -54,6 +54,7 @@ export const SelectArtistModal = (props: SelectArtistModalProps) => {
             disableEscapeKeyDown={false}
             onClose={handleClose}
             className={Styles.selectArtistModal}
+            data-testid="select-artist-modal"
             {...rest}
         >
             <DialogTitle textAlign="center">{t("selectArtist")}</DialogTitle>
@@ -87,7 +88,7 @@ export const SelectArtistModal = (props: SelectArtistModalProps) => {
                 </List>
             </DialogContent>
             <DialogActions className={Styles.modalActions}>
-                <Button color="secondary" variant="contained" autoFocus={false} onClick={handleClose}>
+                <Button data-testid="cancel-button" color="secondary" variant="contained" autoFocus={false} onClick={handleClose}>
                     {t("cancel")}
                 </Button>
             </DialogActions>

@@ -258,7 +258,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
     return (
         <>
             <Grid size={12} className={Styles.trackList}>
-                <List className={Styles.trackList} dense>
+                <List className={Styles.trackList} dense data-testid="track-list">
                     {map(value, (item) => {
                         const info = getTrackStatusInfo(item);
                         const open = Boolean(cutAnchorEl) && cutOpen === item.id;
@@ -270,16 +270,17 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                             key={item.id}
                             className={Styles.track}
                             data-help="trackInfo"
+                            role="listitem"
                             secondaryAction={
                                 <Stack direction="row" spacing={1.25} className={Styles.actions}>
                                     <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button data-help="editTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onEditTrack}>
+                                        <Button data-testid="edit-track-button" data-help="editTrack" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onEditTrack}>
                                             <EditIcon />
                                         </Button>
                                     </Tooltip>
                                     {info?.completed &&
                                         <Tooltip title={t("findFileInSystem")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                            <Button data-help="findInFileSystem" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onFindFileInSystem}>
+                                            <Button data-testid="find-file-button" data-help="findInFileSystem" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onFindFileInSystem}>
                                                 <LaunchIcon />
                                             </Button>
                                         </Tooltip>
@@ -287,13 +288,14 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                     {!includes(queue, item.id) &&
                                         <div>
                                             <Tooltip title={t("cut")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                                <Button data-help="cut" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenTrackCut}>
+                                                <Button data-testid="cut-track-button" data-help="cut" size="small" className={Styles.trackAction} color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenTrackCut}>
                                                     <ContentCutIcon />
                                                 </Button>
                                             </Tooltip>
                                             <Popover
                                                 id={item.id}
                                                 open={open}
+                                                data-testid="track-cut-popup"
                                                 TransitionComponent={Fade}
                                                 TransitionProps={{
                                                     unmountOnExit: true,
@@ -312,7 +314,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                             >
                                                 <Grid container padding={0} spacing={0} className={Styles.trackCutPopup}>
                                                     {map(cuts, (cut, index) =>
-                                                        <Grid container padding={2} paddingBottom={0} spacing={1} key={index}>
+                                                        <Grid data-testid="track-cut" container padding={2} paddingBottom={0} spacing={1} key={index}>
                                                             <Grid size={5}>
                                                                 <NumberFormatBase
                                                                     size="small"
@@ -348,7 +350,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                                 />
                                                             </Grid>
                                                             <Grid size={2} display="flex">
-                                                                <Button className={Styles.deleteCutButton} data-id={item.id} data-index={index} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
+                                                                <Button data-testid="delete-track-cut-button" className={Styles.deleteCutButton} data-id={item.id} data-index={index} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
                                                                     <DeleteForeverIcon />
                                                                 </Button>
                                                             </Grid>
@@ -367,7 +369,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                         </Grid>
                                                     )}   
                                                     <Grid size={12} className={Styles.addTrackCutRow} padding={1}>
-                                                        <Button data-id={item.id} disableElevation variant="contained" color="primary" onClick={onAddTrackCut}>
+                                                        <Button data-testid="add-track-cut-button" data-id={item.id} disableElevation variant="contained" color="primary" onClick={onAddTrackCut}>
                                                             <AddIcon />
                                                         </Button>
                                                     </Grid>
@@ -376,14 +378,14 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                         </div>
                                     }
                                     <Tooltip title={t("openInBrowser")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                        <Button data-help="openInBrowser" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenInBrowser}>
+                                        <Button data-testid="open-track-in-browser-button" data-help="openInBrowser" className={Styles.trackAction} size="small" color="primary" disableElevation variant="contained" data-id={item.id} onClick={onOpenInBrowser}>
                                             <YouTubeIcon />
                                         </Button>
                                     </Tooltip>
                                     {!includes(queue, item.id) &&
                                         <Tooltip title={t("download")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                             <div>
-                                                <Button disabled={includes(queue, "load-single") || includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="secondary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
+                                                <Button data-testid="download-track-button" disabled={includes(queue, "load-single") || includes(queue, "load-multi")} data-help="downloadTrack" className={Styles.trackAction} size="small" color="secondary" disableElevation variant="contained" data-id={item.id} onClick={onDownloadTrackClick}>
                                                     <DownloadIcon />
                                                 </Button>
                                             </div>
@@ -391,7 +393,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                     }
                                     {includes(queue, item.id) &&
                                         <Tooltip title={t("cancel")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                            <Button data-help="cancelDownloadTrack" size="small" className={Styles.trackAction} color="secondary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
+                                            <Button data-testid="cancel-download-track-button" data-help="cancelDownloadTrack" size="small" className={Styles.trackAction} color="secondary" disableElevation variant="contained" data-id={item.id} onClick={onCancelTrackClick}>
                                                 <CloseIcon />
                                             </Button>
                                         </Tooltip>
@@ -402,19 +404,19 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                             <Grid container direction="row" flexGrow={1}>
                                 {item.playlist_autonumber &&
                                     <Grid size={1} className={Styles.numberColumn}>
-                                        <Typography className={Styles.number} variant="body1" color="primary.main">{item.playlist_autonumber}</Typography>
+                                        <Typography data-testid="track-number" className={Styles.number} variant="body1" color="primary.main">{item.playlist_autonumber}</Typography>
                                     </Grid>
                                 }
                                 <Grid size={1} className={Styles.imageColumn}>
-                                    <Avatar className={Styles.image} src={resolveTrackThumbnail(item)}>{item.playlist_autonumber}</Avatar>
+                                    <Avatar data-testid="track-icon" className={Styles.image} src={resolveTrackThumbnail(item)}>{item.playlist_autonumber}</Avatar>
                                 </Grid>
                                 <Grid size={3.25}>
-                                    <ListItemText primary={item.title} secondary={moment.duration(item.duration, "seconds").format("mm:ss", { trim: false})} />
+                                    <ListItemText data-testid="track-text" primary={item.title} secondary={moment.duration(item.duration, "seconds").format("mm:ss", { trim: false})} />
                                 </Grid>
                                 <Grid size={2} className={Styles.column}>
                                     {!isEmpty(trackCuts[item.id]) &&
                                         <Tooltip title={resolveTrackCutsTooltipText(item)} arrow enterDelay={1000} leaveDelay={100} enterNextDelay={250} placement="top">
-                                            <div className={Styles.column}>
+                                            <div className={Styles.column} data-testid="track-cuts">
                                                 <ContentCutIcon className={Styles.cutIcon} color="action" />
                                                 <Typography variant="caption">{resolveTrackCutsText(item)}</Typography>
                                             </div>
@@ -423,18 +425,18 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                 </Grid>
                                 {info && !info.skipped && <>
                                     <Grid size={1} className={Styles.column}>
-                                        {!info.error && <Typography variant="body1">{formatFileSize(info.totalSize)}</Typography>}
+                                        {!info.error && <Typography data-testid="track-size" variant="body1">{formatFileSize(info.totalSize)}</Typography>}
                                     </Grid>
                                     <Grid size={.75} className={Styles.column}>
                                         {info.completed ?
-                                            <CheckIcon className={Styles.completedIcon} color="success" />
+                                            <CheckIcon className={Styles.completedIcon} color="success" data-testid="track-completed-icon"/>
                                             : info.error ?
-                                                <CloseIcon className={Styles.completedIcon} color="error" />
-                                                : <Progress color="primary" value={info.percent} />
+                                                <CloseIcon className={Styles.completedIcon} color="error" data-testid="track-failed-icon" />
+                                                : <Progress color="primary" value={info.percent} data-testid="track-progress" />
                                         }
                                     </Grid>
                                     <Grid size={2.75} className={Styles.column}>
-                                        <Typography variant="body1">{info.status}</Typography>
+                                        <Typography variant="body1" data-testid="track-status">{info.status}</Typography>
                                     </Grid>
                                 </>
                                 }
@@ -444,6 +446,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                 </List>
             </Grid>
             <DetailsModal
+                data-testid="track-details-modal"
                 id="track-details-modal"
                 details={pick(currentTrack, ["title"])}
                 open={!!currentTrack}

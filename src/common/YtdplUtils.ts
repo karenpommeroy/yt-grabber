@@ -122,7 +122,7 @@ export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format
             try {
                 const compiled = template(appOptions.trackOutputTemplate, {interpolate});
 
-                return `${appOptions.outputDirectory}/${compiled(data)}`;
+                return sanitizeFilePath(`${appOptions.outputDirectory}/${compiled(data)}`);
             } catch {
                 const defaultTrackOutputTemplate = get(StoreSchema.application, "properties.trackOutputTemplate.default");
                 const compiled = template(defaultTrackOutputTemplate, {interpolate});
@@ -344,7 +344,8 @@ export const createGifUsingPalette = (directory: string, filename: string, forma
         "-y",
         "-i", `${directory}/${filename}.mkv`,
         "-i", `${directory}/${filename}-palette.png`,
-        "-filter_complex", `fps=15,scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=floyd_steinberg${gifTopText}${gifBottomText}`,
+        // "-filter_complex", `fps=15,scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=floyd_steinberg${gifTopText}${gifBottomText}`,
+        "-filter_complex", `fps=15,scale=${width}:-1:flags=bilinear[x];[x][1:v]paletteuse=dither=bayer${gifTopText}${gifBottomText}`,
         `${directory}/${filename}.gif`,
     ];
 
@@ -369,7 +370,7 @@ export const createGifUsingPalette = (directory: string, filename: string, forma
 export const optimizeGif = (directory: string, filename: string, callback: (error?: Error) => void) => {
     const errors: string[] = [];
     const cmdArgs = [
-        "--optimize=3",
+        "--optimize=2",
         "--colors", "256",
         `${directory}/${filename}.gif`,
         "-o", `${directory}/${filename}.gif`,

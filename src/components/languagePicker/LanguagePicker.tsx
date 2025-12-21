@@ -73,6 +73,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
             <LanguagePickerTrigger showArrow={showArrow} mode={displayMode} loading={loading} onClick={onTriggerClick} />
             {anchorEl && <ClickAwayListener onClickAway={onClickAway}>
                 <Menu
+                    data-testid="language-picker-menu"
                     anchorEl={anchorEl}
                     disablePortal={true}
                     anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -80,6 +81,7 @@ export const LanguagePicker = (props: LanguagePickerProps) => {
                     transformOrigin={{ vertical: -40, horizontal: "center" }}
                     open={Boolean(anchorEl)}
                     onClose={onClose}
+                    tabIndex={1}
                 >
                     {map(availableLocales, (item) => (
                         <LanguagePickerItem
@@ -107,8 +109,10 @@ export const LanguagePickerTrigger = (props: LanguagePickerTriggerProps) => {
             variant="text"
             disableElevation={true}
             color="inherit"
+            data-testid="language-picker-trigger"
         >
             <span
+                data-testid="language-flag"
                 className={Styles.icon}
                 style={{
                     backgroundImage: `url("${prependPath}/resources/locales/${i18n.language}/flag.svg")`,
@@ -116,7 +120,7 @@ export const LanguagePickerTrigger = (props: LanguagePickerTriggerProps) => {
             />
             {mode > ComponentDisplayMode.Compact && (
                 <React.Fragment>
-                    <span className={classnames("uppercase", Styles.name)}>{t("langName", { lng: i18n.language })}</span>
+                    <span data-testid="language-name" className={classnames("uppercase", Styles.name)}>{t("langName", { lng: i18n.language })}</span>
                     {loading && <CircularProgress />}
                 </React.Fragment>
             )}
@@ -130,7 +134,7 @@ export const LanguagePickerItem = (props: LanguagePickerItemProps) => {
     const {t} = useTranslation();
 
     return (
-        <MenuItem key={lang} value={lang} onClick={() => onClick(lang)} className={Styles.languagePickerItem}>
+        <MenuItem tabIndex={1} key={lang} value={lang} onClick={() => onClick(lang)} className={Styles.languagePickerItem}>
             <span
                 className={Styles.icon}
                 style={{

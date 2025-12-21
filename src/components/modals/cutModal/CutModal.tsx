@@ -132,6 +132,7 @@ export const CutModal: React.FC<CutModalProps> = (props: CutModalProps) => {
             maxWidth="md"
             className={Styles.cutModal}
             onKeyUp={handleKeyUp}
+            data-testid="cut-modal"
             {...other}
         >
             <DialogTitle textAlign="center">{t("cutModalTitle")}</DialogTitle>
@@ -192,7 +193,7 @@ export const CutModal: React.FC<CutModalProps> = (props: CutModalProps) => {
                 </Grid>
             </DialogContent>
             <DialogActions sx={{justifyContent: "end"}}>
-                <Button disabled={some(entries, (entry) => isEmpty(entry.title))} variant="contained" disableElevation autoFocus color="secondary" onClick={handleClose}>
+                <Button data-testid="close-button" disabled={some(entries, (entry) => isEmpty(entry.title))} variant="contained" disableElevation autoFocus color="secondary" onClick={handleClose}>
                     {t("ok")}
                 </Button>
             </DialogActions>

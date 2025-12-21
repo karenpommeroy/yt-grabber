@@ -30,6 +30,7 @@ export const ImageModal = (props: ImageModalProps) => {
             disableEscapeKeyDown={false}
             onClose={handleClose}
             className={Styles.imageModal}
+            data-testid="image-modal"
             {...rest}
         >
             <DialogTitle textAlign="center">{title}</DialogTitle>
@@ -53,7 +54,7 @@ export const ImageModal = (props: ImageModalProps) => {
                 )}
             </DialogContent>
             <DialogActions className={Styles.modalActions}>
-                <Button color="secondary" variant="contained" autoFocus={true} onClick={handleClose}>
+                <Button data-testid="close-button" color="secondary" variant="contained" autoFocus={true} onClick={handleClose}>
                     {t("close")}
                 </Button>
             </DialogActions>

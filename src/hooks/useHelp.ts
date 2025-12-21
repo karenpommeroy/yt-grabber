@@ -23,6 +23,7 @@ const useHelp = () => {
         backdrop.style.zIndex = "1";
         backdrop.style.background = background;
         backdrop.style.backdropFilter = filter;
+        backdrop.dataset.testid = "help-backdrop";
 
         document.body.appendChild(backdrop);
 
@@ -67,6 +68,7 @@ const useHelp = () => {
         clone.style.left = bbox.x - clone.offsetLeft + "px";
         clone.style.top = bbox.y - clone.offsetTop + "px";
         clone.style.zIndex = toString(zIndex + 1);
+        clone.dataset.testid = "help-anchor";
 
         return clone;
     };

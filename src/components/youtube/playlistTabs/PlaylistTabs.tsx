@@ -1,11 +1,12 @@
 import classnames from "classnames";
 import {ipcRenderer, IpcRendererEvent} from "electron";
 import {
-    filter, find, findIndex, flatMap, get, includes, isEmpty, isFunction, map, orderBy, reduce,
-    size, some
+    filter, find, findIndex, flatMap, get, includes, isEmpty, isFunction, isUndefined, map, orderBy,
+    reduce, size, some
 } from "lodash-es";
 import path from "path";
 import React, {MouseEvent, useCallback, useEffect} from "react";
+import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
 import TabContext from "@mui/lab/TabContext";
@@ -38,7 +39,8 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     const {queue, onDownloadTrack, onDownloadPlaylist, onCancelPlaylist, onCancelTrack} = props;
     const {trackStatus, playlists, activeTab, setActiveTab, setTrackStatus, setPlaylists, setTracks} = useDataState();
     const {state} = useAppContext();
-    const tabWidth = window.innerWidth / (playlists.length + playlists.length) - 30; 
+    const {t} = useTranslation();
+    const tabWidth = window.innerWidth / (isUndefined(playlists) ? 1 : playlists.length <= 0 ? 1 : playlists.length * 2) - 30; 
 
     useEffect(() => {
         if (activeTab && includes(map(playlists, "url"), activeTab)) {
@@ -169,8 +171,13 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
         };
     }, []);
     
-    if (isEmpty(playlists)) {
-        return null;
+    if (!state.loading) {
+        if (isUndefined(playlists)) {
+            return <Typography className={Styles.welcome} variant="h6">{t("welcomeMessage")}</Typography>;        
+        }
+        if (isEmpty(playlists)) {
+            return <Typography className={Styles.welcome} variant="h6">{t("noResultsMessage")}</Typography>;
+        }
     }
 
     return (
@@ -197,7 +204,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                                     <>
                                         <div>
                                             <Avatar className={classnames(Styles.tabIcon, {[Styles.loading]: loading})} src={item.album.thumbnail} />
-                                            {loading && <Progress variant="indeterminate" className={Styles.tabProgress} thickness={4} color="primary" value={progress} />}
+                                            {loading && <Progress data-testid="tab-progress" variant="indeterminate" className={Styles.tabProgress} thickness={4} color="primary" value={progress} />}
                                         </div>
                                         <Typography title={item.album.title} variant="button" className={Styles.tabTitle} sx={{maxWidth: tabWidth}}>{item.album.title}</Typography>
                                     </>
@@ -249,7 +256,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
                             <Skeleton variant="rounded" width="100%" height={50} />
                             <Skeleton variant="rounded" width="100%" height={50} />
                         </Stack>
-                        <Progress size={100} thickness={4} variant="indeterminate" label={false} position="absolute"/>
+                        <Progress data-testid="tab-content-loading-indicator" size={100} thickness={4} variant="indeterminate" label={false} position="absolute"/>
                     </TabPanel>
                 )}
             </TabContext>

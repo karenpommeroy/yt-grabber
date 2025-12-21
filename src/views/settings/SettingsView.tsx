@@ -208,7 +208,7 @@ export const SettingsView: React.FC = () => {
     }, []);
 
     return (
-        <Box className={Styles.settings}>
+        <Box className={Styles.settings} data-testid="settings">
             <Grid className={Styles.container} container padding={2} spacing={3}>
                 <Grid className={Styles.content} container>
                     <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">
@@ -456,7 +456,7 @@ export const SettingsView: React.FC = () => {
                 </Grid>
                 <Grid className={Styles.footer} container>
                     <Grid size="auto">
-                        <Button variant="contained" color="primary" onClick={handleClose}>
+                        <Button variant="contained" color="primary" onClick={handleClose} data-testid="settings-close-button">
                             {t("close")}
                         </Button>
                     </Grid>
