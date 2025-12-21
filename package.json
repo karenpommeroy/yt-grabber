@@ -28,7 +28,7 @@
   ],
   "main": "./dist/index.js",
   "repository": {
-    "url": "https://github.com/karenpommeroy/yt-grabber.git"
+    "url": "git+https://github.com/karenpommeroy/yt-grabber.git"
   },
   "scripts": {
     "clean": "rimraf dist",
