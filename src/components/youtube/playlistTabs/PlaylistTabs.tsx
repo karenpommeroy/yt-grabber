@@ -173,10 +173,10 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     
     if (!state.loading) {
         if (isUndefined(playlists)) {
-            return <Typography className={Styles.welcome} variant="h6">{t("welcomeMessage")}</Typography>;        
+            return <Typography className={Styles.message} variant="h6">{t("welcomeMessage")}</Typography>;        
         }
         if (isEmpty(playlists)) {
-            return <Typography className={Styles.welcome} variant="h6">{t("noResultsMessage")}</Typography>;
+            return <Typography className={Styles.message} variant="h6">{t("noResultsMessage")}</Typography>;
         }
     }
 
