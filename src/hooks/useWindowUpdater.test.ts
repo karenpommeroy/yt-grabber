@@ -44,4 +44,16 @@ describe("useWindowUpdater", () => {
         expect(callback).toHaveBeenCalledWith();
         expect(removeEventListenerSpy).not.toHaveBeenCalled();
     });
+
+    test("cleans up resize listener on unmount", () => {
+        const callback = jest.fn();
+        const {unmount} = renderHook(() => useWindowUpdater(callback));
+
+        expect(removeEventListenerSpy).not.toHaveBeenCalled();
+
+        unmount();
+        jest.runOnlyPendingTimers();
+
+        expect(removeEventListenerSpy).toHaveBeenCalled();
+    });
 });

@@ -19,7 +19,7 @@ export const FailuresModal = (props: FailuresModalProps) => {
     const {open, onCancel, onConfirm, ...rest} = props;
     const {trackStatus} = useDataState();
     const [failuresCount, setFailuresCount] = useState(0);
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
     const handleCancel = () => {
         if (onCancel) {

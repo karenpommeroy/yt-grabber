@@ -8,16 +8,13 @@ const useWindowUpdater = (callback: () => void, debounceTime = 100) => {
             debounceTime,
         );
 
-        const setupListeners = () => {
-            window.addEventListener("resize", onWindowResized);
-            onWindowResized();
 
-            return () => {
-                window.removeEventListener("resize", onWindowResized);
-            };
+        window.addEventListener("resize", onWindowResized);
+        onWindowResized();
+
+        return () => {
+            window.removeEventListener("resize", onWindowResized);
         };
-
-        setupListeners();
     }, [callback, debounceTime]);
 };
 

@@ -2,7 +2,7 @@ import "moment-duration-format";
 
 import {ipcRenderer} from "electron";
 
-import {fireEvent} from "@testing-library/react";
+import {act, fireEvent, waitFor} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
 import {
@@ -50,6 +50,7 @@ jest.mock("../../modals/cutModal/CutModal", () => {
                 data-help="mock-cut-modal"
                 data-testid="mock-cut-modal"
                 onClick={() => props.onClose([{id: "cut-1", title: "Cut Track", startTime: 0, endTime: 10}])}
+                onKeyDown={(e) => e.key === "Escape" && props.onCancel?.()}
             >
                 cut
             </button>
@@ -61,6 +62,11 @@ const baseAlbum = createAlbumInfo();
 const basePlaylist = createPlaylistInfo({
     url: "album-1",
     album: baseAlbum,
+    tracks: [createTrackInfo({id: "track-1", title: "Track", duration: 300})],
+});
+const anotherPlaylist = createPlaylistInfo({
+    url: "album-2",
+    album: createAlbumInfo({url: "album-2"}),
     tracks: [createTrackInfo({id: "track-1", title: "Track", duration: 300})],
 });
 
@@ -245,5 +251,56 @@ describe("MediaInfoPanel", () => {
         const cutsUpdater = state.setTrackCuts.mock.calls[0][0];
         const cuts = cutsUpdater({});
         expect(cuts["cut-1"]).toEqual([[0, 10]]);
+    });
+
+    test("onCutTrackModalCancel closes modal without updates", async () => {
+        const state = setupDataState({playlists: [basePlaylist, anotherPlaylist], trackCuts: {}} as any);
+
+        const shell = await render(
+            <MediaInfoPanel
+                item={baseAlbum}
+                playlist={basePlaylist}
+            />
+        );
+
+        const cutButton = shell.getByTestId("cut-button");
+        fireEvent.click(cutButton);
+
+        expect((global as any).__cutModalProps.open).toBe(true);
+
+        fireEvent.keyDown(shell.getByTestId("mock-cut-modal"), {key: "Escape", code: "Escape"});
+        act(() => {
+            (global as any).__cutModalProps.onCancel();
+        });
+        expect((global as any).__cutModalProps.open).toBe(false);
+        expect(state.setPlaylists).not.toHaveBeenCalled();
+        expect(state.setTrackCuts).not.toHaveBeenCalled();
+    });
+
+    test("onCutTrackModalClose marks tracksSeparated for multi-track playlists", async () => {
+        const multiTrackPlaylist = createPlaylistInfo({
+            url: "album-2",
+            album: createAlbumInfo({tracksNumber: 2}),
+            tracks: [
+                createTrackInfo({id: "track-1", title: "Track 1", duration: 300}),
+                createTrackInfo({id: "track-2", title: "Track 2", duration: 200}),
+            ],
+        });
+        setupDataState({playlists: [multiTrackPlaylist], trackCuts: {}} as any);
+
+        const shell = await render(
+            <MediaInfoPanel
+                item={multiTrackPlaylist.album}
+                playlist={multiTrackPlaylist}
+            />
+        );
+
+        expect(shell.queryByTestId("cut-button")).toBeNull();
+
+        const cuts = [{id: "cut-1", title: "Cut Track", startTime: 0, endTime: 10}];
+        act(() => {
+            (global as any).__cutModalProps.onClose(cuts);
+        });
+        await waitFor(() => expect(shell.getByTestId("cut-button")).toBeInTheDocument());
     });
 });

@@ -1,7 +1,11 @@
 import {Dispatch} from "react";
 
 import {ColorMode} from "../../common/Theme";
-import {IAction} from "./Action";
+
+export interface IAction<T> {
+    type: T;
+}
+
 
 export enum AppActions {
     SetLocation = "SET_LOCATION",

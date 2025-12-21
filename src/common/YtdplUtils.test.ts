@@ -4,8 +4,9 @@ import {spawn} from "child_process";
 import fs from "fs-extra";
 
 import {isAlbumTrack, isPlaylistTrack} from "./Formatters";
-import {AudioType, MediaFormat, VideoType} from "./Media";
+import {AudioType, Format, MediaFormat, VideoType} from "./Media";
 import {createAlbumInfo, createApplicationOptions, createTrackInfo} from "./TestHelpers";
+import {AlbumInfo, TrackInfo} from "./Youtube";
 import {
     convertOutputToFormat, createGifUsingPalette, generateColorPalette, getOutputFile,
     getOutputFileParts, getOutputFilePath, getYtdplRequestParams, mergeOutputFiles, optimizeGif
@@ -153,6 +154,33 @@ describe("YtdplUtils", () => {
         expect(params).not.toContain("--download-sections");
     });
 
+    test("getPostProcessorArgs returns correct metadata for album track with escaping", () => {
+        isAlbumTrackMock.mockReturnValue(true);
+        const track = {
+            id: "track1",
+            title: "Track \"Title\"",
+            playlist_autonumber: 5,
+        } as TrackInfo;
+        const album = {
+            artist: "Artist \"Name\"",
+            title: "Album \"Name\"",
+            tracksNumber: 12,
+            releaseYear: 2022,
+        } as AlbumInfo;
+        const format = {type: MediaFormat.Audio, extension: "mp3", audioQuality: 2} as Format;
+        const params = getYtdplRequestParams(track, album, {}, format);
+        const postArgsIndex = params.indexOf("--postprocessor-args");
+        expect(postArgsIndex).toBeGreaterThan(-1);
+        
+        const postArgs = params[postArgsIndex + 1];
+        expect(postArgs).toContain("-metadata title=\"Track \\\"Title\\\"\"");
+        expect(postArgs).toContain("-metadata artist=\"Artist \\\"Name\\\"\"");
+        expect(postArgs).toContain("-metadata album=\"Album \\\"Name\\\"\"");
+        expect(postArgs).toContain("-metadata track=\"5/12\"");
+        expect(postArgs).toContain("-metadata date=\"2022\"");
+        expect(postArgs).toContain("-metadata release_year=\"2022\"");
+    });
+
     test("getOutputFile falls back to default playlist template on error", () => {
         setApplicationOptions({playlistOutputTemplate: "{{(function(){throw new Error('boom')})()}}"});
         isPlaylistTrackMock.mockReturnValue(true);
@@ -172,6 +200,28 @@ describe("YtdplUtils", () => {
 
         expect(path.endsWith(".flac")).toBe(true);
         expect(path).toContain("Track Title");
+    });
+
+    test("getOutputFile falls back to default album template on error", () => {
+        isAlbumTrackMock.mockReturnValue(true);
+        isPlaylistTrackMock.mockReturnValue(false);
+        
+        const track = createTrackInfo();
+        const album = createAlbumInfo({title: "Album Title"});
+        const result = getOutputFile(track, album, {type: MediaFormat.Audio});
+        
+        expect(result).toBe(`./downloads/${album.artist}/[${album.releaseYear}] ${album.title}/${track.playlist_autonumber} - ${track.title}`);
+    });
+
+    test("getOutputFile falls back to default track template on error", () => {
+        isAlbumTrackMock.mockReturnValue(false);
+        isPlaylistTrackMock.mockReturnValue(false);
+        
+        const track = createTrackInfo();
+        const album = createAlbumInfo({title: "Track Album"});
+        const result = getOutputFile(track, album, {type: MediaFormat.Audio});
+        
+        expect(result).toBe(`./downloads/${album.artist} - ${track.title}`);
     });
 
     test("mergeOutputFiles invokes ffmpeg with concat args and succeeds", () => {

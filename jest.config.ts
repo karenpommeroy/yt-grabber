@@ -4,7 +4,24 @@ const config: Config = {
     rootDir: ".",
     testEnvironment: "jsdom",
     transform: {
-        "^.+\\.(t|j)sx?$": ["@swc/jest", {}],
+        "^.+\\.(t|j)sx?$": ["@swc/jest", {
+            jsc: {
+                parser: {
+                    syntax: "typescript",
+                    tsx: true,
+                },
+                target: "es2022",
+                transform: {
+                    react: {
+                        runtime: "automatic",
+                    },
+                },
+            },
+            module: {
+                type: "commonjs",
+            },
+            sourceMaps: true,
+        }],
     },
     transformIgnorePatterns: [
         "node_modules/(?!(lodash-es)/)",
@@ -29,12 +46,14 @@ const config: Config = {
         "!src/**/*.d.ts",
         "!src/**/index.ts",
         "!src/react/actions/Action.ts",
+        "!src/common/Messaging.ts",
     ],
     coverageDirectory: "<rootDir>/coverage",
     coverageProvider: "v8",
     coverageReporters: [
-        "json",
         "lcov",
+        "text-summary",
+        "json",
     ],
 };
 

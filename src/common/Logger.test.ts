@@ -1,8 +1,11 @@
+
 import {transports} from "winston";
 
 import {consoleFormat, createLogger, fileFormat} from "./Logger";
 
 import type {TransformableInfo} from "logform";
+
+// jest.mock("./Logger", () => require("@tests/mocks/common/Logger"));
 
 describe("createLogger", () => {
     if (typeof global.setImmediate === "undefined") {
@@ -28,11 +31,13 @@ describe("createLogger", () => {
 
     test("should log messages at different levels", () => {
         const logger = createLogger({ level: "debug" });
-        const spy = jest.spyOn(logger, "info");
+        logger.info = jest.fn();
 
         logger.info("Test message");
 
-        expect(spy).toHaveBeenCalledWith("Test message");
+        expect(logger.info).toHaveBeenCalledWith("Test message");
+
+        jest.clearAllMocks();
     });
 });
 

@@ -6,7 +6,7 @@ import * as ytdlpWrapMock from "yt-dlp-wrap";
 import {act, waitFor} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
-import {FormatScope, InputMode, MediaFormat, VideoType} from "../../common/Media";
+import {FormatScope, InputMode, MediaFormat, QueueKeys, VideoType} from "../../common/Media";
 import {createApplicationOptions} from "../../common/TestHelpers";
 import * as YtdplUtils from "../../common/YtdplUtils";
 import {Messages} from "../../messaging/Messages";
@@ -301,6 +301,55 @@ describe("HomeView", () => {
             },
             storeConfig.options,
         );
+    });
+
+    test("onGetYoutubeCompleted swallow errors and clears the load multi queue", async () => {
+        const setQueue = jest.fn();
+        useDataStateMock.mockReturnValue(createDataState({
+            queue: [QueueKeys.LoadMulti],
+            setQueue,
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.GetYoutubeUrlsCompleted);
+        expect(handler).toBeDefined();
+
+        const promiseAllSpy = jest.spyOn(Promise, "all").mockImplementation(() => {
+            throw new Error("boom");
+        });
+
+        try {
+            act(() => handler?.({} as any, {result: {sources: [], values: []}}));
+        } finally {
+            promiseAllSpy.mockRestore();
+        }
+
+        const queueUpdater = setQueue.mock.calls.at(-1)?.[0];
+        expect(queueUpdater?.([QueueKeys.LoadMulti])).toEqual([]);
+    });
+
+    test("loadMedia catches promise errors and still queues load single", async () => {
+        const setQueue = jest.fn();
+        configureStore({inputMode: InputMode.Auto});
+        useDataStateMock.mockReturnValue(createDataState({setQueue}) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+
+        const promiseAllSpy = jest.spyOn(Promise, "all").mockImplementation(() => {
+            throw new Error("boom");
+        });
+
+        try {
+            act(() => handlers.onLoadInfo(["https://youtube.com/watch?v=abc"], "", ""));
+        } finally {
+            promiseAllSpy.mockRestore();
+        }
+
+        const queueUpdater = setQueue.mock.calls.at(-1)?.[0];
+        expect(queueUpdater?.([])).toEqual([QueueKeys.LoadSingle]);
     });
 
     test("sends cancel messages when cancel is requested", async () => {
@@ -743,7 +792,7 @@ describe("HomeView", () => {
         };
 
         let state: any[] = [];
-        state = reduceCalls(0, state); // add initial track status
+        state = reduceCalls(0, state);
 
         await waitFor(() => expect(capturedHandlers.ytDlpEvent).toBeDefined());
 
@@ -879,7 +928,6 @@ describe("HomeView", () => {
 
         await render(<HomeView />);
 
-        // When queue is empty, operation should not be called
         expect(setOperation).not.toHaveBeenCalled();
     });
 
@@ -1010,7 +1058,6 @@ describe("HomeView", () => {
             capturedHandlers.error?.(new Error("Network error occurred"));
         });
 
-        // Error handler should trigger the merge/convert/process flow
         await waitFor(() => expect(setTrackStatus).toHaveBeenCalled());
     });
 
@@ -1029,7 +1076,6 @@ describe("HomeView", () => {
             await completedHandler?.({} as any, {result: null} as any);
         });
 
-        // setPlaylists should not have been called with the result updater
         const resultUpdaterCalls = setPlaylists.mock.calls.filter(([arg]) => typeof arg === "function" && arg.length > 0);
         expect(resultUpdaterCalls.length).toBe(0);
     });
@@ -1074,7 +1120,6 @@ describe("HomeView", () => {
 
         (ytdlpWrapMock as any).execPromise.mockImplementation((args: string[]) => {
             if (args.includes("--playlist-items")) {
-                // Simulate no valid media found (duration is 0)
                 return Promise.resolve("{\"id\":\"p1\",\"duration\":0,\"playlist_count\":3}");
             }
             return Promise.resolve("{\"id\":\"track1\",\"duration\":321,\"original_url\":\"url1\"}");
@@ -1250,6 +1295,67 @@ describe("HomeView", () => {
         });
 
         await waitFor(() => expect(setErrors).toHaveBeenCalled());
+    });
+
+    test("onConvert marks the matching track as convertingOutput", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn(() => false);
+        (fs as any).removeSync = jest.fn();
+
+        configureStore({application: {mergeParts: true}});
+        const setTrackStatus = jest.fn();
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {t1: [[0, 1], [2, 3]]},
+            formats: {global: {type: MediaFormat.Video, extension: VideoType.Mov}},
+            setTrackStatus,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(YtdplUtils.convertOutputToFormat).toHaveBeenCalled());
+
+        const convertingUpdater = setTrackStatus.mock.calls
+            .map(([fn]) => fn)
+            .filter((fn): fn is (prev: {trackId: string; status?: string; percent: number}[]) => {trackId: string; status?: string; percent: number}[] => typeof fn === "function")
+            .find((fn) => {
+                const prev: {trackId: string; status?: string; percent: number}[] = [
+                    {trackId: "t1", status: undefined, percent: 0},
+                    {trackId: "t2", status: undefined, percent: 0},
+                ];
+                const next = fn(prev);
+                return next[0].status === "convertingOutput" && next[0].percent === 90;
+            });
+
+        expect(convertingUpdater).toBeDefined();
     });
 
     test("handles GIF palette generation error", async () => {
@@ -1649,7 +1755,6 @@ describe("HomeView", () => {
         await render(<HomeView />);
 
         const handlers = getInputPanelHandlers();
-        // Mix of artist URLs and video URLs
         const urls = [
             "https://youtube.com/watch?v=abc",
             "https://music.youtube.com/channel/artist"
@@ -1658,7 +1763,6 @@ describe("HomeView", () => {
         ipcRendererSendMock.mockClear();
         await act(async () => handlers.onLoadInfo(urls, "", ""));
 
-        // Should have called loadMedia for basic and loadDiscographyInfo for artists
         expect(setQueue).toHaveBeenCalled();
         expect(ipcRendererSendMock).toHaveBeenCalledWith(
             Messages.GetYoutubeUrls,
@@ -1703,7 +1807,6 @@ describe("HomeView", () => {
 
         await waitFor(() => expect(capturedHandlers.progress).toBeDefined());
 
-        // Trigger progress with NaN percent
         act(() => capturedHandlers.progress?.({percent: NaN}));
 
         expect(setTrackStatus).toHaveBeenCalled();
@@ -1750,10 +1853,8 @@ describe("HomeView", () => {
 
         await waitFor(() => expect(capturedHandlers.error).toBeDefined());
 
-        // Cancel the track first
         act(() => stubbedProps["playlist-tabs"].onCancelTrack("t1"));
 
-        // Then trigger the error
         await act(async () => {
             capturedHandlers.error?.(new Error("Aborted"));
         });
@@ -1887,7 +1988,6 @@ describe("HomeView", () => {
             capturedHandlers.close?.();
         });
 
-        // Should convert each part individually instead of merging
         await waitFor(() => expect(YtdplUtils.convertOutputToFormat).toHaveBeenCalled());
     });
 
@@ -1903,7 +2003,6 @@ describe("HomeView", () => {
         const setTrackStatus = jest.fn();
         const setQueue = jest.fn();
 
-        // Chain of errors: palette error, then gif creation error, then optimize error
         (YtdplUtils.generateColorPalette as jest.Mock).mockImplementationOnce(
             (dir: string, name: string, format: any, ext: string, cb: (err?: Error) => void) => cb && cb(new Error("Palette failed"))
         );
@@ -2051,7 +2150,6 @@ describe("HomeView", () => {
 
         await waitFor(() => expect(capturedHandlers.close).toBeDefined());
 
-        // Cancel all tracks
         act(() => getInputPanelHandlers().onCancel());
 
         await act(async () => {
@@ -2102,7 +2200,6 @@ describe("HomeView", () => {
 
         await waitFor(() => expect(capturedHandlers.error).toBeDefined());
 
-        // Trigger error with the generic URL error message that should be filtered
         await act(async () => {
             capturedHandlers.error?.(new Error("[generic] '' is not a valid URL"));
         });
@@ -2117,7 +2214,47 @@ describe("HomeView", () => {
 
         await render(<HomeView />);
 
-        // Just checking that the component renders without error when ytdlpExecutablePath is empty
         expect(true).toBe(true);
+    });
+
+    test("operation effect triggers download branch when operation is 'download' and queue is not empty", async () => {
+        const setOperation = jest.fn();
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            queue: ["t1", "t2"],
+            operation: "download",
+            setOperation,
+            setTrackStatus,
+            setQueue,
+            tracks: [{id: "t1"}, {id: "t2"}],
+        }) as any);
+
+        configureStore({application: {concurrency: 2}});
+
+        await render(<HomeView />);
+
+        expect(setOperation).toHaveBeenCalledWith(undefined);
+        expect(setTrackStatus.mock.calls.length + setQueue.mock.calls.length).toBeGreaterThan(0);
+    });
+
+    test("download calls loadInfo and sets autoDownload when playlists is empty", async () => {
+        const setAutoDownload = jest.fn();
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [],
+            setAutoDownload,
+            setPlaylists,
+        }));
+
+        await render(<HomeView />);
+        const handlers = getInputPanelHandlers();
+
+        await act(async () => handlers.onDownload(["url1"], "2000", "2020"));
+
+        expect(setAutoDownload).toHaveBeenCalledWith(true);
+        expect(setPlaylists).toHaveBeenCalled();
     });
 });

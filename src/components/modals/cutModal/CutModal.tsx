@@ -132,6 +132,7 @@ export const CutModal: React.FC<CutModalProps> = (props: CutModalProps) => {
             maxWidth="md"
             className={Styles.cutModal}
             onKeyUp={handleKeyUp}
+            disableEscapeKeyDown
             data-testid="cut-modal"
             {...other}
         >

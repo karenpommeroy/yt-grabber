@@ -103,4 +103,36 @@ describe("AppBar", () => {
 
         expect(logoClick).toHaveBeenCalled();
     });
+
+    test("handleOpenDevelopment navigates to development when navigation enabled", async () => {
+        const {actions} = createContextValue();
+
+        useClickCounterMock.mockImplementation((callback) => {
+            return {
+                onClick: () => callback(),
+                clickCounter: 0
+            };
+        });
+
+        const shell = await render(<AppBar />);
+        const logoButton = shell.container.querySelector(".logo");
+        fireEvent.click(logoButton);
+
+        expect(actions.setLocation).toHaveBeenCalledWith("/development");
+    });
+
+    test("handleOpenDevelopment does nothing when navigation disabled", async () => {
+        const {actions} = createContextValue();
+
+        useClickCounterMock.mockImplementation((callback) => {
+            return {
+                onClick: () => callback(),
+                clickCounter: 0
+            };
+        });
+
+        await render(<AppBar disableNavigation />);
+
+        expect(actions.setLocation).not.toHaveBeenCalled();
+    });
 });

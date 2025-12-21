@@ -201,6 +201,21 @@ describe("SettingsView", () => {
         ), {timeout: 2000});
     });
 
+    test("onChromeExecutablePathChange persists selected file path", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const chromeInput = shell.getByLabelText("chromeExecutablePath") as HTMLInputElement;
+        fireEvent.change(chromeInput, {target: {value: "E:/apps/chrome-custom.exe"}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({chromeExecutablePath: "E:/apps/chrome-custom.exe"}),
+        ));
+    });
+
     test("resets output directory to default when cleared", async () => {
         const shell = await render(<SettingsView />);
 

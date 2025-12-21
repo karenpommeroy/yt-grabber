@@ -53,4 +53,14 @@ describe("SelectArtistModal", () => {
         expect(ipcRenderer.send).toHaveBeenCalledWith(Messages.OpenUrlInBrowser, {url: artists[0].url});
         expect(handleClose).not.toHaveBeenCalled();
     });
+
+    test("invokes onClose with no argument when cancel button is clicked", async () => {
+        const handleClose = jest.fn();
+        const shell = await renderModal<SelectArtistModalProps>(SelectArtistModal, {...baseProps, onClose: handleClose});
+
+        const cancelButton = shell.getByTestId("cancel-button");
+        fireEvent.click(cancelButton);
+
+        expect(handleClose).toHaveBeenCalledWith();
+    });
 });

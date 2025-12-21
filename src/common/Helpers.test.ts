@@ -1,5 +1,7 @@
 import "moment-duration-format";
 
+import * as lodashEs from "lodash-es";
+
 import {
     escapePathString, formatFileSize, formatTime, getDataAttributes, getProcessArgs,
     getRealFileExtension, getUrlType, isArtist, isDebugMode, isDev, isDevApplication, isPlaylist,
@@ -11,6 +13,15 @@ import {UrlType} from "./Youtube";
 
 import type {App} from "electron";
 
+jest.mock("lodash-es", () => {
+    const actual = jest.requireActual("lodash-es");
+    return {
+        __esModule: true,
+        ...actual,
+        groupBy: jest.fn(actual.groupBy),
+    };
+});
+
 describe("Helpers", () => {
     const originalNodeEnv = process.env.NODE_ENV;
     const originalArgv = [...process.argv];
@@ -19,6 +30,7 @@ describe("Helpers", () => {
         process.env.NODE_ENV = originalNodeEnv;
         process.argv = [...originalArgv];
         jest.useRealTimers();
+        (lodashEs.groupBy as jest.Mock).mockReset();
     });
 
     test("isDev detects development environment", () => {
@@ -119,8 +131,22 @@ describe("Helpers", () => {
         });
     });
 
-    test("resolveMockData returns empty promises list", () => {
-        expect(resolveMockData(10)).toEqual([]);
+
+    test("resolveMockData resolves after timers run for each group", async () => {
+        jest.useFakeTimers();
+
+        (lodashEs.groupBy as jest.Mock).mockReturnValue({
+            p1: [{id: "a", playlist_id: "p1"}],
+            p2: [{id: "b", playlist_id: "p2"}],
+        });
+
+        const promises = resolveMockData(100);
+        const allPromise = Promise.all(promises);
+
+        expect(promises).toHaveLength(2);
+
+        jest.runAllTimers();
+        await expect(allPromise).resolves.toHaveLength(2);
     });
 
     test("waitFor resolves after timeout", async () => {
