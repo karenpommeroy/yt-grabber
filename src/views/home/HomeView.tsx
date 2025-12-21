@@ -285,8 +285,8 @@ export const HomeView: React.FC = () => {
                 downloadAlbums: appOptions.downloadAlbums,
                 downloadSinglesAndEps: appOptions.downloadSinglesAndEps,
                 multiMatchAction: appOptions.multiMatchAction,
-                fromYear,
-                untilYear
+                fromYear: isEmpty(fromYear) ? undefined : fromYear,
+                untilYear: isEmpty(untilYear) ? undefined : untilYear,
             },
         };
 

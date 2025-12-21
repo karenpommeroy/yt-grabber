@@ -1,5 +1,6 @@
 import {i18n as i18next} from "i18next";
 import {merge} from "lodash-es";
+import moment from "moment";
 import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
@@ -55,7 +56,6 @@ export const execute = async (parameters: MessageHandlerParams) => {
         }
         
         reporter.finish("done", result);
-        console.error("Execution failed at stage: ", error.stack);
     } finally {
         await closeResources();
     }
@@ -75,7 +75,7 @@ const run = async (
     reporter.start(i18n.t("starting"));
     browser = await puppeteer.launch(merge(puppeteerOptions, options));
     [page] = await browser.pages();
-    
+
     await page.setUserAgent(UserAgent);
     await setCookies(page);
     await navigateToPage(params.url, page);
@@ -86,27 +86,28 @@ const run = async (
 
         await navigateToPage(artistChannelUrl, page);
         await page.waitForNetworkIdle();
-
+        
         if (params.options?.downloadAlbums) {
             const albums = await getAlbums(params);
             results.push(...albums);
         }
 
+        
         if (params.options?.downloadSinglesAndEps) {
             await navigateToPage(artistChannelUrl, page);
             await page.waitForNetworkIdle();
-
+            
             const singles = await getSingles(params);
             results.push(...singles);
         }
-
+        
         return results;
     };
 
     for (const a of params.values) {
         result.values.push(...await process(a));
     }
-
+    
     reporter.finish("done", result);
 };
 
@@ -209,13 +210,13 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
 const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
     const results: string[] = [];
     const {fromYear, untilYear} = params.options;
-
+    
     try {
         const element = await page.waitForSelector(`::-p-xpath(${SinglesHrefSelector})`, {timeout: 1000});
         const singlesUrl = await element.evaluate((el) => el.getAttribute("href"));
 
         await navigateToPage(`${params.url}/${singlesUrl}`, page);
-        
+
         try {
             const singleFilterButton = await page.waitForSelector(`::-p-xpath(${SingleFilterSelector})`, {timeout: 1000});
         
@@ -227,18 +228,18 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
         } finally {
             const selector =  fromYear || untilYear ? getYtMusicSingleLinkSelectorFilteredByDate(fromYear, untilYear) : SingleLinkSelector;
             const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
-
+            
             for (const item of items) {
                 results.push(`${params.url}/${item}`);
             }
-
+            
             // eslint-disable-next-line no-unsafe-finally
             return results;
         }
     } catch (error) {
         const selector =  fromYear || untilYear ? getYtMusicSinglesDirectLinkSelectorFilteredByDate(fromYear, untilYear) : SinglesDirectLinkSelector;
         const singles = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
-
+        
         for (const item of singles) {
             results.push(`${params.url}/${item}`);
         }
