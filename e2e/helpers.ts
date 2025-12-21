@@ -6,6 +6,7 @@ import {_electron as electron, ElectronApplication, Page} from "playwright";
 export const getElectronApp = async (): Promise<ElectronApplication> => {
     const useDev = process.env.E2E_DEV === "true";
     let app: ElectronApplication;
+    process.env.I18NEXT_LANGUAGE = "en-GB";
     process.env.CI = "e2e";
 
     if (useDev) {
