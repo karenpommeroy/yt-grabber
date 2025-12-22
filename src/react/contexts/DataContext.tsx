@@ -1,6 +1,6 @@
 import React, {createContext, useContext, useState} from "react";
 
-import {AudioType, Format, MediaFormat} from "../../common/Media";
+import {AudioType, Format, MediaFormat, VideoType} from "../../common/Media";
 import {ApplicationOptions} from "../../common/Store";
 import {PlaylistInfo, TrackInfo, TrackStatusInfo} from "../../common/Youtube";
 
@@ -51,11 +51,12 @@ const DataContext = createContext<DataState | undefined>(undefined);
 
 export function DataProvider(props: any) {
     const [appOptions] = useState<ApplicationOptions>(global.store.get("application"));
+    const globalFormat: Format = {type: global.store.get("application").defaultMediaFormat, extension: global.store.get("application").defaultMediaFormat === MediaFormat.Audio ? AudioType.Mp3 : VideoType.Mp4, audioQuality: 10};
     const [playlists, setPlaylists] = useState<PlaylistInfo[]>();
     const [tracks, setTracks] = useState<TrackInfo[]>([]);
     const [trackStatus, setTrackStatus] = useState<TrackStatusInfo[]>([]);
     const [trackCuts, setTrackCuts] = useState<{[key: string]: [number, number][]}>({});
-    const [formats, setFormats] = useState<Record<string, Format>>({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 10}});
+    const [formats, setFormats] = useState<Record<string, Format>>({global: globalFormat});
     const [urls, setUrls] = useState<string[]>(appOptions.urls);
     const [autoDownload, setAutoDownload] = useState<boolean>(false);
     const [queue, setQueue] = useState<string[]>([]);
@@ -71,7 +72,7 @@ export function DataProvider(props: any) {
         setTrackCuts({});
         setAutoDownload(false);
         setQueue([]);
-        setFormats({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 10}});
+        setFormats({global: globalFormat});
         setOperation(undefined);
         setErrors([]);
         setWarnings([]);

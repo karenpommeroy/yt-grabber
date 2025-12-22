@@ -1,7 +1,9 @@
 import {Schema} from "electron-store";
 import {values} from "lodash-es";
 
-import {FormatScope, InputMode, MultiMatchAction, SortOrder, TabsOrderKey} from "./Media";
+import {
+    FormatScope, InputMode, MediaFormat, MultiMatchAction, SortOrder, TabsOrderKey
+} from "./Media";
 
 export type ApplicationOptions = {
     youtubeUrl?: string;
@@ -30,6 +32,7 @@ export type ApplicationOptions = {
     downloadAlbums?: boolean;
     showAdvancedSearchOptions?: boolean;
     inputMode?: InputMode;
+    defaultMediaFormat?: MediaFormat;
     tabsOrder?: [TabsOrderKey, SortOrder];
 };
 
@@ -157,6 +160,11 @@ export const StoreSchema: Schema<IStore> = {
             showAdvancedSearchOptions: {
                 type: "boolean",
                 default: false
+            },
+            defaultMediaFormat: {
+                type: "string",
+                default: MediaFormat.Audio,
+                enum: values(MediaFormat)
             },
             inputMode: {
                 type: "string",

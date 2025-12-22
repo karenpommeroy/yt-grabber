@@ -23,7 +23,7 @@ const TestConsumer: React.FC<{onState?: (state: DataState) => void}> = ({onState
 describe("DataContext", () => {
     beforeEach(() => {
         jest.clearAllMocks();
-        mockStoreGet.mockReturnValue({urls: ["https://example.com"]});
+        mockStoreGet.mockReturnValue({urls: ["https://example.com"], defaultMediaFormat: MediaFormat.Audio});
     });
 
     describe("DataProvider", () => {

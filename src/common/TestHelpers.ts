@@ -56,6 +56,7 @@ export const createApplicationOptions = (overrides: Partial<ApplicationOptions> 
         playlistCheckMaxItemsCount: 3,
         playlistCountThreshold: 10,
         urls: [],
+        defaultMediaFormat: MediaFormat.Audio,
         formatScope: FormatScope.Global,
         multiMatchAction: MultiMatchAction.UseFirst,
         tabsOrder: [TabsOrderKey.Default, SortOrder.Asc],

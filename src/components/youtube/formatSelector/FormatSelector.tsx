@@ -43,7 +43,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     const [gifTopText, setGifTopText] = useState("");
     const [gifBottomText, setGifBottomText] = useState("");
 
-    const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(format.type ?? MediaFormat.Audio);
+    const [selectedMediaType, setSelectedMediaType] = useState<MediaFormat>(format.type ?? options.defaultMediaFormat);
     const [selectedAudioExtension, setSelectedAudioExtension] = useState<AudioType>(format.type === MediaFormat.Audio ? format.extension as AudioType :first(audioExtensions));
     const [selectedVideoExtension, setSelectedVideoExtension] = useState<VideoType>(format.type === MediaFormat.Video ? format.extension as VideoType :first(videoExtensions));
     const [selectedFormat, setSelectedFormat] = useState<AudioType | VideoType>(format.extension ?? first(extensions));

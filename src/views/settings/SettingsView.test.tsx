@@ -5,7 +5,9 @@ import versionInfo from "win-version-info";
 import {act, fireEvent, waitFor} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
-import {FormatScope, MultiMatchAction, SortOrder, TabsOrderKey} from "../../common/Media";
+import {
+    FormatScope, MediaFormat, MultiMatchAction, SortOrder, TabsOrderKey
+} from "../../common/Media";
 import {ApplicationOptions} from "../../common/Store";
 import {createApplicationOptions} from "../../common/TestHelpers";
 import {useAppContext} from "../../react/contexts/AppContext";
@@ -229,6 +231,22 @@ describe("SettingsView", () => {
         await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
             "application",
             expect.objectContaining({outputDirectory: path.resolve("./output")}),
+        ));
+    });
+
+    test("persists defaultMediaFormat setting toggles", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const selectInput = shell.getByTestId("media-format-select").querySelector("input") as HTMLInputElement;
+        expect(selectInput.value).toBe(MediaFormat.Audio);
+        fireEvent.change(selectInput, {target: {value: MediaFormat.Video}});
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({defaultMediaFormat: MediaFormat.Video}),
         ));
     });
 

@@ -186,5 +186,7 @@
     "customYtdlpArgsContent": [
         "Command line arguments to be passed to yt-dlp during download (space separated).",
         "Example: `--no-check-certificate --audio-format=wav`"
-    ]
+    ],
+    "defaultMediaFormatHeader": "Default media format",
+    "defaultMediaFormatContent": "Specifies default media format for each newly opened tab."
 }

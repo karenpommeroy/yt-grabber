@@ -1,5 +1,7 @@
 import {spawn} from "child_process";
-import {filter, first, get, includes, isEmpty, isNil, join, map, omitBy} from "lodash-es";
+import {
+    capitalize, filter, first, get, includes, isEmpty, isNil, join, map, omitBy, values
+} from "lodash-es";
 import path from "path";
 import React, {useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
@@ -15,7 +17,9 @@ import {
 import {SelectChangeEvent} from "@mui/material/Select";
 
 import {getBinPath} from "../../common/FileSystem";
-import {FormatScope, MultiMatchAction, SortOrder, TabsOrderKey} from "../../common/Media";
+import {
+    FormatScope, MediaFormat, MultiMatchAction, SortOrder, TabsOrderKey
+} from "../../common/Media";
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
 import FileField from "../../components/fileField/FileField";
 import NumberField from "../../components/numberField/NumberField";
@@ -54,6 +58,10 @@ export const SettingsView: React.FC = () => {
 
     const handleClose = async () => {
         actions.setLocation("/");
+    };
+
+    const onDefaultMediaFormatChange = (e: SelectChangeEvent<MediaFormat>) => {       
+        setApplicationOptions((prev) => ({...prev, defaultMediaFormat: e.target.value}));
     };
 
     const onYoutubeUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,6 +251,23 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12} data-help="themePicker">
                             <ThemePicker />
+                        </Grid>
+                        <Grid size={12} data-help="defaultMediaFormat">
+                            <FormControl fullWidth>
+                                <InputLabel>{t("defaultMediaFormat")}</InputLabel>
+                                <Select<MediaFormat>
+                                    data-testid="media-format-select"
+                                    className={Styles.select}
+                                    value={applicationOptions.defaultMediaFormat}
+                                    label={t("defaultMediaFormat")}
+                                    MenuProps={{
+                                        disablePortal: true,
+                                    }}
+                                    onChange={onDefaultMediaFormatChange}
+                                >
+                                    {map(values(MediaFormat), (f) => <MenuItem key={f} aria-label={f} value={f}  className={Styles.menuItem}>{capitalize(f)}</MenuItem>)}
+                                </Select>
+                            </FormControl>
                         </Grid>
                         <Grid size={12} data-help="formatScope">
                             <FormControl>

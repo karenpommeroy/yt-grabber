@@ -186,5 +186,7 @@
     "customYtdlpArgsContent": [
         "Argumenty wiersza poleceń, które mają być przekazane do yt-dlp podczas pobierania (oddzielone spacjami).",
         "Przykład: `--no-check-certificate --audio-format=wav`"
-    ]
+    ],
+    "defaultMediaFormatHeader": "Domyślny typ mediów",
+    "defaultMediaFormatContent": "Domyślny typ mediów dla każdej nowo otwartej zakładki."
 }
