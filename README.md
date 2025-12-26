@@ -5,9 +5,9 @@
 ![Tests](https://github.com/karenpommeroy/yt-grabber/actions/workflows/tests.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/karenpommeroy/yt-grabber/branch/main/graph/badge.svg)](https://codecov.io/gh/karenpommeroy/yt-grabber)
 
-**YT Grabber** is a robust desktop application designed to retrieve multimedia from YouTube and YouTube Music services.
+**YT Grabber** is a robust desktop application designed to retrieve multimedia from YouTube, YouTube Music and other multimedia sites.
 
-It provides responsive UI to manage your downloads and automation features improve and accelerate download process.
+It provides responsive UI to manage your downloads and automation features that improve and accelerate download process.
 
 It provides support for downloading:
 
@@ -38,14 +38,16 @@ Each download can be customized to your needs for easy workflow automation.
 
 
 ## Features
+* Support for most major multimedia sites (full list is available
+[here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md))
 
-* Download video, audio, playlists, songs, albums and complete artist discographies
+* Download video, audio, playlists, songs, albums, singles and complete artist discographies
 
 * Multiple output formats (mp3, m4a, flac, wav, mp4, mkv, mov, avi, mpeg, gif)
 
 * Customizable audio and video quality
 
-* Trimming video and audio (multiple parts)
+* Cutting video and audio (multiple output parts)
 
 * Batch multimedia download
 
@@ -95,7 +97,8 @@ To build **yt-grabber** follow these steps:
 1. Clone this repository
 2. Install dependencies using `npm install` or `yarn install` command
 3. If using `yarn` with Visual Studio Code also run `yarn dlx @yarnpkg/sdks vscode`
-4. Run `npm build` or `yarn build` command to build
+4. Run `npm build` or `yarn build` command to create development build
+5. Run `npm build:prod` or `yarn build:prod` command to create production build.
 
 ## Running
 
@@ -114,7 +117,8 @@ There are two types of tests avalable:
 
 To execute unit tests run `npm test` or `yarn test` command (unit tests are also run when packaging the applciation).
 
-To execute end2end tests run `npm playwright test` or `yarn playwright test` command.
+To execute end to end tests on a development build run `npm e2e:dev` or `yarn e2e:dev` command.
+To execute end to end tests on a production build run `npm e2e:prod` or `yarn e2e:prod` command.
 
 ## Debugging
 
