@@ -538,6 +538,22 @@ describe("HomeView", () => {
         );
     });
 
+    test("loads info for other urls", async () => {
+        const setQueue = jest.fn();
+        configureStore({inputMode: InputMode.Auto});
+        useDataStateMock.mockReturnValue(createDataState({setQueue}) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+        const urls = ["https://www.dailymotion.com/video/x60vr14"];
+
+        ipcRendererSendMock.mockClear();
+        handlers.onLoadInfo(urls, "", "");
+
+        expect(setQueue).toHaveBeenCalledWith(expect.any(Function));
+    });
+
     test("updates tracks and warnings from yt-dlp results", async () => {
         const setTracks = jest.fn();
         const setPlaylists = jest.fn();

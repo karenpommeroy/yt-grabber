@@ -50,6 +50,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
 
     const truncateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)/;
     const validateRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:music\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|browse\/|channel\/|shorts\/|live\/|playlist\?list=)|youtu\.be\/)([\w-]{11})/;
+    const urlRegex = /^(https?:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/[^\s]*)?$/;
 
     const isValid = (value: string) => {
         const options = global.store.get("application");
@@ -58,7 +59,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
             return true;
         }
 
-        return options.debugMode ? true : validateRegex.test(value);
+        return options.debugMode ? true : validateRegex.test(value) || urlRegex.test(value);
     };
 
     useEffect(() => {

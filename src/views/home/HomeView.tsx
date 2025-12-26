@@ -229,6 +229,7 @@ export const HomeView: React.FC = () => {
         const artists = groups[UrlType.Artist] ?? [];
         const lists = groups[UrlType.Playlist] ?? [];
         const vids = groups[UrlType.Track] ?? [];
+        const other = groups[UrlType.Other] ?? [];
         const basic = [...lists, ...vids];
 
         if (inputMode === InputMode.Artists) {
@@ -258,12 +259,21 @@ export const HomeView: React.FC = () => {
         if (artists.length) {
             loadDiscographyInfo(artists);
         }
+
+        if (other.length) {
+            loadMedia(other);
+        }
     };
 
     const loadMedia = (urls: string[]) => {
         try {
             Promise.all(afterEach(getResolveDataPromise(urls, true), update))
                 .then((result) => {
+                    for (const item of result) {
+                        if (item.errors && item.errors.length > 0) {
+                            cancelPendingPlaylist(item.url);
+                        }
+                    }
                     setQueue((prev) => filter(prev, (p) => p !== QueueKeys.LoadSingle));
 
                     return result;
@@ -507,6 +517,10 @@ export const HomeView: React.FC = () => {
 
     const cancelPendingPlaylists = () => {
         setPlaylists(filter(playlists, (p) => !isEmpty(p.album)));
+    };
+
+    const cancelPendingPlaylist = (id: string) => {
+        setPlaylists(filter(playlists, (p) => p.url === id));
     };
 
     const cancelPlaylist = (id: string) => {

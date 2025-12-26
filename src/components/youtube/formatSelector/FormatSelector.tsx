@@ -69,7 +69,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
         if (!isFormatValid(currentValue) || !activeTab) return;
 
         setFormats((prev) => {
-            const newFormat = options.formatScope === FormatScope.Tab ? prev[activeTab] ? {[activeTab]: currentValue} : {[activeTab]: prev.global} : {global: currentValue};
+            const newFormat = options.formatScope === FormatScope.Tab ? prev[activeTab] ? {[activeTab]: currentValue} : {[activeTab]: currentValue} : {global: currentValue};
             
             return assign({}, prev, newFormat);
         });
