@@ -188,5 +188,7 @@
         "Przykład: `--no-check-certificate --audio-format=wav`"
     ],
     "defaultMediaFormatHeader": "Domyślny typ mediów",
-    "defaultMediaFormatContent": "Domyślny typ mediów dla każdej nowo otwartej zakładki."
+    "defaultMediaFormatContent": "Domyślny typ mediów dla każdej nowo otwartej zakładki.",
+    "splitChaptersHeader": "Podziel na rozdziały",
+    "splitChaptersContent": "Określa czy generować plików wynikowych, jeśli źródłowe media zawierają rozdziały."
 }

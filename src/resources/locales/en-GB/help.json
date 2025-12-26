@@ -188,5 +188,7 @@
         "Example: `--no-check-certificate --audio-format=wav`"
     ],
     "defaultMediaFormatHeader": "Default media format",
-    "defaultMediaFormatContent": "Specifies default media format for each newly opened tab."
+    "defaultMediaFormatContent": "Specifies default media format for each newly opened tab.",
+    "splitChaptersHeader": "Split chapters",
+    "splitChaptersContent": "Specifies whether output should be split into multiple files if source media contains chapters."
 }

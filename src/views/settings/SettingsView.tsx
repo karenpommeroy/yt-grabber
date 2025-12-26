@@ -168,6 +168,10 @@ export const SettingsView: React.FC = () => {
         setApplicationOptions((prev) => ({...prev, downloadAlbums: e.target.checked}));
     };
     
+    const onSplitChaptersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, splitChapters: e.target.checked}));
+    };
+    
     const onOverwriteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, alwaysOverwrite: e.target.checked}));
     };
@@ -222,6 +226,7 @@ export const SettingsView: React.FC = () => {
                     <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">
                         <Grid size={6} spacing={2} data-help="concurrency">
                             <NumberField
+                                size="small"
                                 fullWidth
                                 label={t("concurrency")}
                                 id="concurrency"
@@ -236,6 +241,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={6} data-help="globalAudioQuality">
                             <NumberField
+                                size="small"
                                 fullWidth
                                 label={t("audioQuality")}
                                 id="quality"
@@ -250,12 +256,13 @@ export const SettingsView: React.FC = () => {
                             />
                         </Grid>
                         <Grid size={12} data-help="themePicker">
-                            <ThemePicker />
+                            <ThemePicker size="small" />
                         </Grid>
                         <Grid size={12} data-help="defaultMediaFormat">
                             <FormControl fullWidth>
                                 <InputLabel>{t("defaultMediaFormat")}</InputLabel>
                                 <Select<MediaFormat>
+                                    size="small"
                                     data-testid="media-format-select"
                                     className={Styles.select}
                                     value={applicationOptions.defaultMediaFormat}
@@ -273,8 +280,8 @@ export const SettingsView: React.FC = () => {
                             <FormControl>
                                 <FormLabel id="format-selector-scope-group-label">{t("formatScope")}</FormLabel>
                                 <RadioGroup row name="format-selector-scope-group" value={applicationOptions.formatScope} onChange={onFormatScopeChange}>
-                                    <FormControlLabel value={FormatScope.Global} control={<Radio />} label={t("formatScopeGlobal")}/>
-                                    <FormControlLabel value={FormatScope.Tab} control={<Radio />} label={t("formatScopeTab")}/>
+                                    <FormControlLabel value={FormatScope.Global} control={<Radio size="small" />} label={t("formatScopeGlobal")}/>
+                                    <FormControlLabel value={FormatScope.Tab} control={<Radio size="small" />} label={t("formatScopeTab")}/>
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
@@ -282,8 +289,8 @@ export const SettingsView: React.FC = () => {
                             <FormControl>
                                 <FormLabel id="format-selector-multi-match-group-label">{t("multiMatchAction")}</FormLabel>
                                 <RadioGroup row name="format-selector-multi-match-group" value={applicationOptions.multiMatchAction} onChange={onMultiMatchActionChange}>
-                                    <FormControlLabel value={MultiMatchAction.UseFirst} control={<Radio />} label={t("multiMatchActionUseFirst")}/>
-                                    <FormControlLabel value={MultiMatchAction.Ask} control={<Radio />} label={t("multiMatchActionAsk")}/>
+                                    <FormControlLabel value={MultiMatchAction.UseFirst} control={<Radio size="small" />} label={t("multiMatchActionUseFirst")}/>
+                                    <FormControlLabel value={MultiMatchAction.Ask} control={<Radio size="small" />} label={t("multiMatchActionAsk")}/>
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
@@ -292,6 +299,7 @@ export const SettingsView: React.FC = () => {
                                 <FormControl fullWidth>
                                     <InputLabel>{t("tabsOrder")}</InputLabel>
                                     <Select
+                                        size="small"
                                         value={applicationOptions.tabsOrder[0]}
                                         label={t("tabsOrder")}
                                         onChange={onTabsOrderKeyChange}
@@ -306,8 +314,8 @@ export const SettingsView: React.FC = () => {
                             </Grid>
                             {applicationOptions.tabsOrder[0] !== TabsOrderKey.Default &&
                                 <Grid size={2} className={Styles.column} data-help="tabsOrder">
-                                    {applicationOptions.tabsOrder[1] === SortOrder.Asc && <Button variant="outlined" fullWidth value={SortOrder.Desc} onClick={onTabsOrderOrderChange}><NorthIcon /></Button>}
-                                    {applicationOptions.tabsOrder[1] === SortOrder.Desc && <Button variant="outlined" fullWidth value={SortOrder.Asc} onClick={onTabsOrderOrderChange}><SouthIcon /></Button>}
+                                    {applicationOptions.tabsOrder[1] === SortOrder.Asc && <Button size="small" variant="outlined" fullWidth value={SortOrder.Desc} onClick={onTabsOrderOrderChange}><NorthIcon /></Button>}
+                                    {applicationOptions.tabsOrder[1] === SortOrder.Desc && <Button size="small" variant="outlined" fullWidth value={SortOrder.Asc} onClick={onTabsOrderOrderChange}><SouthIcon /></Button>}
                                 </Grid>
                             }
                         </Grid>
@@ -315,16 +323,19 @@ export const SettingsView: React.FC = () => {
                             <FormControl>
                                 <FormLabel component="legend">{t("download")}</FormLabel>
                                 <FormGroup row>
-                                    <FormControlLabel data-help="downloadAlbums" control={<Checkbox checked={applicationOptions.downloadAlbums} onChange={onDownloadAlbumsChange} />} label={t("downloadAlbums")} />
-                                    <FormControlLabel data-help="downloadSinglesAndEps" control={<Checkbox checked={applicationOptions.downloadSinglesAndEps} onChange={onDownloadSinglesAndEpsChange} />} label={t("downloadSinglesAndEps")} />
+                                    <FormControlLabel data-help="downloadAlbums" control={<Checkbox size="small" checked={applicationOptions.downloadAlbums} onChange={onDownloadAlbumsChange} />} label={t("downloadAlbums")} />
+                                    <FormControlLabel data-help="downloadSinglesAndEps" control={<Checkbox size="small" checked={applicationOptions.downloadSinglesAndEps} onChange={onDownloadSinglesAndEpsChange} />} label={t("downloadSinglesAndEps")} />
                                 </FormGroup>
                             </FormControl>
                         </Grid>
+                        <Grid size={12} data-help="splitChapters">
+                            <FormControlLabel control={<Switch checked={applicationOptions.splitChapters} size="small" onChange={onSplitChaptersChange} />} label={t("splitChapters")} />
+                        </Grid>
                         <Grid size={12} data-help="alwaysOverwrite">
-                            <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />
+                            <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} size="small" onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />
                         </Grid>
                         <Grid size={12} data-help="mergeParts">
-                            <FormControlLabel control={<Switch checked={applicationOptions.mergeParts} onChange={onMergePartsChange} />} label={t("mergeParts")} />
+                            <FormControlLabel control={<Switch checked={applicationOptions.mergeParts} size="small" onChange={onMergePartsChange} />} label={t("mergeParts")} />
                         </Grid>
                         <Grid size={12} data-help="ytdlpVersion">
                             <Stack direction="row" spacing={1} className={Styles.ytdlpVersion}>
@@ -336,6 +347,7 @@ export const SettingsView: React.FC = () => {
                     <Grid className={Styles.group} container size={6} spacing={2} component={Paper} variant="outlined">
                         <Grid size={12}>
                             <FileField
+                                size="small"
                                 data-help="outputDirectory"
                                 fullWidth
                                 label={t("outputDirectory")}
@@ -349,6 +361,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <TextField
+                                size="small"
                                 data-help="albumOutputTemplate"
                                 fullWidth
                                 label={t("albumOutputTemplate")}
@@ -364,6 +377,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <TextField
+                                size="small"
                                 data-help="playlistOutputTemplate"
                                 fullWidth
                                 label={t("playlistOutputTemplate")}
@@ -379,6 +393,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <TextField
+                                size="small"
                                 data-help="videoOutputTemplate"
                                 fullWidth
                                 label={t("videoOutputTemplate")}
@@ -394,6 +409,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <TextField
+                                size="small"
                                 data-help="trackOutputTemplate"
                                 fullWidth
                                 label={t("trackOutputTemplate")}
@@ -409,6 +425,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <TextField
+                                size="small"
                                 data-help="youtubeDomainUrl"
                                 fullWidth
                                 label={t("youtubeUrl")}
@@ -423,6 +440,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <FileField
+                                size="small"
                                 data-help="chromeExecutablePath"
                                 fullWidth
                                 label={t("chromeExecutablePath")}
@@ -437,6 +455,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <FileField
+                                size="small"
                                 data-help="ytdlpExecutablePath"
                                 fullWidth
                                 label={t("ytdlpExecutablePath")}
@@ -451,6 +470,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <FileField
+                                size="small"
                                 data-help="ffmpegExecutablePath"
                                 fullWidth
                                 label={t("ffmpegExecutablePath")}
@@ -465,6 +485,7 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12}>
                             <TextField
+                                size="small"
                                 data-help="customYtdlpArgs"
                                 fullWidth
                                 label={t("customYtdlpArgs")}

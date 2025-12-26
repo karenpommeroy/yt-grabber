@@ -15,6 +15,11 @@ export type TrackInfo = {
     duration: number;
     id: string;
     uploader: string;
+    chapters?: Array<{
+        title: string;
+        start_time: number;
+        end_time: number;
+    }>;
     original_url: string;
     playlist: string;
     playlist_title: string;

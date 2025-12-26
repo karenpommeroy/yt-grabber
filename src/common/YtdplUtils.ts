@@ -1,6 +1,6 @@
 import {spawn} from "child_process";
 import fs from "fs-extra";
-import {flatten, get, isEmpty, map, padStart, template, times, toString} from "lodash-es";
+import {flatten, get, isEmpty, map, padStart, replace, template, times, toString} from "lodash-es";
 import moment from "moment";
 
 import {getBinPath} from "./FileSystem";
@@ -23,7 +23,10 @@ export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackC
         appOptions.alwaysOverwrite ? "--force-overwrite" : "",
         "--extractor-args", "youtube:player_client=default,web_safari;player_js_version=actual",
         "--postprocessor-args", getPostProcessorArgs(track, album),
-        "--output", getOutput(track, album, format, trackCuts)
+        "-P", `home:${appOptions.outputDirectory}`,
+        appOptions.splitChapters ? "--split-chapters" : "",
+        "--output", getOutput(track, album, format, trackCuts),
+        // "--output", `section:${appOptions.outputDirectory}/%(title)s/%(section_number)02d - %(section_title)s.%(ext)s`,
     ];
 
     return [...paramRetriever(format), ...commonParams, customYtdlpArgs];
@@ -43,6 +46,7 @@ const getYtdplParamsForAudio = (format: Format) => {
         "--audio-format", format.extension,
         format.extension !== "wav" ? "--embed-thumbnail" : "", // wav does not support thumbnail embedding
         "--audio-quality", toString(10 - format.audioQuality),
+        
     ];
 };
 
@@ -55,10 +59,16 @@ const getYtdplParamsForVideo = (format: Format) => {
         [VideoType.Mpeg]: "webm",
         [VideoType.Gif]: "webm",
     };
-    const selected = format.videoQuality;
+    const selected = format.videoQuality ?? "";
     const [, height] = map(selected.match(/\d+/g), Number);
     const ext = extensionsMapping[format.extension];
 
+    if (isEmpty(selected) || isNaN(height)) {
+        return [
+            "-f", `bv*+ba/b[ext=${ext}]`,
+        ];
+    }
+    
     return [
         "-f", `bv*[height<=${height}][ext=${ext}]+ba[ext=m4a]/b[height<=${height}][ext=${ext}] / bv*+ba/b`,
     ];
@@ -91,7 +101,8 @@ const getCutArgs = (track: TrackInfo,  trackCuts: {[key: string]: [number, numbe
 
 const getOutput = (track: TrackInfo, album: AlbumInfo, format: Format, trackCuts: {[key: string]: [number, number][]}) => {
     const cuts = trackCuts[track.id] ?? [];
-    return getOutputFile(track, album, format) + (cuts.length > 1 ? " %(autonumber)03d" : "") + ".%(ext)s";
+    
+    return replace(getOutputFile(track, album, format) + (cuts.length > 1 ? " %(autonumber)03d" : "") + ".%(ext)s", `${global.store.get("application.outputDirectory")}/`, "");
 };
 
 export const getOutputFile = (track: TrackInfo, album: AlbumInfo, format: Format) => {

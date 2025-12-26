@@ -30,6 +30,7 @@ export type ApplicationOptions = {
     mergeParts?: boolean;
     downloadSinglesAndEps?: boolean;
     downloadAlbums?: boolean;
+    splitChapters?: boolean;
     showAdvancedSearchOptions?: boolean;
     inputMode?: InputMode;
     defaultMediaFormat?: MediaFormat;
@@ -152,6 +153,10 @@ export const StoreSchema: Schema<IStore> = {
             downloadAlbums: {
                 type: "boolean",
                 default: true
+            },
+            splitChapters: {
+                type: "boolean",
+                default: false
             },
             downloadSinglesAndEps: {
                 type: "boolean",

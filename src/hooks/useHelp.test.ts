@@ -106,4 +106,129 @@ describe("useHelp", () => {
         expect(document.body.contains(createdAnchor)).toBe(false);
         expect(actions.setHelp).toHaveBeenCalledWith(false);
     });
+
+
+    test("clicking inside help overlay does not close it", async () => {
+        const helpElement = document.createElement("button");
+        helpElement.dataset.help = "demo";
+        document.body.appendChild(helpElement);
+
+        const {result} = renderHook(() => useHelp());
+
+        await act(async () => {
+            helpElement.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        });
+
+        await waitFor(() => expect(result.current.anchorEl).not.toBeNull());
+        const anchorEl = result.current.anchorEl!;
+
+        await act(async () => {
+            anchorEl.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        });
+
+        expect(result.current.anchorEl).not.toBeNull();
+    });
+
+    test("clicking outside help overlay closes it", async () => {
+        const helpElement = document.createElement("button");
+        helpElement.dataset.help = "demo";
+        document.body.appendChild(helpElement);
+
+        const {result} = renderHook(() => useHelp());
+
+        await act(async () => {
+            helpElement.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        });
+
+        await waitFor(() => expect(result.current.anchorEl).not.toBeNull());
+
+        await act(async () => {
+            document.body.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        });
+
+        await waitFor(() => expect(result.current.anchorEl).toBeNull());
+    });
+
+    test("handleMouseEvent stops propagation and prevents default", async () => {
+        const event = new MouseEvent("mouseup", {bubbles: true, cancelable: true});
+        event.stopPropagation = jest.fn();
+        event.preventDefault = jest.fn();
+
+        renderHook(() => useHelp());
+
+        await act(async () => {
+            document.body.dispatchEvent(event);
+        });
+
+        expect(event.stopPropagation).toHaveBeenCalled();
+        expect(event.preventDefault).toHaveBeenCalled();
+    });
+
+    test("recursively copies styles and disables events for nested children", async () => {
+        const helpElement = document.createElement("div");
+        helpElement.dataset.help = "nested";
+        
+        const child = document.createElement("div");
+        child.className = "child";
+        helpElement.appendChild(child);
+
+        const grandchild = document.createElement("span");
+        grandchild.textContent = "Grandchild";
+        child.appendChild(grandchild);
+
+        document.body.appendChild(helpElement);
+
+        const {result, unmount} = renderHook(() => useHelp());
+
+        await act(async () => {
+            helpElement.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true}));
+        });
+
+        await waitFor(() => expect(result.current.anchorEl).not.toBeNull());
+        const anchorEl = result.current.anchorEl!;
+
+        const clonedChild = anchorEl.children[0] as HTMLElement;
+        expect(clonedChild).toBeDefined();
+        expect(clonedChild.style.pointerEvents).toBe("none");
+        
+        const clonedGrandchild = clonedChild.children[0] as HTMLElement;
+        expect(clonedGrandchild).toBeDefined();
+
+        expect(clonedGrandchild.textContent).toBe("Grandchild");
+        expect(clonedGrandchild.style.pointerEvents).toBe("none");
+        unmount();
+    });
+
+    test("copyComputedStyle error is caught and logged", async () => {
+        const helpElement = document.createElement("button");
+        helpElement.dataset.help = "demo";
+        document.body.appendChild(helpElement);
+
+        const logger = { error: jest.fn() };
+        (global as any).logger = logger;
+
+        const error = new Error("Style error");
+        window.getComputedStyle = jest.fn(() => {
+            return {
+                getPropertyValue: () => { throw error; },
+                [Symbol.iterator]: function* () { yield "color"; },
+            } as any;
+        });
+
+        const { result, unmount } = renderHook(() => useHelp());
+
+        await act(async () => {
+            helpElement.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+        });
+
+        await waitFor(() => expect(result.current.anchorEl).not.toBeNull());
+        expect(logger.error).toHaveBeenCalledWith(
+            expect.stringContaining("Error copying style property"),
+            "color",
+            error
+        );
+
+        unmount();
+        window.getComputedStyle = originalGetComputedStyle;
+    });
 });
