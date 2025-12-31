@@ -110,6 +110,7 @@
     "videoOutputTemplate": "Output template (videos)",
     "warnings": "Warnings",
     "welcomeMessage": "Type in your query to start",
+    "wrongFileFormat": "File format error",
     "year": "Year",
     "youtubeUrl": "YouTube URL",
     "ytdlpExecutablePath": "Path to yt-dpl executable",

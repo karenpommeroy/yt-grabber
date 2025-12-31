@@ -110,6 +110,7 @@
     "videoOutputTemplate": "Szablon wyjściowy (pliki wideo)",
     "warnings": "Ostrzeżenia",
     "welcomeMessage": "Wpisz zapytanie, aby rozpocząć",
+    "wrongFileFormat": "Błąd formatu pliku",
     "year": "Rok",
     "youtubeUrl": "YouTube URL",
     "ytdlpExecutablePath": "Ścieżka do pliku wykonywalnego biblioteki yt-dlp",

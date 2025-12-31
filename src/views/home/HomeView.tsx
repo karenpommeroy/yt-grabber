@@ -486,12 +486,14 @@ export const HomeView: React.FC = () => {
 
                     onMerge({trackId: track.id, error: errorMsg, parts})
                         .then(onConvert)
-                        .then(onProcessEnd);
+                        .then(onProcessEnd)
+                        .then(onCheckCorrectness);
                 })
                 .on("close", () => {
                     onMerge({trackId: track.id, parts})
                         .then(onConvert)
-                        .then(onProcessEnd);
+                        .then(onProcessEnd)
+                        .then(onCheckCorrectness);
                 });
         }
     };
@@ -815,48 +817,79 @@ export const HomeView: React.FC = () => {
             removeIncompleteFiles({dir: dirPath, name: parsedPath.name, ext: format.extension}, result.parts > 1);
         }
 
-        setTrackStatus((prev) => map(prev, (item) => {
-            if (item.trackId === result.trackId) {
-                return {
-                    ...item,
-                    status: aborted ? t("cancelled") : result.error ?? t("done"),
-                    error: !!result.error || aborted,
-                    completed,
-                    percent: 100,
-                    totalSize: totalSize ? totalSize : item.totalSize,
-                };
+        return new Promise((resolve) => {
+
+            setTrackStatus((prev) => map(prev, (item) => {
+                if (item.trackId === result.trackId) {
+                    return {
+                        ...item,
+                        status: aborted ? t("cancelled") : result.error ?? t("done"),
+                        error: !!result.error || aborted,
+                        completed,
+                        percent: 100,
+                        totalSize: totalSize ? totalSize : item.totalSize,
+                    };
+                } else {
+                    return item;
+                }
+            }));
+
+            delete abortControllers[result.trackId];
+
+            setQueue((prev) => filter(prev, (item) => item !== result.trackId));
+
+            if (abortRef.current === "all") {
+                setQueue([]);
+                setAutoDownload(false);
+                setAbort(undefined);
+                
+                resolve(result);
+            }
+
+            if (abortRef.current) {
+                setAutoDownload(false);
+                setAbort(undefined);
+
+                if (find(playlists, ["url", abortRef.current])) {
+                    return;
+                }
+            }
+
+            const nextTrackToDownload = find(queue, (item) => !find(trackStatusRef.current, (status) => status.trackId === item));
+
+            if (!nextTrackToDownload) {
+                setAutoDownload(false);
+                resolve(result);
             } else {
-                return item;
+                downloadTrack(nextTrackToDownload);
+                resolve(result);
             }
-        }));
+        });
+    }, [abort, abortRef, tracks, trackStatus, trackStatusRef.current, formats, queue, appOptions]);
 
-        delete abortControllers[result.trackId];
-
-        setQueue((prev) => filter(prev, (item) => item !== result.trackId));
-
-        if (abortRef.current === "all") {
-            setQueue([]);
-            setAutoDownload(false);
-            setAbort(undefined);
-            return;
+    const onCheckCorrectness = useCallback((result: {trackId: string, error?: string; parts?: number}) => {
+        const track = find(tracks, ["id", result.trackId]);
+        const album = getTrackAlbum(track.id);
+        const playlist = getTrackPlaylist(result.trackId);
+        const format = getPlaylistFormat(playlist);
+        const outputPath = getOutputFile(track, album, format) + ".webp";
+        
+        if (fs.existsSync(outputPath)) {
+            setTrackStatus((prev) => map(prev, (item) => {
+                if (item.trackId === result.trackId) {
+                    return {
+                        ...item,
+                        status: t("wrongFileFormat"),
+                        error: true,
+                        completed: false,
+                        percent: 100,
+                    };
+                } else {
+                    return item;
+                }
+            }));
         }
 
-        if (abortRef.current) {
-            setAutoDownload(false);
-            setAbort(undefined);
-
-            if (find(playlists, ["url", abortRef.current])) {
-                return;
-            }
-        }
-
-        const nextTrackToDownload = find(queue, (item) => !find(trackStatusRef.current, (status) => status.trackId === item));
-
-        if (!nextTrackToDownload) {
-            setAutoDownload(false);
-        } else {
-            downloadTrack(nextTrackToDownload);
-        }
     }, [abort, abortRef, tracks, trackStatus, trackStatusRef.current, formats, queue, appOptions]);
 
     const getTrackAlbum = useCallback((trackId: string) => {
