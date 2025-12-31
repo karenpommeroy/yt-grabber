@@ -89,6 +89,21 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
         }
     };
 
+    const onTabClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
+        if (event.button === 1) {
+            event.stopPropagation();
+            const currentIndex = findIndex(playlists, (p) => p.url === activeTab);
+            const nextIndex = currentIndex === size(playlists) - 1 ? currentIndex - 1 : currentIndex + 1;
+            const albumId = event.currentTarget.getAttribute("data-id");
+            const trackIdsForAlbum = map(get(find(playlists, ["album.id", albumId]), "tracks"), "id");
+            
+            setActiveTab(playlists[nextIndex]?.url);
+            setTrackStatus((prev) => filter(prev, (p) => !includes(trackIdsForAlbum, p.trackId)));
+            setPlaylists((prev) => filter(prev, (p) => p.album.id !== albumId));
+            setTracks((prev) => filter(prev, (p) => !includes(trackIdsForAlbum, p.id)));
+        }
+    }, [playlists, activeTab]);
+
     const onRemove = useCallback((event: MouseEvent<SVGSVGElement>) => {
         event.stopPropagation();
         const currentIndex = findIndex(playlists, (p) => p.url === activeTab);
@@ -191,8 +206,9 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
 
                             return <Tab
                                 key={item.album.id}
+                                data-id={item.album.id}
                                 className={Styles.tab}
-                                
+                                onMouseDown={onTabClick}
                                 icon={
                                     <Badge
                                         className={Styles.tabRemoveButton}
