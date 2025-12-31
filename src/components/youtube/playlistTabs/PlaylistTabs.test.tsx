@@ -139,6 +139,27 @@ describe("PlaylistTabs", () => {
         expect(dataState.setTrackStatus).toHaveBeenCalledWith(expect.any(Function));
     });
 
+    test("middle-clicking a tab closes it and advances to next", async () => {
+        const dataState = createDataState({
+            trackStatus: [
+                {trackId: "track-1", percent: 50},
+                {trackId: "track-2", percent: 10},
+            ],
+        });
+        useDataStateMock.mockReturnValue(dataState);
+
+        const shell = await render(<PlaylistTabs queue={["track-1"]} />);
+
+        const firstTabButton = shell.getByText(secondPlaylist.album.title).closest("button")!;
+
+        fireEvent.mouseDown(firstTabButton, {button: 1});
+
+        expect(dataState.setActiveTab).toHaveBeenCalledWith(secondPlaylist.url);
+        expect(dataState.setPlaylists).toHaveBeenCalledWith(expect.any(Function));
+        expect(dataState.setTracks).toHaveBeenCalledWith(expect.any(Function));
+        expect(dataState.setTrackStatus).toHaveBeenCalledWith(expect.any(Function));
+    });
+
     test("invokes download, cancel, and IPC actions", async () => {
         const onDownloadTrack = jest.fn();
         const onDownloadPlaylist = jest.fn();

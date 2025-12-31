@@ -1,6 +1,6 @@
 import React from "react";
 
-import {act, waitFor} from "@testing-library/react";
+import {act, fireEvent, waitFor} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
 import NumberField from "./NumberField";
@@ -41,6 +41,10 @@ const ControlledNumberField: React.FC<ControlledNumberFieldProps> = ({value = 0,
 };
 
 describe("NumberField", () => {
+    beforeEach(() => {
+        useIntervalMock.mockReset();
+    });
+
     test("increments and decrements within boundaries", async () => {
         const onChange = jest.fn();
         const shell = await render(
@@ -144,6 +148,28 @@ describe("NumberField", () => {
         await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(0));
     });
 
+    test("rejects empty input when allowEmpty is false", async () => {
+        const onChange = jest.fn();
+        const shell = await render(
+            <ControlledNumberField
+                value={2}
+                allowEmpty={false}
+                onChange={onChange}
+            />,
+        );
+
+        await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(2));
+
+        const input = shell.getByRole("textbox") as HTMLInputElement;
+
+        act(() => {
+            fireEvent.change(input, {target: {value: ""}});
+        });
+
+        await waitFor(() => expect(onChange).toHaveBeenCalledTimes(1));
+        expect(input.value).toBe("2.00");
+    });
+
     test("applies readOnly state to input when provided", async () => {
         const onChange = jest.fn();
         const shell = await render(<ControlledNumberField readOnly value={1} onChange={onChange} />);
@@ -173,5 +199,68 @@ describe("NumberField", () => {
         act(() => intervalCb && intervalCb());
 
         await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(1.5));
+    });
+
+    test("holding decrease starts interval and releasing stops it", async () => {
+        let lastDelay: number | null | undefined;
+        useIntervalMock.mockImplementation((_cb: () => void, delay: number | null | undefined) => {
+            lastDelay = delay;
+        });
+
+        const onChange = jest.fn();
+        const shell = await render(<ControlledNumberField value={1} initialPressedDelay={200} onChange={onChange} />);
+
+        await waitFor(() => expect(lastDelay).toBeNull());
+
+        const [decreaseButton] = shell.getAllByRole("button");
+
+        act(() => {
+            decreaseButton.dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+        });
+
+        await waitFor(() => expect(lastDelay).toBe(200));
+
+        act(() => {
+            decreaseButton.dispatchEvent(new MouseEvent("mouseup", {bubbles: true}));
+        });
+
+        await waitFor(() => expect(lastDelay).toBeNull());
+    });
+
+    test("increase mouseup resets delay and stops interval", async () => {
+        let lastDelay: number | null | undefined;
+        let intervalCb: (() => void) | undefined;
+        useIntervalMock.mockImplementation((cb: () => void, delay: number | null | undefined) => {
+            intervalCb = cb;
+            lastDelay = delay;
+        });
+
+        const shell = await render(<ControlledNumberField value={1} initialPressedDelay={300} onChange={jest.fn()} />);
+
+        await waitFor(() => expect(lastDelay).toBeNull());
+
+        const [, increaseButton] = shell.getAllByRole("button");
+
+        act(() => {
+            increaseButton.dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+        });
+
+        await waitFor(() => expect(lastDelay).toBe(300));
+
+        act(() => intervalCb && intervalCb());
+
+        await waitFor(() => expect(lastDelay).toBe(250));
+
+        act(() => {
+            increaseButton.dispatchEvent(new MouseEvent("mouseup", {bubbles: true}));
+        });
+
+        await waitFor(() => expect(lastDelay).toBeNull());
+
+        act(() => {
+            increaseButton.dispatchEvent(new MouseEvent("mousedown", {bubbles: true}));
+        });
+
+        await waitFor(() => expect(lastDelay).toBe(300));
     });
 });
