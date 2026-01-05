@@ -342,12 +342,6 @@ export const SettingsView: React.FC = () => {
                         <Grid size={12} data-help="mergeParts">
                             <FormControlLabel control={<Switch checked={applicationOptions.mergeParts} size="small" onChange={onMergePartsChange} />} label={t("mergeParts")} />
                         </Grid>
-                        <Grid size={12} data-help="ytdlpVersion">
-                            <Stack direction="row" spacing={1} className={Styles.ytdlpVersion}>
-                                <Typography component="span" variant="body1">{t("ytdlpVersion")}: {ytDlpVersion}</Typography>
-                                <Button size="small" variant="contained" loading={updatingYtDlp} onClick={onUpdateYtDlpClick}>{t("update")}</Button>
-                            </Stack>
-                        </Grid>
                     </Grid>
                     <Grid className={Styles.group} container size={6} spacing={2} component={Paper} variant="outlined">
                         <Grid size={12}>
@@ -502,6 +496,12 @@ export const SettingsView: React.FC = () => {
                                 error={!!validationErrors["customYtdlpArgs"]}
                                 type="string"
                             />
+                        </Grid>
+                        <Grid size={12} data-help="ytdlpVersion">
+                            <Stack direction="row" spacing={1} className={Styles.ytdlpVersion}>
+                                <Typography component="span" variant="body1">{t("ytdlpVersion")}: {ytDlpVersion}</Typography>
+                                <Button size="small" variant="contained" loading={updatingYtDlp} onClick={onUpdateYtDlpClick}>{t("update")}</Button>
+                            </Stack>
                         </Grid>
                     </Grid>
                 </Grid>
