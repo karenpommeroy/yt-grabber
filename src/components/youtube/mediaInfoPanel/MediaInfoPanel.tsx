@@ -176,7 +176,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                     </Button>
                                 </Tooltip>
                                 {(tracksSeparated || playlist.tracks.length === 1) && <Tooltip title={t("cut")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
-                                    <Button data-help="cutTrack" data-testid="cut-button" className={Styles.cutTrack} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={cutTrack}>
+                                    <Button data-help="cutPlaylist" data-testid="cut-button" className={Styles.cutTrack} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={cutTrack}>
                                         <FormatListNumberedIcon />
                                     </Button>
                                 </Tooltip>}

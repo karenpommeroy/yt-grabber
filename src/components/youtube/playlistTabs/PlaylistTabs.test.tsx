@@ -1,7 +1,7 @@
 import {ipcRenderer} from "electron";
 import path from "path";
 
-import {fireEvent, waitFor} from "@testing-library/react";
+import {act, fireEvent, waitFor} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
 import {SortOrder, TabsOrderKey} from "../../../common/Media";
@@ -114,9 +114,9 @@ describe("PlaylistTabs", () => {
 
         const shell = await render(<PlaylistTabs queue={[]} />);
         const secondTab = shell.getByText(secondPlaylist.album.title);
-
-        fireEvent.click(secondTab.closest("button")!);
-
+        act(() => {
+            fireEvent.click(secondTab.closest("button")!);
+        });
         expect(dataState.setActiveTab).toHaveBeenCalledWith(secondPlaylist.url);
     });
 
@@ -130,8 +130,9 @@ describe("PlaylistTabs", () => {
 
         const shell = await render(<PlaylistTabs queue={["track-1"]} />);
         const closeIcon = shell.getAllByTestId("CloseIcon")[0];
-
-        fireEvent.click(closeIcon);
+        act(() => {
+            fireEvent.click(closeIcon);
+        });
 
         expect(dataState.setActiveTab).toHaveBeenCalledWith(secondPlaylist.url);
         expect(dataState.setPlaylists).toHaveBeenCalledWith(expect.any(Function));
@@ -151,8 +152,9 @@ describe("PlaylistTabs", () => {
         const shell = await render(<PlaylistTabs queue={["track-1"]} />);
 
         const firstTabButton = shell.getByText(secondPlaylist.album.title).closest("button")!;
-
-        fireEvent.mouseDown(firstTabButton, {button: 1});
+        await act(async () => {
+            fireEvent.mouseDown(firstTabButton, {button: 1});
+        });
 
         expect(dataState.setActiveTab).toHaveBeenCalledWith(secondPlaylist.url);
         expect(dataState.setPlaylists).toHaveBeenCalledWith(expect.any(Function));
@@ -181,14 +183,15 @@ describe("PlaylistTabs", () => {
                 onCancelTrack={onCancelTrack}
             />
         );
-
-        fireEvent.click(shell.getByTestId("download-track"));
-        fireEvent.click(shell.getByTestId("cancel-track"));
-        fireEvent.click(shell.getByTestId("download-album"));
-        fireEvent.click(shell.getByTestId("cancel-album"));
-        fireEvent.click(shell.getByTestId("open-url"));
-        fireEvent.click(shell.getByTestId("open-file"));
-        fireEvent.click(shell.getByTestId("open-output"));
+        act(() => {
+            fireEvent.click(shell.getByTestId("download-track"));
+            fireEvent.click(shell.getByTestId("cancel-track"));
+            fireEvent.click(shell.getByTestId("download-album"));
+            fireEvent.click(shell.getByTestId("cancel-album"));
+            fireEvent.click(shell.getByTestId("open-url"));
+            fireEvent.click(shell.getByTestId("open-file"));
+            fireEvent.click(shell.getByTestId("open-output"));
+        });
 
         expect(onDownloadTrack).toHaveBeenCalledWith("track-1");
         expect(onCancelTrack).toHaveBeenCalledWith("track-1");
@@ -256,7 +259,6 @@ describe("PlaylistTabs", () => {
     });
 
     test("renders skeleton loading state for playlist with empty album", async () => {
-        // Playlist with empty album object (loading state)
         const loadingPlaylist = {
             url: "loading-playlist",
             album: {} as any,
@@ -270,7 +272,6 @@ describe("PlaylistTabs", () => {
 
         const shell = await render(<PlaylistTabs queue={[]} />);
 
-        // Should render skeleton elements for loading playlist
         const skeletons = shell.container.querySelectorAll(".MuiSkeleton-root");
         expect(skeletons.length).toBeGreaterThan(0);
     });

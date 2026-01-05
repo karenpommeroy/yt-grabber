@@ -107,12 +107,13 @@
     "tracks": "Spuren",
     "untilYear": "Bis (Jahr)",
     "update": "Aktualisierung",
+    "urls": "URLs",
     "videoOutputTemplate": "Ausgabevorlage (videos)",
     "warnings": "Warnungen",
     "welcomeMessage": "Geben Sie Ihre Anfrage ein, um zu starten",
     "wrongFileFormat": "Dateiformatfehler",
     "year": "Jahr",
-    "youtubeUrl": "YouTube-URL",
+    "youtubeUrl": "YouTube URL",
     "ytdlpExecutablePath": "Pfad zur ausführbaren Datei yt-dpl",
     "ytdlpVersion": "YT-DLP-Version"
 }

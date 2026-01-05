@@ -1,6 +1,6 @@
 {
-    "youtubeUrlHeader": "Pole adresu URL YouTube",
-    "youtubeUrlContent": [
+    "inputFieldHeader": "Pole adresu URL YouTube",
+    "inputFieldContent": [
         "Wprowadź adres URL do filmu, playlisty lub kanału z YouTube lub YouTube Music (w trybie automatycznym).",
         "Możesz również wprowadzić nazwę wykonawcę, nazwę albumu lub tytuł piosenki zgodnie z wybranym trybem (dla innych trybów poza automatycznym).",
         "Adresy URL są automatycznie rozpoznawane i oznaczane.",
@@ -189,6 +189,8 @@
     ],
     "defaultMediaFormatHeader": "Domyślny typ mediów",
     "defaultMediaFormatContent": "Domyślny typ mediów dla każdej nowo otwartej zakładki.",
+    "cutPlaylistHeader": "Podziel playlistę",
+    "cutPlaylistContent": "Pozwala podzielić playlistę na wiele oddzielnych kawałków.",
     "splitChaptersHeader": "Podziel na rozdziały",
     "splitChaptersContent": "Określa czy generować plików wynikowych, jeśli źródłowe media zawierają rozdziały."
 }

@@ -169,7 +169,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const getInputLabel = () => {
         switch (inputMode) {
         case InputMode.Auto:
-            return t("youtubeUrl");
+            return t("urls");
         case InputMode.Artists:
             return t("artistOrArtists");
         case InputMode.Albums:
@@ -177,7 +177,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         case InputMode.Songs:
             return t("songOrSongs");
         default:
-            return t("youtubeUrl");
+            return t("urls");
         }
     };
 
@@ -235,7 +235,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     renderInput={(params: AutocompleteRenderInputParams) => (
                         <TextField
                             {...params}
-                            data-help="youtubeUrl"
+                            data-help="urlField"
                             fullWidth
                             variant="outlined"
                             label={getInputLabel()}

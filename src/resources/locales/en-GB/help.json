@@ -1,6 +1,6 @@
 {
-    "youtubeUrlHeader": "Youtube URL field",
-    "youtubeUrlContent": [
+    "inputFieldHeader": "Youtube URL field",
+    "inputFieldContent": [
         "Input url to video, playlist or channel from YouTube or YouTubeMusic (when in Autodetect mode).",
         "You can also input artist, album name or song name according to mode selected (for all modes except Autodetect).",
         "Urls are automatically recognized and marked.",
@@ -189,6 +189,8 @@
     ],
     "defaultMediaFormatHeader": "Default media format",
     "defaultMediaFormatContent": "Specifies default media format for each newly opened tab.",
+    "cutPlaylistHeader": "Cut playlist",
+    "cutPlaylistContent": "Allows to cut playlist into multiple separate tracks.",
     "splitChaptersHeader": "Split chapters",
     "splitChaptersContent": "Specifies whether output should be split into multiple files if source media contains chapters."
 }

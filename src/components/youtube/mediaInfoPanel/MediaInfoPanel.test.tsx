@@ -233,7 +233,7 @@ describe("MediaInfoPanel", () => {
             />
         );
 
-        const cutButton = shell.container.querySelector("[data-help=\"cutTrack\"]") as HTMLButtonElement;
+        const cutButton = shell.container.querySelector("[data-help=\"cutPlaylist\"]") as HTMLButtonElement;
         fireEvent.click(cutButton);
 
         const modalProps = (global as any).__cutModalProps;
