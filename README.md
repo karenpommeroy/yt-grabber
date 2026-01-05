@@ -5,7 +5,7 @@
 ![Tests](https://github.com/karenpommeroy/yt-grabber/actions/workflows/tests.yml/badge.svg)
 [![Coverage](https://codecov.io/gh/karenpommeroy/yt-grabber/branch/main/graph/badge.svg)](https://codecov.io/gh/karenpommeroy/yt-grabber)
 
-**YT Grabber** is a robust desktop application designed to retrieve multimedia from YouTube, YouTube Music and other multimedia sites.
+**YT Grabber** is a robust desktop application designed to retrieve multimedia from YouTube, YouTube Music and other multimedia sites and social media platforms.
 
 It provides responsive UI to manage your downloads and automation features that improve and accelerate download process.
 
@@ -38,8 +38,7 @@ Each download can be customized to your needs for easy workflow automation.
 
 
 ## Features
-* Support for most major multimedia sites (full list is available
-[here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md))
+* Support for most major multimedia sites and social media platforms like Youtube, Youtube Music, Vimeo, DailyMotion, Facebook, Instagram, TikTok (full list is available [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md))
 
 * Download video, audio, playlists, songs, albums, singles and complete artist discographies
 

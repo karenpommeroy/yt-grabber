@@ -24,7 +24,14 @@
     "youtube mpeg",
     "youtube mkv",
     "youtube avi",
-    "youtube gif"
+    "youtube gif",
+    "vimeo",
+    "dailymotion",
+    "soundcloud",
+    "bandcamp",
+    "facebook",
+    "instagram",
+    "tiktok"
   ],
   "main": "./dist/index.js",
   "repository": {
