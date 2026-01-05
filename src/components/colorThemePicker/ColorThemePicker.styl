@@ -1,0 +1,36 @@
+@import "../../styles/mixins.styl";
+
+.color-theme-picker {
+    position: relative;
+    
+    .theme-sample {
+        display: inline-flex;
+        border: 1px solid var(--theme-palette-primary-light);
+
+        .color {
+            width: 26px;
+            height: 26px;
+        }
+    }
+
+    .select {
+        align-items: center;
+        display: flex;
+        capitalize();
+
+        .select-input, .menu-item {
+            .menu-item-wrapper {
+                display: flex;
+                align-items: center;
+            }
+        }
+    }
+
+    .menu-item {
+        capitalize();
+    }
+
+    .icon {
+        padding-right: .5rem;
+    }
+}

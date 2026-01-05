@@ -191,6 +191,8 @@
     "defaultMediaFormatContent": "Domyślny typ mediów dla każdej nowo otwartej zakładki.",
     "cutPlaylistHeader": "Podziel playlistę",
     "cutPlaylistContent": "Pozwala podzielić playlistę na wiele oddzielnych kawałków.",
+    "colorThemePickerHeader": "Wybór motywu kolorystycznego",
+    "colorThemePickerContent": "Pozwala wybrać motyw kolorystyczny aplikacji.",
     "splitChaptersHeader": "Podziel na rozdziały",
     "splitChaptersContent": "Określa czy generować plików wynikowych, jeśli źródłowe media zawierają rozdziały."
 }

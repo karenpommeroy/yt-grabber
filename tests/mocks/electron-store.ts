@@ -1,4 +1,14 @@
-export const get = jest.fn().mockReturnValue({language: "en-GB"});
+import {get as _get} from "lodash-es";
+
+import {SortOrder, TabsOrderKey} from "../../src/common/Media";
+
+export const storeMock: Record<string, any> = {application: {language: "en-GB", theme: "sunset-sky", tabsOrder: [TabsOrderKey.Default, SortOrder.Asc]}};
+
+export const get = jest.fn((key?: string) => {
+    if (!key) return storeMock;
+
+    return _get(storeMock, key);
+});
 
 export const set = jest.fn();
 

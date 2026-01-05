@@ -191,6 +191,8 @@
     "defaultMediaFormatContent": "Legt das Standard-Medienformat für jeden neu geöffneten Tab fest.",
     "cutPlaylistHeader": "Playlist zuschneiden",
     "cutPlaylistContent": "Ermöglicht das Zuschneiden der Playlist in mehrere separate Titel.",
+    "colorThemePickerHeader": "Farbthema Auswahl",
+    "colorThemePickerContent": "Ermöglicht die Auswahl des Farbthemas der Anwendung.",
     "splitChaptersHeader": "Kapitel aufteilen",
     "splitChaptersContent": "Legt fest, ob die Ausgabe in mehrere Dateien aufgeteilt werden soll, wenn die Quellmedien Kapitel enthalten."
 }

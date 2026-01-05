@@ -100,11 +100,6 @@ export const renderConfig: Configuration & DevServerConfiguration = {
                 loader: "source-map-loader",
             },
             {
-                test: /\.json$/,
-                loader: "json",
-                exclude: [getRoot(__dirname, "config"), /node_modules/],
-            },
-            {
                 test: /\.css$/i,
                 use: [
                     {

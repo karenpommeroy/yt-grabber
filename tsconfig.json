@@ -21,6 +21,6 @@
       "@app/*": ["src/*"]
     }
   },
-  "include": ["./src/**/*.ts", "./src/**/*.tsx", "webpack.config.ts", "jest.setup.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx", "./src/**/*.json", "webpack.config.ts", "jest.setup.ts"],
   "exclude": ["node_modules"]
 }

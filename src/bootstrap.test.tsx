@@ -8,7 +8,6 @@ import i18n from "./i18next";
 
 jest.mock("./App", () => require("@tests/mocks/App"));
 jest.mock("./react/contexts/AppContext", () => require("@tests/mocks/react/contexts/AppContext"));
-jest.mock("./react/contexts/AppThemeContext", () => require("@tests/mocks/react/contexts/AppThemeContext"));
 jest.mock("./react/contexts/DataContext", () => require("@tests/mocks/react/contexts/DataContext"));
 jest.mock("moment-duration-format", () => require("@tests/mocks/moment-duration-format"));
 
@@ -50,7 +49,6 @@ describe("bootstrap", () => {
 
         expect(screen.getByTestId("app-context-provider")).toBeInTheDocument();
         expect(screen.getByTestId("data-provider")).toBeInTheDocument();
-        expect(screen.getByTestId("app-theme-provider")).toBeInTheDocument();
         expect(screen.getByTestId("app")).toBeInTheDocument();
     });
 });

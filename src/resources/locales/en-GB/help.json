@@ -191,6 +191,8 @@
     "defaultMediaFormatContent": "Specifies default media format for each newly opened tab.",
     "cutPlaylistHeader": "Cut playlist",
     "cutPlaylistContent": "Allows to cut playlist into multiple separate tracks.",
+    "colorThemePickerHeader": "Color theme picker",
+    "colorThemePickerContent": "Allows to select application color theme.",
     "splitChaptersHeader": "Split chapters",
     "splitChaptersContent": "Specifies whether output should be split into multiple files if source media contains chapters."
 }

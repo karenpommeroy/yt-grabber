@@ -1,6 +1,7 @@
 import React, {createContext, FC, ReactNode, useReducer} from "react";
 
 import {ColorMode} from "../../common/Theme";
+import {Themes} from "../../theme/Theme";
 import {actions} from "../actions/AppActions";
 import reducer from "../reducers/AppReducer";
 import {createDefaultState, IAppState} from "../states/AppState";
@@ -9,7 +10,7 @@ export interface IAppContext {
     state: IAppState;
     actions: {
         setLocation: (location: string) => void;
-        setTheme: (theme: string) => void;
+        setTheme: (theme: Themes) => void;
         setMode: (mode: ColorMode) => void;
         setLoading: (loading: boolean) => void;
         setHelp: (help: boolean) => void;

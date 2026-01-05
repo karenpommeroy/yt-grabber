@@ -3,6 +3,7 @@ import React from "react";
 import {act, render, screen} from "@testing-library/react";
 
 import {ColorMode} from "../../common/Theme";
+import {Themes} from "../../theme/Theme";
 import AppContext, {AppContextProvider, IAppContext, useAppContext} from "./AppContext";
 
 const TestConsumer: React.FC<{onContext?: (ctx: IAppContext) => void}> = ({onContext}) => {
@@ -40,7 +41,7 @@ describe("AppContext", () => {
 
             expect(capturedContext).toBeDefined();
             expect(capturedContext!.state.location).toBe("/");
-            expect(capturedContext!.state.theme).toBe("purple-rain");
+            expect(capturedContext!.state.theme).toBe(Themes.SunsetSky);
             expect(capturedContext!.state.mode).toBe(ColorMode.Dark);
             expect(capturedContext!.state.loading).toBe(false);
             expect(capturedContext!.state.help).toBe(false);
@@ -91,13 +92,13 @@ describe("AppContext", () => {
                 </AppContextProvider>
             );
 
-            expect(capturedContext!.state.theme).toBe("purple-rain");
+            expect(capturedContext!.state.theme).toBe(Themes.SunsetSky);
 
             act(() => {
-                capturedContext!.actions.setTheme("dark-knight");
+                capturedContext!.actions.setTheme(Themes.PinkFloyd);
             });
 
-            expect(capturedContext!.state.theme).toBe("dark-knight");
+            expect(capturedContext!.state.theme).toBe(Themes.PinkFloyd);
         });
 
         it("should update mode via setMode", () => {

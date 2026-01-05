@@ -15,6 +15,7 @@
     "chromeExecutablePath": "Ścieżka do pliku wykonywalnego przeglądarki Chrome",
     "close": "Zamknij",
     "closeSettings": "Zamknij Ustawienia",
+    "colorTheme": "Motyw kolorystyczny",
     "concurrency": "Liczba równocześnie pobieranych plików",
     "convertingOutput": "Konwertowanie pliku",
     "customYtdlpArgs": "Dodatkowe argumenty dla yt-dlp",

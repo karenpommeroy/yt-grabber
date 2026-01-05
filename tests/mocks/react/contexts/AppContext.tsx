@@ -5,7 +5,7 @@ const actual = jest.requireActual("@app/react/contexts/AppContext");
 export const useAppContext = jest.fn(() => ({
     state: {
         location: "/",
-        theme: "purple-rain",
+        theme: "sunset-sky",
         mode: "dark",
         loading: false,
         help: false

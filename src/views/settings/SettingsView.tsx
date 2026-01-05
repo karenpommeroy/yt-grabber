@@ -21,6 +21,7 @@ import {
     FormatScope, MediaFormat, MultiMatchAction, SortOrder, TabsOrderKey
 } from "../../common/Media";
 import StoreSchema, {ApplicationOptions} from "../../common/Store";
+import ColorThemePicker from "../../components/colorThemePicker/ColorThemePicker";
 import FileField from "../../components/fileField/FileField";
 import NumberField from "../../components/numberField/NumberField";
 import ThemePicker from "../../components/themePicker/ThemePicker";
@@ -35,6 +36,7 @@ export const SettingsView: React.FC = () => {
     const [ytDlpVersion, setYtDlpVersion] = useState("");
     const [applicationOptions, setApplicationOptions] = useState<ApplicationOptions>(global.store.get("application"));
     const [debouncedApplicationOptions] = useDebounceValue(applicationOptions, 500, {leading: true});
+    
     const tabsOrderKeyOptions = [
         {value: "default", text: t("default")},
         {value: "artist", text: t("artist")},
@@ -193,7 +195,7 @@ export const SettingsView: React.FC = () => {
     };
 
     const onTabsOrderOrderChange = (event: React.MouseEvent<HTMLButtonElement>) => {       
-        setApplicationOptions((prev) => ({...prev, tabsOrder: [prev.tabsOrder[0], event.currentTarget.value as SortOrder]}));
+        setApplicationOptions((prev) => ({...prev, tabsOrder: [prev.tabsOrder[0], (event.target as HTMLButtonElement).value as SortOrder]}));
     };
     
     const refreshYtDlpVersion = () => {
@@ -257,6 +259,9 @@ export const SettingsView: React.FC = () => {
                         </Grid>
                         <Grid size={12} data-help="themePicker">
                             <ThemePicker size="small" />
+                        </Grid>
+                        <Grid size={12} data-help="colorThemePicker">
+                            <ColorThemePicker size="small"/>
                         </Grid>
                         <Grid size={12} data-help="defaultMediaFormat">
                             <FormControl fullWidth>

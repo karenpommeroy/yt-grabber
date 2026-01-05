@@ -1,6 +1,7 @@
 import {Schema} from "electron-store";
 import {values} from "lodash-es";
 
+import {Themes} from "../theme/Theme";
 import {
     FormatScope, InputMode, MediaFormat, MultiMatchAction, SortOrder, TabsOrderKey
 } from "./Media";
@@ -35,6 +36,7 @@ export type ApplicationOptions = {
     inputMode?: InputMode;
     defaultMediaFormat?: MediaFormat;
     tabsOrder?: [TabsOrderKey, SortOrder];
+    colorTheme?: Themes;
 };
 
 export interface IStore {
@@ -179,6 +181,11 @@ export const StoreSchema: Schema<IStore> = {
             tabsOrder: {
                 type: "array",
                 default: [TabsOrderKey.Default, SortOrder.Asc],
+            },
+            colorTheme: {
+                type: "string",
+                default: Themes.SunsetSky,
+                enum: values(Themes),
             },
         },
         default: {},

@@ -39,7 +39,7 @@ Store.initRenderer();
 const createWindow = async () => {
     mainWindow = new BrowserWindow({
         width: 1100,
-        height: 920,
+        height: 978,
         frame: true,
         roundedCorners: true,
         title: "YT Grabber",

@@ -1,0 +1,168 @@
+{
+  "colorSchemes": {
+    "dark": {
+      "palette": {
+        "action": {
+          "selectedOpacity": 0.8
+        },
+        "background": {
+          "default": "hsl(270, 45%, 7.5%)",
+          "paper": "hsl(270, 45%, 10%)"
+        },
+        "divider": "hsla(270, 45%, 15%, 0.6)",
+        "error": {
+          "main": "#c62828"
+        },
+        "grey": {
+          "100": "#cfd8dc",
+          "200": "#b0bec5",
+          "300": "#90a4ae",
+          "400": "#78909c",
+          "50": "#eceff1",
+          "500": "#607d8b",
+          "600": "#546e7a",
+          "700": "#455a64",
+          "800": "#37474f",
+          "900": "#263238",
+          "A100": "#cfd8dc",
+          "A200": "#b0bec5",
+          "A400": "#78909c",
+          "A700": "#455a64"
+        },
+        "info": {
+          "main": "#1565c0"
+        },
+        "mode": "dark",
+        "primary": {
+          "main": "hsl(270, 35%, 25%)"
+        },
+        "secondary": {
+          "main": "hsl(30, 85%, 50%)"
+        },
+        "success": {
+          "main": "#2e7d32"
+        },
+        "text": {
+          "disabled": "#607d8b",
+          "primary": "hsl(270, 40%, 37.5%)",
+          "secondary": "hsl(0, 0%, 70%)"
+        },
+        "tonalOffset": {
+          "dark": 0.5,
+          "light": 0.5
+        },
+        "warning": {
+          "main": "#d84315"
+        }
+      }
+    },
+    "light": {
+      "palette": {
+        "action": {
+          "selectedOpacity": 0.4
+        },
+        "background": {
+          "default": "hsl(270, 40%, 95.5%)",
+          "paper": "hsl(270, 40%, 86.5%)"
+        },
+        "divider": "hsla(270, 35%, 68.5%, 0.4)",
+        "error": {
+          "main": "#c62828"
+        },
+        "grey": {
+          "100": "#cfd8dc",
+          "200": "#b0bec5",
+          "300": "#90a4ae",
+          "400": "#78909c",
+          "50": "#eceff1",
+          "500": "#607d8b",
+          "600": "#546e7a",
+          "700": "#455a64",
+          "800": "#37474f",
+          "900": "#263238",
+          "A100": "#cfd8dc",
+          "A200": "#b0bec5",
+          "A400": "#78909c",
+          "A700": "#455a64"
+        },
+        "info": {
+          "main": "#1565c0"
+        },
+        "mode": "light",
+        "primary": {
+          "main": "hsl(270, 35%, 55%)"
+        },
+        "secondary": {
+          "main": "hsl(30, 85%, 50%)"
+        },
+        "success": {
+          "main": "#2e7d32"
+        },
+        "text": {
+          "disabled": "#607d8b",
+          "primary": "hsl(270, 35%, 46%)",
+          "secondary": "hsl(227, 15%, 40%)"
+        },
+        "tonalOffset": {
+          "dark": 0.5,
+          "light": 0.5
+        },
+        "warning": {
+          "main": "#d84315"
+        }
+      }
+    }
+  },
+  "shape": {
+    "borderRadius": 8
+  },
+  "typography": {
+    "body1": {
+      "fontSize": "0.875rem"
+    },
+    "body2": {
+      "fontSize": "0.875rem",
+      "fontWeight": 400
+    },
+    "caption": {
+      "fontSize": "0.75rem",
+      "fontWeight": 400
+    },
+    "fontFamily": "Lato, sans-serif",
+    "h1": {
+      "fontSize": "3rem",
+      "fontWeight": 600,
+      "letterSpacing": -0.5,
+      "lineHeight": 1.2
+    },
+    "h2": {
+      "fontSize": "2.25rem",
+      "fontWeight": 600,
+      "lineHeight": 1.2
+    },
+    "h3": {
+      "fontSize": "1.875rem",
+      "lineHeight": 1.2
+    },
+    "h4": {
+      "fontSize": "1.5rem",
+      "fontWeight": 600,
+      "lineHeight": 1.5
+    },
+    "h5": {
+      "fontSize": "1.25rem",
+      "fontWeight": 600
+    },
+    "h6": {
+      "fontSize": "1.125rem",
+      "fontWeight": 600
+    },
+    "subtitle1": {
+      "fontSize": "1.125rem"
+    },
+    "subtitle2": {
+      "fontSize": "0.875rem",
+      "fontWeight": 500
+    }
+  }
+}

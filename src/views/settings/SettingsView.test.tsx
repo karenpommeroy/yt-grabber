@@ -58,13 +58,23 @@ beforeEach(() => {
 
 describe("SettingsView", () => {
     test("navigates away when close button is clicked", async () => {
+        const actions = {
+            setLocation: jest.fn(),
+            setTheme: jest.fn(),
+            setMode: jest.fn(),
+            setLoading: jest.fn(),
+            setHelp: jest.fn(),
+        };
+        const state = {};
+        
+        useAppContextMock.mockImplementation(() => ({state, actions}));
+
         const shell = await render(<SettingsView />);
 
         const closeButton = shell.getByRole("button", {name: "close"});
         fireEvent.click(closeButton);
 
-        const context = useAppContextMock.mock.results.at(-1)?.value;
-        expect(context?.actions.setLocation).toHaveBeenCalledWith("/");
+        expect(actions.setLocation).toHaveBeenCalledWith("/");
     });
 
     test("persists download settings when toggled", async () => {

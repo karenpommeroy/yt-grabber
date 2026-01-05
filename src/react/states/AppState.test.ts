@@ -1,4 +1,5 @@
 import {ColorMode} from "../../common/Theme";
+import {Themes} from "../../theme/Theme";
 import {createDefaultState} from "./AppState";
 
 describe("AppState", () => {
@@ -7,7 +8,7 @@ describe("AppState", () => {
 
         expect(state).toEqual({
             location: "/",
-            theme: "purple-rain",
+            theme: Themes.SunsetSky,
             mode: ColorMode.Dark,
             loading: false,
             help: false,

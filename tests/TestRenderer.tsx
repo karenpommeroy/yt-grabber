@@ -3,15 +3,16 @@ import momentDurationFormat from "moment-duration-format";
 import React from "react";
 import {I18nextProvider} from "react-i18next";
 
+import {ThemeProvider} from "@emotion/react";
 import {render as baseRender, RenderOptions, waitFor} from "@testing-library/react";
 
 import i18n from "../src/i18next";
 import {AppContextProvider} from "../src/react/contexts/AppContext";
-import {AppThemeProvider} from "../src/react/contexts/AppThemeContext";
 import {DataProvider} from "../src/react/contexts/DataContext";
+import {getThemeDefinition, Themes} from "../src/theme/Theme";
 import {RootAttributeRemover} from "./RootAttributeRemover";
 
-export const Providers: React.FC<{children: React.ReactNode;}> = ({children}) => {
+export const Providers: React.FC<{children: React.ReactNode}> = ({children}) => {
     momentDurationFormat(moment as any);
     moment.updateLocale("en", {week: {dow: 1}});
     
@@ -19,12 +20,12 @@ export const Providers: React.FC<{children: React.ReactNode;}> = ({children}) =>
         <AppContextProvider>
             <DataProvider>
                 <I18nextProvider i18n={i18n}>
-                    <AppThemeProvider>
+                    <ThemeProvider theme={getThemeDefinition(global.store.get("application.colorTheme") ?? Themes.SunsetSky)}>
                         <div id="test-root">
                             {children}
                         </div>
                         <RootAttributeRemover rootSelector="body > div" attributeName="aria-hidden"/>
-                    </AppThemeProvider>
+                    </ThemeProvider>
                 </I18nextProvider>
             </DataProvider>
         </AppContextProvider>

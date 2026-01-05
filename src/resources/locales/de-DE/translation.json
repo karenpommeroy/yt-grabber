@@ -15,6 +15,7 @@
     "chromeExecutablePath": "Ausführbarer Pfad für Chrome",
     "close": "Schließen",
     "closeSettings": "Einstellungen schließen",
+    "colorTheme": "Farbthema",
     "concurrency": "Parallelität",
     "convertingOutput": "Ausgabedatei konvertieren",
     "customYtdlpArgs": "Benutzerdefinierte Argumente für yt-dlp",

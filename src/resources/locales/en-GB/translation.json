@@ -15,6 +15,7 @@
     "chromeExecutablePath": "Chrome executable path",
     "close": "Close",
     "closeSettings": "Close Settings",
+    "colorTheme": "Color theme",
     "concurrency": "Concurrent downloads",
     "convertingOutput": "Converting output",
     "customYtdlpArgs": "Custom arguments for yt-dlp",
