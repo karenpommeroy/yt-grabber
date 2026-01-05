@@ -1,11 +1,12 @@
 import {ColorMode} from "../../common/Theme";
+import {Themes} from "../../theme/Theme";
 import {AppActions} from "../actions/AppActions";
 import reducer from "./AppReducer";
 
 describe("AppReducer", () => {
     const initialState = {
         location: "/",
-        theme: "light",
+        theme: Themes.SunsetSky,
         mode: ColorMode.Light,
         loading: false,
         help: false,
@@ -17,8 +18,8 @@ describe("AppReducer", () => {
     });
 
     test("handles SetTheme", () => {
-        const next = reducer({...initialState}, {type: AppActions.SetTheme, theme: "dark"});
-        expect(next).toEqual({...initialState, theme: "dark"});
+        const next = reducer({...initialState}, {type: AppActions.SetTheme, theme: Themes.SunsetSky});
+        expect(next).toEqual({...initialState, theme: "sunset-sky"});
     });
 
     test("handles SetMode", () => {
