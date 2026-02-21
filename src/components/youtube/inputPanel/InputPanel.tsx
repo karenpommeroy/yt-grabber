@@ -19,7 +19,7 @@ import {
     TextField, Tooltip, Typography
 } from "@mui/material";
 
-import {getUrlType} from "../../../common/Helpers";
+import {copyToClipBoard, getUrlType} from "../../../common/Helpers";
 import {InputMode} from "../../../common/Media";
 import {ApplicationOptions} from "../../../common/Store";
 import {UrlType} from "../../../common/Youtube";
@@ -181,14 +181,6 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         }
     };
 
-    const copyToClipboard = async (value: string) => {
-        try {
-            await navigator.clipboard.writeText(value);
-        } catch (err) {
-            console.error("Failed to copy:", err);
-        }
-    };
-
     const renderUrlTag = useCallback((option: string) => {
         const colors: Record<UrlType, string> = {
             [UrlType.Artist]: "success",
@@ -206,7 +198,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     label={truncate(replace(option, truncateRegex, ""), {length: valueCount === 2 ? 30 : 20})}
                     sx={{marginX: .5}}
                     onDelete={() => !loading && handleDelete(option)}
-                    onClick={() => copyToClipboard(option)}
+                    onClick={() => copyToClipBoard(option)}
                 />
             </Tooltip>
         );

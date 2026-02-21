@@ -209,3 +209,12 @@ export const splitDataAttributes = <T extends Record<string, any>>(props: T) => 
 
     return [dataProps as DataAttributes<T>, restProps as NonDataAttributes<T>] as const;
 };
+
+export const copyToClipBoard = async (value: string) => {
+    try {
+        await navigator.clipboard.writeText(value);
+    } catch (err) {
+        console.error("Failed to copy:", err);
+    }
+};
+

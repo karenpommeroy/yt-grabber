@@ -1,5 +1,5 @@
 import {isEmpty, map} from "lodash-es";
-import React, {HTMLAttributes} from "react";
+import React, {HTMLAttributes, MouseEvent} from "react";
 import {useTranslation} from "react-i18next";
 
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -8,6 +8,7 @@ import {
     Divider, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Tooltip
 } from "@mui/material";
 
+import {copyToClipBoard} from "../../../common/Helpers";
 import {useDataState} from "../../../react/contexts/DataContext";
 import Styles from "./LogMenu.styl";
 
@@ -38,6 +39,11 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
 
     const handleWarningClose = () => {
         setWarningAnchorEl(null);
+    };
+
+    const handleLogEntryClick = (value: string) => {
+        copyToClipBoard(value);
+        setErrorAnchorEl(null);
     };
 
     if (hidden) return null;
@@ -72,7 +78,7 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
                 }}
             >
                 {map(errors, (error, index) =>([
-                    <MenuItem key={index} dense onClick={handleErrorClose} className={Styles.logEntry}>
+                    <MenuItem key={index} dense onClick={() => handleLogEntryClick(`${error.url}: ${error.message}`)} className={Styles.logEntry}>
                         <ListItemIcon className={Styles.logEntryIcon}>
                             <CancelIcon />
                         </ListItemIcon>
@@ -106,7 +112,7 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
                 }}
             >
                 {map(warnings, (warning, index) =>([
-                    <MenuItem key={index} dense onClick={handleWarningClose} className={Styles.logEntry}>
+                    <MenuItem key={index} dense onClick={() => handleLogEntryClick(`${warning.url}: ${warning.message}`)} className={Styles.logEntry}>
                         <ListItemIcon className={Styles.logEntryIcon}>
                             <ErrorIcon />
                         </ListItemIcon>
