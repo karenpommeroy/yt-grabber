@@ -204,6 +204,9 @@ export const HomeView: React.FC = () => {
 
         if (!isEmpty(item.errors)) {
             setErrors((prev) => [...prev, {url: item.url, message: join(item.errors, "\n")}]);
+            setPlaylists((prev) => {
+                return filter(prev, (p) => p.url !== item.url);
+            });
         }
 
         if (item.value) {
