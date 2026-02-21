@@ -42,6 +42,8 @@
     "exceptionGetYoutubeUrlsText": "Error occured while loading resources from youtube: {{error}}",
     "exceptionTimeout": "Timeout error",
     "exceptionTimeoutText": "Timeout occured while loading resources from youtube",
+    "exceptionYoutubeResolvePlaylists": "ResolveYoutubePlaylists: Error",
+    "exceptionYoutubeResolvePlaylistsText": "Error occured while loading playlists from youtube: {{error}}",
     "extractingAudio": "Extracting Audio",
     "failuresEncountered": "Some downloads failed",
     "failuresEncounteredDoYouWishToRetry": "When processing some elements errors were encountered what made downloading them not possible.<br /><br />Number of failed downloads: <b>{{count}}</b><br /><br />Do you wish to retry downloading them?",

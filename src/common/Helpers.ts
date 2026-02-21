@@ -217,4 +217,3 @@ export const copyToClipBoard = async (value: string) => {
         console.error("Failed to copy:", err);
     }
 };
-

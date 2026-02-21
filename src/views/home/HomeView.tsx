@@ -82,11 +82,13 @@ export const HomeView: React.FC = () => {
         ipcRenderer.on(Messages.GetYoutubeArtistsCompleted, onGetYoutubeCompleted);
         ipcRenderer.on(Messages.GetYoutubeAlbumsCompleted, onGetYoutubeCompleted);
         ipcRenderer.on(Messages.GetYoutubeTracksCompleted, onGetYoutubeCompleted);
+        ipcRenderer.on(Messages.ResolveYoutubePlaylistsCompleted, onResolveYoutubePlaylistsCompleted);
         
         ipcRenderer.on(Messages.GetYoutubeUrlsCanceled, onGetYoutubeCancelled);
         ipcRenderer.on(Messages.GetYoutubeArtistsCanceled, onGetYoutubeCancelled);
         ipcRenderer.on(Messages.GetYoutubeAlbumsCanceled, onGetYoutubeCancelled);
         ipcRenderer.on(Messages.GetYoutubeTracksCanceled, onGetYoutubeCancelled);
+        ipcRenderer.on(Messages.ResolveYoutubePlaylistsCanceled, onGetYoutubeCancelled);
         
         ipcRenderer.on(Messages.GetYoutubeArtistsPause, onGetYoutubeArtistsPause);
 
@@ -97,11 +99,13 @@ export const HomeView: React.FC = () => {
             ipcRenderer.off(Messages.GetYoutubeArtistsCompleted, onGetYoutubeCompleted);
             ipcRenderer.off(Messages.GetYoutubeAlbumsCompleted, onGetYoutubeCompleted);
             ipcRenderer.off(Messages.GetYoutubeTracksCompleted, onGetYoutubeCompleted);
+            ipcRenderer.off(Messages.ResolveYoutubePlaylistsCompleted, onResolveYoutubePlaylistsCompleted);
 
             ipcRenderer.off(Messages.GetYoutubeUrlsCanceled, onGetYoutubeCancelled);
             ipcRenderer.off(Messages.GetYoutubeArtistsCanceled, onGetYoutubeCancelled);
             ipcRenderer.off(Messages.GetYoutubeAlbumsCanceled, onGetYoutubeCancelled);
             ipcRenderer.off(Messages.GetYoutubeTracksCanceled, onGetYoutubeCancelled);
+            ipcRenderer.off(Messages.ResolveYoutubePlaylistsCanceled, onGetYoutubeCancelled);
 
             ipcRenderer.off(Messages.GetYoutubeArtistsPause, onGetYoutubeArtistsPause);
         };
@@ -174,6 +178,32 @@ export const HomeView: React.FC = () => {
         }
 
         setPlaylists((prev) => [...filter(prev, (p) => !includes(data.result.sources, p.url)), ...map(data.result.values, (v) => ({url: v, album: {}, tracks: []} as PlaylistInfo))]);
+        
+        try {
+            const promise = Promise.all(afterEach(getResolveDataPromise(data.result.values), update))
+                .then((result) => {
+                    setQueue((prev) => filter(prev, (p) => p !== QueueKeys.LoadMulti));
+
+                    return result;
+                });
+
+            return promise;
+        } catch {
+            setQueue((prev) => filter(prev, (p) => p !== QueueKeys.LoadMulti));
+        }
+    };
+    
+    const onResolveYoutubePlaylistsCompleted = (event: IpcRendererEvent, data: ProgressInfo<GetYoutubeResult>) => {
+        if (!data.result) return;
+        
+        if (!isEmpty(data.result.errors)) {
+            for (const error of data.result.errors) {
+                logger.error(`${error.title}: ${error.description}`);
+            }
+        }
+
+        setPlaylists((prev) => [...filter(prev, (p) => !includes(data.result.sources, p.url)), ...map(data.result.values, (v) => ({url: v, album: {}, tracks: []} as PlaylistInfo))]);
+        
         try {
             const promise = Promise.all(afterEach(getResolveDataPromise(data.result.values), update))
                 .then((result) => {
@@ -198,12 +228,15 @@ export const HomeView: React.FC = () => {
     }, [playlists]);
 
     const update = useCallback((item: YoutubeInfoResult) => {
+        const resolvingPlaylistErrorRegex = /Failed to resolve album to playlist/m;
+        const filteredErrors = filter(item.errors, (e) => !resolvingPlaylistErrorRegex.test(e));
+        
         if (!isEmpty(item.warnings)) {
             setWarnings((prev) => [...prev, {url: item.url, message: join(item.warnings, "\n")}]);
         }
 
-        if (!isEmpty(item.errors)) {
-            setErrors((prev) => [...prev, {url: item.url, message: join(item.errors, "\n")}]);
+        if (!isEmpty(filteredErrors)) {
+            setErrors((prev) => [...prev, {url: item.url, message: join(filteredErrors, "\n")}]);
             setPlaylists((prev) => {
                 return filter(prev, (p) => p.url !== item.url);
             });
@@ -222,6 +255,27 @@ export const HomeView: React.FC = () => {
             }));
         }
     }, [playlists]);
+
+    const correctUrlsWithResolvePlaylistError = (urlsWithError: string[]) => {
+        const options: LaunchOptions = global.store.get("options");
+        const params: GetYoutubeParams = {
+            values: urlsWithError,
+            lang: i18n.language,
+            url: appOptions.youtubeUrl,
+        };
+        
+        setPlaylists((prev) => {
+            return map(urls, (v) => {
+                if (includes(urlsWithError, v)) {
+                    return {url: v, album: {}, tracks: []} as PlaylistInfo;
+                }
+
+                return find(prev, ["url", v]);
+            });
+        });
+        setQueue((prev) => [...prev, QueueKeys.LoadMulti]);
+        ipcRenderer.send(Messages.ResolveYoutubePlaylists, params, options);
+    };
 
     const loadInfo = (urls: string[], fromYear: string, untilYear: string) => {
         clear();
@@ -268,20 +322,32 @@ export const HomeView: React.FC = () => {
         }
     };
 
-    const loadMedia = (urls: string[]) => {
+    const loadMedia = async (urls: string[]) => {
+        const resolvingPlaylistErrorRegex = /Failed to resolve album to playlist/m;
+        const urlsWithResolvePlaylistError: string[] = [];
         try {
             Promise.all(afterEach(getResolveDataPromise(urls, true), update))
                 .then((result) => {
                     for (const item of result) {
                         if (item.errors && item.errors.length > 0) {
-                            cancelPendingPlaylist(item.url);
+                            const hasResolvePlaylistError = some(item.errors, (e) => resolvingPlaylistErrorRegex.test(e));
+                            
+                            if (hasResolvePlaylistError) {
+                                urlsWithResolvePlaylistError.push(item.url);
+                            } else {
+                                cancelPendingPlaylist(item.url);
+                            }
                         }
                     }
+                    
                     setQueue((prev) => filter(prev, (p) => p !== QueueKeys.LoadSingle));
-
+                    
+                    if (!isEmpty(urlsWithResolvePlaylistError)) {
+                        correctUrlsWithResolvePlaylistError(urlsWithResolvePlaylistError);
+                    }
+                        
                     return result;
                 });
-
             setQueue((prev) => [...prev, QueueKeys.LoadSingle]);
         } catch {
             setQueue((prev) => [...prev, QueueKeys.LoadSingle]);
@@ -369,6 +435,7 @@ export const HomeView: React.FC = () => {
                             const errorRegex = /ERROR:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
                             const warningMatches = e.message.match(warningRegex) ?? [];
                             const errorMatches = e.message.match(errorRegex) ?? [];
+                            
                             if (controller.signal.aborted) {
                                 return resolve({url, errors: [], warnings: []});
                             }
@@ -518,6 +585,7 @@ export const HomeView: React.FC = () => {
         ipcRenderer.send(Messages.GetYoutubeArtistsCancel);
         ipcRenderer.send(Messages.GetYoutubeAlbumsCancel);
         ipcRenderer.send(Messages.GetYoutubeTracksCancel);
+        ipcRenderer.send(Messages.ResolveYoutubePlaylistsCancel);
     };
 
     const cancelPendingPlaylists = () => {

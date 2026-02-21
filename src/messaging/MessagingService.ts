@@ -1,5 +1,8 @@
 import {BrowserWindow, IpcMain} from "electron";
 
+import {
+    ResolveYoutubePlaylistsMessageChannel
+} from "./channels/ResolveYoutubePlaylistsMessageChannel";
 import {SystemMessageChannel} from "./channels/SystemMessageChannel";
 import {YoutubeAlbumsMessageChannel} from "./channels/YoutubeAlbumsMessageChannel";
 import {YoutubeArtistsMessageChannel} from "./channels/YoutubeArtistsMessageChannel";
@@ -23,6 +26,7 @@ export class MessagingService {
         this.channels.set(Messages.GetYoutubeAlbums, new YoutubeAlbumsMessageChannel(this.messageBus));
         this.channels.set(Messages.GetYoutubeTracks, new YoutubeTracksMessageChannel(this.messageBus));
         this.channels.set(Messages.OpenUrlInBrowser, new SystemMessageChannel(this.messageBus));
+        this.channels.set(Messages.ResolveYoutubePlaylists, new ResolveYoutubePlaylistsMessageChannel(this.messageBus));
         this.id = Date.now();
     }
 }

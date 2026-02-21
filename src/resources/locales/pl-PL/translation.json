@@ -42,6 +42,8 @@
     "exceptionGetYoutubeUrlsText": "Wystąpił błąd podczas wczytywania danych z YouTube: {{error}}",
     "exceptionTimeout": "Błąd czasu oczekiwania",
     "exceptionTimeoutText": "Przekroczono limit czasu podczas wczytywania danych z YouTube",
+    "exceptionYoutubeResolvePlaylists": "ResolveYoutubePlaylists: Błąd",
+    "exceptionYoutubeResolvePlaylistsText": "Wystąpił błąd podczas wczytywania playlist z YouTube: {{error}}",
     "extractingAudio": "Wyodrębnianie dźwięku",
     "failuresEncountered": "Podczas pobierania wystąpiły błędy",
     "failuresEncounteredDoYouWishToRetry": "Podczas przetwarzania niektórych elementów napotkano błędy, co uniemożliwiło ich prawidłowe pobranie.<br /><br />Liczba nieudanych pobrań: <b>{{count}}</b><br /><br />Czy chcesz spróbować pobrać je ponownie?",

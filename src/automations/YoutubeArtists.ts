@@ -11,7 +11,7 @@ import puppeteerOptions, {UserAgent} from "../common/PuppeteerOptions";
 import {IReporter, ProgressInfo, Reporter} from "../common/Reporter";
 import {YoutubeArtist} from "../common/Youtube";
 import {MessageHandlerParams} from "../messaging/MessageChannel";
-import {clearInput, navigateToPage, setCookies} from "./Helpers";
+import {clearInput, navigateToPage, resolveValidYoutubePlaylistUrl, setCookies} from "./Helpers";
 import {
     AlbumFilterSelector, AlbumLinkSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector,
     getYtMusicAlbumLinkSelectorFilteredByDate, getYtMusicAlbumsDirectLinkSelectorFilteredByDate,
@@ -92,7 +92,6 @@ const run = async (
             results.push(...albums);
         }
 
-        
         if (params.options?.downloadSinglesAndEps) {
             await navigateToPage(artistChannelUrl, page);
             await page.waitForNetworkIdle();
@@ -189,7 +188,7 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
             const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
             for (const item of items) {
-                results.push(`${params.url}/${item}`);
+                results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
             }
 
             // eslint-disable-next-line no-unsafe-finally
@@ -200,7 +199,7 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
         const albums = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
         for (const item of albums) {
-            results.push(`${params.url}/${item}`);
+            results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
         }
 
         return results;
@@ -230,7 +229,7 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
             const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
             
             for (const item of items) {
-                results.push(`${params.url}/${item}`);
+                results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
             }
             
             // eslint-disable-next-line no-unsafe-finally
@@ -241,7 +240,7 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
         const singles = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
         
         for (const item of singles) {
-            results.push(`${params.url}/${item}`);
+            results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
         }
 
         return results;

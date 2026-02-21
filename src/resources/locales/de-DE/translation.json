@@ -42,6 +42,8 @@
     "exceptionGetYoutubeUrlsText": "Beim Laden der Ressourcen von YouTube ist ein Fehler aufgetreten: {{error}}",
     "exceptionTimeout": "Timeout-Fehler",
     "exceptionTimeoutText": "Beim Laden von Ressourcen von YouTube ist eine Zeitüberschreitung aufgetreten",
+    "exceptionYoutubeResolvePlaylists": "ResolveYoutubePlaylists: Fehler",
+    "exceptionYoutubeResolvePlaylistsText": "Beim Laden von Wiedergabelisten von YouTube ist ein Fehler aufgetreten: {{error}}",
     "extractingAudio": "Audio Extrahieren",
     "failuresEncountered": "Einige Downloads sind fehlgeschlagen",
     "failuresEncounteredDoYouWishToRetry": "Bei der Verarbeitung einiger Elemente sind Fehler aufgetreten, die den Download verhindert haben.<br /><br />Anzahl fehlgeschlagener Downloads: <b>{{count}}</b><br /><br />Möchten Sie den Download erneut versuchen?",

@@ -29,5 +29,10 @@ export enum Messages {
     GetYoutubeTracksCompleted = "get-youtube-tracks-completed",
     GetYoutubeTracksCancel = "get-youtube-tracks-cancel",
     GetYoutubeTracksCanceled = "get-youtube-tracks-canceled",
+
+    ResolveYoutubePlaylists = "resolve-youtube-playlists",
+    ResolveYoutubePlaylistsCompleted = "resolve-youtube-playlists-completed",
+    ResolveYoutubePlaylistsCancel = "resolve-youtube-playlists-cancel",
+    ResolveYoutubePlaylistsCanceled = "resolve-youtube-playlists-canceled",
 };
 
