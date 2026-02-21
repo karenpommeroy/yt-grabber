@@ -30,8 +30,8 @@ export const ColorThemePicker = (props: IColorThemePickerProps) => {
     return (
         <FormControl fullWidth className={classnames(Styles.colorThemePicker, className)}>
             <InputLabel id="color-theme-picker-label">{t("colorTheme")}</InputLabel>
-            {state.mode && <Select
-                value={global.store.get("application.colorTheme")}
+            {state.theme && <Select
+                value={global.store.get("application.colorTheme") ?? state.theme}
                 labelId="color-theme-picker-label"
                 label={t("colorTheme")}
                 size="small"
