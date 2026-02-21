@@ -2,10 +2,16 @@
 const reporterStartMock = jest.fn();
 const reporterFinishMock = jest.fn();
 
-const ReporterInstanceMock = () => ({
-    start: reporterStartMock,
-    finish: reporterFinishMock,
-});
+const ReporterInstanceMock = (onUpdate?: (data: any) => void) => {
+    if (onUpdate) {
+        onUpdate({ status: "initializing" });
+    }
+    
+    return {
+        start: reporterStartMock,
+        finish: reporterFinishMock,
+    };
+};
 
 // jest.mock("../common/Reporter", () => ({
 //     __esModule: true,

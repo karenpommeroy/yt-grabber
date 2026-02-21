@@ -108,6 +108,7 @@ export const createPage = (): PageStub => ({
     },
     cookies: jest.fn(),
     setCookie: jest.fn(),
+    $eval: jest.fn(),
 } as unknown as PageStub);
 
 export const createInput = (): ElementHandle<Element> => ({

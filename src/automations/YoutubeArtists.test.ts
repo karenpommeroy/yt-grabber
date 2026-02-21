@@ -7,7 +7,7 @@ import {Reporter} from "../common/Reporter";
 import {
     createBrowserMock, createElements, createI18n, createPageMock, createYoutubeParams
 } from "../common/TestHelpers";
-import {clearInput, navigateToPage, setCookies} from "./Helpers";
+import {clearInput, navigateToPage, resolveValidYoutubePlaylistUrl, setCookies} from "./Helpers";
 import {
     AlbumFilterSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector, SingleFilterSelector,
     SinglesDirectLinkSelector, SinglesHrefSelector, YtMusicArtistBestResultLinkSelector,
@@ -15,7 +15,10 @@ import {
 } from "./Selectors";
 import execute from "./YoutubeArtists";
 
-jest.mock("./Helpers", () => require("@tests/mocks/automations/Helpers"));
+jest.mock("./Helpers", () => ({
+    ...require("@tests/mocks/automations/Helpers"),
+    resolveValidYoutubePlaylistUrl: jest.fn(),
+}));
 jest.mock("puppeteer-core", () => require("@tests/mocks/puppeteer-core"));
 jest.mock("puppeteer-extra", () => require("@tests/mocks/puppeteer-extra"));
 jest.mock("puppeteer-extra-plugin-stealth", () => require("@tests/mocks/puppeteer-extra-plugin-stealth"));
@@ -24,6 +27,7 @@ jest.mock("../common/Reporter", () => require("@tests/mocks/common/Reporter"));
 const navigateToPageMock = navigateToPage as jest.Mock;
 const setCookiesMock = setCookies as jest.Mock;
 const clearInputMock = clearInput as jest.Mock;
+const resolveValidYoutubePlaylistUrlMock = resolveValidYoutubePlaylistUrl as jest.Mock;
 const launchMock = puppeteer.launch as jest.Mock;
 const reporterInstance = new Reporter(() => {});
 const reporterFinishMock = reporterInstance.finish as jest.Mock;
@@ -84,6 +88,8 @@ describe("YoutubeArtists automation", () => {
 
             return Promise.resolve(callback(createElements([href])));
         });
+        
+        resolveValidYoutubePlaylistUrlMock.mockImplementation((url: string) => Promise.resolve(url));
 
         const browser = createBrowserMock(page);
         launchMock.mockResolvedValue(browser);
@@ -151,6 +157,8 @@ describe("YoutubeArtists automation", () => {
 
             return Promise.reject(new Error(`Unexpected selector: ${selector}`));
         });
+        
+        resolveValidYoutubePlaylistUrlMock.mockImplementation((url: string) => Promise.resolve(url));
 
         const browser = createBrowserMock(page);
         launchMock.mockResolvedValue(browser);
@@ -377,7 +385,11 @@ describe("YoutubeArtists automation", () => {
             return Promise.reject(new Error(`Unexpected selector: ${selector}`));
         });
 
-        page.$$eval.mockResolvedValue(["album/one"]);
+        page.$$eval.mockImplementation((_selector: string, callback: (elements: Array<{getAttribute: () => string;}>) => string[]) => {
+            return Promise.resolve(callback(createElements(["album/one"])));
+        });
+        
+        resolveValidYoutubePlaylistUrlMock.mockImplementation((url: string) => Promise.resolve(url));
 
         const browser = createBrowserMock(page);
         launchMock.mockResolvedValue(browser);
@@ -421,7 +433,11 @@ describe("YoutubeArtists automation", () => {
             return Promise.reject(new Error(`Unexpected selector: ${selector}`));
         });
 
-        page.$$eval.mockResolvedValue(["single/one"]);
+        page.$$eval.mockImplementation((_selector: string, callback: (elements: Array<{getAttribute: () => string;}>) => string[]) => {
+            return Promise.resolve(callback(createElements(["single/one"])));
+        });
+        
+        resolveValidYoutubePlaylistUrlMock.mockImplementation((url: string) => Promise.resolve(url));
 
         const browser = createBrowserMock(page);
         launchMock.mockResolvedValue(browser);

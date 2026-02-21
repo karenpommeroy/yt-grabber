@@ -1,5 +1,6 @@
 import {ipcRenderer} from "electron";
 import fs from "fs-extra";
+import {filter, find, includes, isEmpty, map, some} from "lodash-es";
 import React from "react";
 import * as ytdlpWrapMock from "yt-dlp-wrap";
 
@@ -2272,5 +2273,455 @@ describe("HomeView", () => {
 
         expect(setAutoDownload).toHaveBeenCalledWith(true);
         expect(setPlaylists).toHaveBeenCalled();
+    });
+
+    test("correctUrlsWithResolvePlaylistError resets playlists with resolve errors", async () => {
+        const setPlaylists = jest.fn();
+        const setQueue = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockRejectedValue(new Error("ERROR: Failed to resolve album to playlist\nWARNING: skipping subtitle"));
+
+        const existingPlaylists = [
+            {url: "url1", album: {id: "a1", title: "Album 1"}, tracks: [{id: "t1"}]},
+        ];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: existingPlaylists,
+            setPlaylists,
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+        const urls = ["url1"];
+
+        await act(async () => handlers.onLoadInfo(urls, "", ""));
+
+        await waitFor(() => expect(setQueue).toHaveBeenCalled());
+
+        const queueUpdaters = setQueue.mock.calls
+            .map(([fn]) => fn)
+            .filter((fn): fn is (prev: string[]) => string[] => typeof fn === "function");
+
+        const addsLoadMulti = queueUpdaters.some((updater) => {
+            const result = updater?.([]);
+            return result?.includes(QueueKeys.LoadMulti) ?? false;
+        });
+
+        expect(addsLoadMulti).toBe(true);
+    });
+
+    test("correctUrlsWithResolvePlaylistError sends ResolveYoutubePlaylists message with error URLs", async () => {
+        const setQueue = jest.fn();
+        const setPlaylists = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockRejectedValue(new Error("ERROR: Failed to resolve album to playlist"));
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [{url: "url1", album: {id: "a1"}, tracks: [{id: "t1"}]}],
+            setPlaylists,
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+
+        ipcRendererSendMock.mockClear();
+
+        await act(async () => handlers.onLoadInfo(["url1"], "", ""));
+
+        await waitFor(() => {
+            const calls = ipcRendererSendMock.mock.calls.filter(
+                ([msg]) => msg === Messages.ResolveYoutubePlaylists
+            );
+            return calls.length > 0;
+        }, {timeout: 5000});
+
+        const resolvePlaylistsCalls = ipcRendererSendMock.mock.calls.filter(
+            ([msg]) => msg === Messages.ResolveYoutubePlaylists
+        );
+
+        expect(resolvePlaylistsCalls.length).toBeGreaterThan(0);
+        expect(resolvePlaylistsCalls[0][1]).toMatchObject({
+            values: expect.arrayContaining(["url1"]),
+            lang: expect.any(String),
+            url: storeConfig.application.youtubeUrl,
+        });
+    });
+
+    test("correctUrlsWithResolvePlaylistError called with multiple error URLs", async () => {
+        const setQueue = jest.fn();
+        const setPlaylists = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockRejectedValue(new Error("ERROR: Failed to resolve album to playlist"));
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [
+                {url: "url1", album: {id: "a1"}, tracks: [{id: "t1"}]},
+                {url: "url2", album: {id: "a2"}, tracks: [{id: "t2"}]},
+            ],
+            setPlaylists,
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+
+        ipcRendererSendMock.mockClear();
+
+        await act(async () => handlers.onLoadInfo(["url1", "url2"], "", ""));
+
+        await waitFor(() => {
+            const calls = ipcRendererSendMock.mock.calls.filter(
+                ([msg]) => msg === Messages.ResolveYoutubePlaylists
+            );
+            return calls.length > 0;
+        }, {timeout: 5000});
+
+        const resolveCall = ipcRendererSendMock.mock.calls.find(
+            ([msg]) => msg === Messages.ResolveYoutubePlaylists
+        );
+
+        expect(resolveCall?.[1].values).toEqual(expect.arrayContaining(["url1", "url2"]));
+    });
+
+    test("correctUrlsWithResolvePlaylistError includes language from i18n", async () => {
+        const setQueue = jest.fn();
+        const setPlaylists = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockRejectedValue(new Error("ERROR: Failed to resolve album to playlist"));
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [{url: "url1", album: {id: "a1"}, tracks: [{id: "t1"}]}],
+            setPlaylists,
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+
+        ipcRendererSendMock.mockClear();
+
+        await act(async () => handlers.onLoadInfo(["url1"], "", ""));
+
+        await waitFor(() => {
+            const calls = ipcRendererSendMock.mock.calls.filter(
+                ([msg]) => msg === Messages.ResolveYoutubePlaylists
+            );
+            return calls.length > 0;
+        }, {timeout: 5000});
+
+        const resolveCall = ipcRendererSendMock.mock.calls.find(
+            ([msg]) => msg === Messages.ResolveYoutubePlaylists
+        );
+
+        expect(resolveCall?.[1].lang).toBeTruthy();
+        expect(typeof resolveCall?.[1].lang).toBe("string");
+    });
+
+    test("correctUrlsWithResolvePlaylistError includes youtube URL from app options", async () => {
+        const setQueue = jest.fn();
+        const setPlaylists = jest.fn();
+
+        configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
+        (ytdlpWrapMock as any).execPromise.mockRejectedValue(new Error("ERROR: Failed to resolve album to playlist"));
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [{url: "url1", album: {id: "a1"}, tracks: [{id: "t1"}]}],
+            setPlaylists,
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+
+        ipcRendererSendMock.mockClear();
+
+        await act(async () => handlers.onLoadInfo(["url1"], "", ""));
+
+        await waitFor(() => {
+            const calls = ipcRendererSendMock.mock.calls.filter(
+                ([msg]) => msg === Messages.ResolveYoutubePlaylists
+            );
+            return calls.length > 0;
+        }, {timeout: 5000});
+
+        const resolveCall = ipcRendererSendMock.mock.calls.find(
+            ([msg]) => msg === Messages.ResolveYoutubePlaylists
+        );
+
+        expect(resolveCall?.[1].url).toBe(storeConfig.application.youtubeUrl);
+    });
+
+    test("onResolveYoutubePlaylistsCompleted returns early when result is null", async () => {
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setPlaylists,
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+
+        await act(async () => {
+            await handler?.({} as any, {result: null} as any);
+        });
+
+        const resultUpdaterCalls = setPlaylists.mock.calls.filter(([arg]) => typeof arg === "function" && arg.length > 0);
+        expect(resultUpdaterCalls.length).toBe(0);
+    });
+
+    test("onResolveYoutubePlaylistsCompleted logs errors from result", async () => {
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setPlaylists,
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+        const errors = [
+            {title: "Error 1", description: "Description 1"},
+            {title: "Error 2", description: "Description 2"},
+        ];
+
+        await act(async () => {
+            await handler?.({} as any, {
+                result: {
+                    errors,
+                    values: [],
+                    sources: [],
+                },
+            } as any);
+        });
+
+        expect((global as any).logger.error).toHaveBeenCalledWith("Error 1: Description 1");
+        expect((global as any).logger.error).toHaveBeenCalledWith("Error 2: Description 2");
+    });
+
+    test("onResolveYoutubePlaylistsCompleted updates playlists with new values", async () => {
+        const setPlaylists = jest.fn();
+        const setQueue = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [{url: "old-url", album: {id: "old"}, tracks: []}],
+            setPlaylists,
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+
+        await act(async () => {
+            await handler?.({} as any, {
+                result: {
+                    errors: [],
+                    values: ["new-url-1", "new-url-2"],
+                    sources: ["old-url"],
+                },
+            } as any);
+        });
+
+        await waitFor(() => expect(setPlaylists).toHaveBeenCalled());
+
+        const playlistUpdaters = setPlaylists.mock.calls
+            .map(([fn]) => fn)
+            .filter((fn): fn is (prev: any[]) => any[] => typeof fn === "function");
+
+        const addsNewPlaylists = playlistUpdaters.some((updater) => {
+            const result = updater?.([]);
+            return result?.length === 2 && result.every((p) => includes(["new-url-1", "new-url-2"], p.url));
+        });
+
+        expect(addsNewPlaylists).toBe(true);
+    });
+
+    test("onResolveYoutubePlaylistsCompleted clears LoadMulti from queue", async () => {
+        const setQueue = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            queue: [QueueKeys.LoadMulti],
+            setQueue,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+
+        await act(async () => {
+            await handler?.({} as any, {
+                result: {
+                    errors: [],
+                    values: ["url-1"],
+                    sources: [],
+                },
+            } as any);
+        });
+
+        await waitFor(() => expect(setQueue).toHaveBeenCalled());
+
+        const queueUpdater = setQueue.mock.calls.at(-1)?.[0];
+        expect(queueUpdater?.([QueueKeys.LoadMulti])).toEqual([]);
+    });
+
+    test("onResolveYoutubePlaylistsCompleted removes sources from previous playlists", async () => {
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists: [
+                {url: "url1", album: {id: "a1"}, tracks: []},
+                {url: "url2", album: {id: "a2"}, tracks: []},
+            ],
+            setPlaylists,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+
+        await act(async () => {
+            await handler?.({} as any, {
+                result: {
+                    errors: [],
+                    values: ["new-url"],
+                    sources: ["url1"],
+                },
+            } as any);
+        });
+
+        await waitFor(() => expect(setPlaylists).toHaveBeenCalled());
+
+        const playlistUpdaters = setPlaylists.mock.calls
+            .map(([fn]) => fn)
+            .filter((fn): fn is (prev: any[]) => any[] => typeof fn === "function");
+
+        const removesSourceUrl = playlistUpdaters.some((updater) => {
+            const result = updater?.([
+                {url: "url1", album: {id: "a1"}, tracks: []},
+                {url: "url2", album: {id: "a2"}, tracks: []},
+            ]);
+            return result?.every((p) => p.url !== "url1") && find(result, ["url", "url2"]);
+        });
+
+        expect(removesSourceUrl).toBe(true);
+    });
+
+    test("onResolveYoutubePlaylistsCompleted creates new playlist with empty album", async () => {
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setPlaylists,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+
+        await act(async () => {
+            await handler?.({} as any, {
+                result: {
+                    errors: [],
+                    values: ["resolved-url"],
+                    sources: [],
+                },
+            } as any);
+        });
+
+        await waitFor(() => expect(setPlaylists).toHaveBeenCalled());
+
+        const playlistUpdaters = setPlaylists.mock.calls
+            .map(([fn]) => fn)
+            .filter((fn): fn is (prev: any[]) => any[] => typeof fn === "function");
+
+        const createsEmptyAlbumPlaylist = playlistUpdaters.some((updater) => {
+            const result = updater?.([]);
+            return result?.some((p) => p.url === "resolved-url" && isEmpty(p.album) && isEmpty(p.tracks));
+        });
+
+        expect(createsEmptyAlbumPlaylist).toBe(true);
+    });
+
+    test("onResolveYoutubePlaylistsCompleted handles empty errors array", async () => {
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setPlaylists,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+
+        await act(async () => {
+            await handler?.({} as any, {
+                result: {
+                    errors: [],
+                    values: ["url-1"],
+                    sources: [],
+                },
+            } as any);
+        });
+
+        expect((global as any).logger.error).not.toHaveBeenCalled();
+        await waitFor(() => expect(setPlaylists).toHaveBeenCalled());
+    });
+
+    test("onResolveYoutubePlaylistsCompleted processes all resolved values", async () => {
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setPlaylists,
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.ResolveYoutubePlaylistsCompleted);
+        const urls = ["url-1", "url-2", "url-3"];
+
+        await act(async () => {
+            await handler?.({} as any, {
+                result: {
+                    errors: [],
+                    values: urls,
+                    sources: [],
+                },
+            } as any);
+        });
+
+        await waitFor(() => expect(setPlaylists).toHaveBeenCalled());
+
+        const playlistUpdaters = setPlaylists.mock.calls
+            .map(([fn]) => fn)
+            .filter((fn): fn is (prev: any[]) => any[] => typeof fn === "function");
+
+        const processesAllUrls = playlistUpdaters.some((updater) => {
+            const result = updater?.([]);
+            return result?.length === 3 && result.every((p) => includes(urls, p.url));
+        });
+
+        expect(processesAllUrls).toBe(true);
     });
 });

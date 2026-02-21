@@ -3,7 +3,7 @@ import fs from "fs-extra";
 import {getProfilePath} from "../common/FileSystem";
 import {waitFor} from "../common/Helpers";
 import {createInput, createPage} from "../common/TestHelpers";
-import {clearInput, navigateToPage, setCookies} from "./Helpers";
+import {clearInput, navigateToPage, resolveValidYoutubePlaylistUrl, setCookies} from "./Helpers";
 
 jest.mock("fs-extra", () => require("@tests/mocks/fs-extra"));
 jest.mock("../common/FileSystem", () => require("@tests/mocks/common/FileSystem"));
@@ -61,5 +61,50 @@ describe("automation helpers", () => {
         expect(page.cookies).not.toHaveBeenCalled();
         expect(page.setCookie).toHaveBeenCalledWith(...cachedCookies);
         expect(fs.writeJSONSync).not.toHaveBeenCalled();
+    });
+
+    test("resolveValidYoutubePlaylistUrl returns url unchanged when it does not include browse", async () => {
+        const url = "https://music.youtube.com/playlist?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf";
+        const page = createPage();
+
+        const result = await resolveValidYoutubePlaylistUrl(url, page);
+
+        expect(result).toBe(url);
+        expect(page.goto).not.toHaveBeenCalled();
+    });
+
+    test("resolveValidYoutubePlaylistUrl returns original url when canonical href not found", async () => {
+        const url = "https://music.youtube.com/browse/VLOPL1234567890";
+        const page = createPage();
+        (page.$eval as jest.Mock).mockRejectedValue(new Error("element not found"));
+
+        const result = await resolveValidYoutubePlaylistUrl(url, page);
+
+        expect(result).toBe(url);
+        expect(page.goto).toHaveBeenCalled();
+    });
+
+    test("resolveValidYoutubePlaylistUrl extracts playlist id from canonical href", async () => {
+        const url = "https://music.youtube.com/browse/VLOPL1234567890";
+        const canonicalHref = "https://music.youtube.com/playlist?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf";
+        const page = createPage();
+        (page.$eval as jest.Mock).mockResolvedValue(canonicalHref);
+
+        const result = await resolveValidYoutubePlaylistUrl(url, page);
+
+        expect(result).toBe(canonicalHref);
+        expect(page.goto).toHaveBeenCalled();
+    });
+
+    test("resolveValidYoutubePlaylistUrl returns original url when canonical href doesn't match playlist regex", async () => {
+        const url = "https://music.youtube.com/browse/VLOPL1234567890";
+        const canonicalHref = "https://music.youtube.com/watch?v=abc123";
+        const page = createPage();
+        (page.$eval as jest.Mock).mockResolvedValue(canonicalHref);
+
+        const result = await resolveValidYoutubePlaylistUrl(url, page);
+
+        expect(result).toBe(url);
+        expect(page.goto).toHaveBeenCalled();
     });
 });

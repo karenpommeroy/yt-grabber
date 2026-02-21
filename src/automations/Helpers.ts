@@ -37,14 +37,18 @@ export const resolveValidYoutubePlaylistUrl = async (url: string, page: Page) =>
     if (includes(url, "browse")) {
         await navigateToPage(url, page);
         
-        const canonicalHref = await page.$eval("link[rel=\"canonical\"]", (el) => (el as HTMLLinkElement).href);
+        try {
+            const canonicalHref = await page.$eval("link[rel=\"canonical\"]", (el) => (el as HTMLLinkElement).href);
 
-        if (!canonicalHref) {
+            if (!canonicalHref) {
+                return url;
+            } else {
+                const match = canonicalHref.match(/https:\/\/music\.youtube\.com\/playlist\?list=([^"&]+)/);
+
+                return match?.[1] ? `https://music.youtube.com/playlist?list=${match[1]}` : url;
+            }
+        } catch {
             return url;
-        } else {
-            const match = canonicalHref.match(/https:\/\/music\.youtube\.com\/playlist\?list=([^"&]+)/);
-
-            return match[1] ? `https://music.youtube.com/playlist?list=${match[1]}` : url;
         }
     } else {
         return url;
