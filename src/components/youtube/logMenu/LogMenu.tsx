@@ -1,5 +1,5 @@
 import {isEmpty, map} from "lodash-es";
-import React, {HTMLAttributes, MouseEvent} from "react";
+import React, {HTMLAttributes} from "react";
 import {useTranslation} from "react-i18next";
 
 import CancelIcon from "@mui/icons-material/Cancel";

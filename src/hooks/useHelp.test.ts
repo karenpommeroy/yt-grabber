@@ -210,8 +210,9 @@ describe("useHelp", () => {
         const error = new Error("Style error");
         window.getComputedStyle = jest.fn(() => {
             return {
+                length: 1,
+                item: () => "color",
                 getPropertyValue: () => { throw error; },
-                [Symbol.iterator]: function* () { yield "color"; },
             } as any;
         });
 

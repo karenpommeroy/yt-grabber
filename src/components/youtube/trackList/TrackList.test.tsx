@@ -178,6 +178,7 @@ describe("TrackList", () => {
         });
 
         const shell = await render(<TrackList queue={[]} />);
+        expect(shell.getAllByTestId("cut-track-button").length).toEqual(2);
         const cutButton = shell.container.querySelector("[data-help=\"cut\"]") as HTMLButtonElement;
 
         fireEvent.click(cutButton);

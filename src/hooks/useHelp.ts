@@ -36,12 +36,15 @@ const useHelp = () => {
 
         const copyComputedStyle = (src: HTMLElement, dest: HTMLElement) => {
             const computedStyle = window.getComputedStyle(src);
-            
-            for (const key of computedStyle) {
+
+            for (let i = 0; i < computedStyle.length; i++) {
+                const key = computedStyle.item(i);
+                if (!key) continue;
+
                 try {
-                    dest.style[key as any] = computedStyle.getPropertyValue(key);
+                    dest.style.setProperty(key, computedStyle.getPropertyValue(key));
                 } catch (error) {
-                    logger.error("Error copying style property '%s': %O", key, error);
+                    logger.error("Error copying style property", key, error);
                 }
             }
         };

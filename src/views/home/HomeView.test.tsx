@@ -1,6 +1,6 @@
 import {ipcRenderer} from "electron";
 import fs from "fs-extra";
-import {filter, find, includes, isEmpty, map, some} from "lodash-es";
+import {find, includes, isEmpty} from "lodash-es";
 import React from "react";
 import * as ytdlpWrapMock from "yt-dlp-wrap";
 
@@ -82,7 +82,7 @@ type StoreOverrides = {
     playlistCountThreshold?: number;
     additional?: Record<string, unknown>;
 };
-
+ 
 const storeGetMock = store.get as jest.Mock;
 const storeSetMock = store.set as jest.Mock;
 const storeOnDidAnyChangeMock = store.onDidAnyChange as jest.Mock;
