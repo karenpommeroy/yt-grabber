@@ -12,6 +12,14 @@ Object.defineProperty(process, "resourcesPath", {
     writable: false,
 });
 
+Object.defineProperty(navigator, "clipboard", {
+    value: {
+        writeText: jest.fn().mockResolvedValue(undefined),
+        readText: jest.fn().mockResolvedValue("mocked text"),
+    },
+    writable: true,
+});
+
 jest.mock("react-i18next", () => reactI18nMock);
 jest.mock("electron", () => electronMock);
 jest.mock("electron-store", () => storeMock);
