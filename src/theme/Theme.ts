@@ -9,7 +9,14 @@ import sunsetSkyJson from "./definitions/SunsetSky.json";
 export type ColorScheme = {palette: Partial<Palette>};
 
 export const getThemeDefinition = (name: Themes): CssVarsThemeOptions => {
-    return createTheme(themeDefinitions[name]);
+    return createTheme({
+        cssVariables: {
+            colorSchemeSelector: "data-theme-mode",
+            cssVarPrefix: "theme",
+            rootSelector: ":root",
+        },
+        ...themeDefinitions[name]
+    });
 }; 
 
 export enum Themes {
