@@ -297,15 +297,11 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                 open={open}
                                                 data-testid="track-cut-popup"
                                                 slotProps={{
-                                                    root: {
-                                                        disablePortal: true,
-                                                    },
                                                     transition: {
                                                         unmountOnExit: true,
                                                         mountOnEnter: true,
                                                     }
                                                 }}
-                                                disablePortal={true}
                                                 slots={{transition: Fade}}
                                                 anchorEl={cutAnchorEl}
                                                 onClose={onCloseTrackCut}
