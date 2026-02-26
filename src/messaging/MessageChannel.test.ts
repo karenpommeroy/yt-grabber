@@ -27,7 +27,11 @@ class TestChannel extends MessageChannel {
 }
 
 type MessageBusStub = {
-    ipcMain: {on: jest.Mock; once: jest.Mock};
+    ipcMain: {
+        on: jest.Mock;
+        once: jest.Mock;
+        removeListener: jest.Mock;
+    };
     mainWindow: {webContents: {send: jest.Mock}};
     controllers: Map<Messages, AbortController>;
 };
@@ -37,6 +41,7 @@ const createMessageBus = () => {
         ipcMain: {
             on: jest.fn(),
             once: jest.fn(),
+            removeListener: jest.fn(),
         },
         mainWindow: {
             webContents: {
@@ -133,5 +138,18 @@ describe("MessageChannel", () => {
         resumeHandler({}, {status: "ok"});
 
         await expect(pausePromise).resolves.toEqual({status: "ok"});
+    });
+
+    test("destroy removes execute and cancel listeners and clears controllers", () => {
+        const {stub, bus} = createMessageBus();
+        const channel = new TestChannel(bus);
+        const removeListenerSpy = jest.spyOn(stub.ipcMain, "removeListener");
+
+        stub.controllers.set(defaultKeys.execute, new AbortController());
+        channel.destroy();
+
+        expect(removeListenerSpy).toHaveBeenCalledWith(defaultKeys.execute, channel.execute);
+        expect(removeListenerSpy).toHaveBeenCalledWith(defaultKeys.cancel, channel.cancel);
+        expect(stub.controllers.size).toBe(0);
     });
 });

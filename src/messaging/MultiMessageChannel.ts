@@ -32,6 +32,12 @@ export abstract class MultiMessageChannel {
         });
     };
     
+    public destroy = () => {
+        forEach(this.messages, (m) => {
+            this.messageBus.ipcMain.removeListener(m.executeMessageKey, partialRight(this.execute, m.executeMessageKey));
+        });
+    };
+    
     public execute = async (event: IpcMainEvent, params: MultiMessageHandlerParams, messageKey: Messages) => {
         const messageDef = find(this.messages, ["executeMessageKey", messageKey]);
         const result = await messageDef.messageHandler(params);

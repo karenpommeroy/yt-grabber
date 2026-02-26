@@ -32,6 +32,7 @@ if (isDevApplication(app)) {
 }
 
 let mainWindow: BrowserWindow | null;
+let messagingService: MessagingService | null;
 
 process.traceProcessWarnings = true;
 Store.initRenderer();
@@ -65,8 +66,8 @@ const createWindow = async () => {
     });
     
 
-    const messaggingService = new MessagingService(ipcMain, mainWindow);
-    logger.debug("Messaging service initialized: %s", messaggingService.id);
+    messagingService = new MessagingService(ipcMain, mainWindow);
+    logger.debug("Messaging service initialized: %s", messagingService.id);
 };
 
 app.on("ready", createWindow);
@@ -86,6 +87,10 @@ app.on("activate", () => {
 app.on("before-quit", () => {
     if (mainWindow !== null) {
         mainWindow.removeAllListeners("closed");
+    }
+    if (messagingService) {
+        messagingService.destroy();
+        messagingService = null;
     }
 });
 

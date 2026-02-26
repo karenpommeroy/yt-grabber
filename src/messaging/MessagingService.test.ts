@@ -61,4 +61,23 @@ describe("MessagingService", () => {
 
         nowSpy.mockRestore();
     });
+
+    test("destroy calls destroy on all channels and clears the map", () => {
+        const service = new MessagingService(ipcMain, mainWindow);
+        const serviceWithChannels = service as unknown as {
+            channels: Map<string, {destroy: jest.Mock}>;
+        };
+
+        serviceWithChannels.channels.forEach((channel) => {
+            channel.destroy = jest.fn();
+        });
+
+        service.destroy();
+
+        serviceWithChannels.channels.forEach((channel) => {
+            expect(channel.destroy).toHaveBeenCalled();
+        });
+
+        expect(serviceWithChannels.channels.size).toBe(0);
+    });
 });

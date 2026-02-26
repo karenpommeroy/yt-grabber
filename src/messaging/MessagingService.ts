@@ -29,4 +29,9 @@ export class MessagingService {
         this.channels.set(Messages.ResolveYoutubePlaylists, new ResolveYoutubePlaylistsMessageChannel(this.messageBus));
         this.id = Date.now();
     }
+
+    public destroy = () => {
+        this.channels.forEach((channel) => channel.destroy());
+        this.channels.clear();
+    };
 }

@@ -43,6 +43,12 @@ export abstract class MessageChannel {
         this.messageBus.ipcMain.on(this.messageKeys.execute, this.execute);
         this.messageBus.ipcMain.on(this.messageKeys.cancel, this.cancel);
     };
+
+    public destroy = () => {
+        this.messageBus.ipcMain.removeListener(this.messageKeys.execute, this.execute);
+        this.messageBus.ipcMain.removeListener(this.messageKeys.cancel, this.cancel);
+        this.messageBus.controllers.delete(this.messageKeys.execute);
+    };
     
     public execute = async (event: IpcMainEvent, params: GetYoutubeParams, options: LaunchOptions) => {
         const controller = new AbortController();

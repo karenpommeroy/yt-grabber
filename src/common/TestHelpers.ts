@@ -84,6 +84,7 @@ export const createMessageBus = (): InstanceType<typeof MessageBus> => {
     const messageBus = {
         ipcMain: {
             on: jest.fn(),
+            removeListener: jest.fn(),
         },
         mainWindow: {
             webContents: {

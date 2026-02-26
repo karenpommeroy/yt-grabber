@@ -53,4 +53,20 @@ describe("MultiMessageChannel", () => {
         expect(secondHandler).toHaveBeenCalledWith(params);
         expect(messageBus.mainWindow.webContents.send).toHaveBeenCalledWith(`${Messages.GetYoutubeArtistsCompleted}_${params.id}`, {items: [2]});
     });
+
+    test("destroy removes listeners for each definition", () => {
+        const handler: MultiMessageHandler = jest.fn();
+        definitions = [
+            {executeMessageKey: Messages.GetYoutubeUrls, completedMessageKey: Messages.GetYoutubeUrlsCompleted, messageHandler: handler},
+            {executeMessageKey: Messages.GetYoutubeArtists, completedMessageKey: Messages.GetYoutubeArtistsCompleted, messageHandler: handler},
+        ];
+        
+        const channel = new TestMultiChannel(messageBus);
+        (messageBus.ipcMain.on as jest.Mock).mockClear();
+        
+        channel.destroy();
+
+        expect(messageBus.ipcMain.removeListener).toHaveBeenCalledWith(Messages.GetYoutubeUrls, expect.any(Function));
+        expect(messageBus.ipcMain.removeListener).toHaveBeenCalledWith(Messages.GetYoutubeArtists, expect.any(Function));
+    });
 });
