@@ -1,10 +1,14 @@
 import {createTheme, PaletteMode, ThemeOptions} from "@mui/material";
 import {CssVarsThemeOptions, Palette} from "@mui/material/styles";
 
+import forestGreenJson from "./definitions/ForestGreen.json";
+import midnightTealJson from "./definitions/MidnightTeal.json";
 import oceanWavesJson from "./definitions/OceanWaves.json";
 import pastelMidnightJson from "./definitions/PastelMidnight.json";
 import pinkFloydJson from "./definitions/PinkFloyd.json";
+import steelGreyJson from "./definitions/SteelGrey.json";
 import sunsetSkyJson from "./definitions/SunsetSky.json";
+import terracottaWarmthJson from "./definitions/TerracottaWarmth.json";
 
 export type ColorScheme = {palette: Partial<Palette>};
 
@@ -23,7 +27,11 @@ export enum Themes {
     PastelMidnight = "pastel-midnight",
     SunsetSky = "sunset-sky",
     OceanWaves = "ocean-waves",
-    PinkFloyd = "pink-floyd"
+    PinkFloyd = "pink-floyd",
+    ForestGreen = "forest-green",
+    MidnightTeal = "midnight-teal",
+    SteelGrey = "steel-grey",
+    TerracottaWarmth = "terracotta-warmth",
 }
 
 export const themeDefinitions: Record<Themes, ThemeOptions> = {
@@ -31,6 +39,10 @@ export const themeDefinitions: Record<Themes, ThemeOptions> = {
     [Themes.SunsetSky]: sunsetSkyJson as ThemeOptions,
     [Themes.OceanWaves]: oceanWavesJson as ThemeOptions,
     [Themes.PinkFloyd]: pinkFloydJson as ThemeOptions,
+    [Themes.ForestGreen]: forestGreenJson as ThemeOptions,
+    [Themes.MidnightTeal]: midnightTealJson as ThemeOptions,
+    [Themes.SteelGrey]: steelGreyJson as ThemeOptions,
+    [Themes.TerracottaWarmth]: terracottaWarmthJson as ThemeOptions,
 };
 
 export const getThemeSample = (name: Themes, mode: string) => {
