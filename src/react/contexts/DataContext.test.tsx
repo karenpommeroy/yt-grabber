@@ -347,7 +347,7 @@ describe("DataContext", () => {
             expect(capturedState!.trackCuts).toEqual({});
             expect(capturedState!.autoDownload).toBe(false);
             expect(capturedState!.queue).toEqual([]);
-            expect(capturedState!.formats).toEqual({global: {type: MediaFormat.Audio, extension: AudioType.Mp3, audioQuality: 10}});
+            expect(capturedState!.formats).toEqual({global: {type: MediaFormat.Video, extension: "mp4", audioQuality: 5}});
             expect(capturedState!.operation).toBeUndefined();
             expect(capturedState!.errors).toEqual([]);
             expect(capturedState!.warnings).toEqual([]);

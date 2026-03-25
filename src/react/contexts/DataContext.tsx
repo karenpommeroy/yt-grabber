@@ -72,7 +72,6 @@ export function DataProvider(props: any) {
         setTrackCuts({});
         setAutoDownload(false);
         setQueue([]);
-        setFormats({global: globalFormat});
         setOperation(undefined);
         setErrors([]);
         setWarnings([]);
