@@ -4,6 +4,7 @@ import {ElementHandle, Page} from "puppeteer-core";
 
 import {getProfilePath} from "../common/FileSystem";
 import {waitFor} from "../common/Helpers";
+import {ILogger} from "../common/Logger";
 import puppeteerOptions from "../common/PuppeteerOptions";
 
 export const navigateToPage = async (url: string, page: Page, timeout = puppeteerOptions.timeout) => {
@@ -14,7 +15,7 @@ export const navigateToPage = async (url: string, page: Page, timeout = puppetee
 };
 
 export const clearInput = async (input: ElementHandle<Element>, page: Page) => {
-    await input.click({clickCount: 3});
+    await input.click({count: 3});
     await page.keyboard.press("Backspace");
 };
 
@@ -33,8 +34,11 @@ export const setCookies = async (page: Page) => {
     }
 };
 
-export const resolveValidYoutubePlaylistUrl = async (url: string, page: Page) => {
+export const resolveValidYoutubePlaylistUrl = async (url: string, page: Page, logger?: ILogger) => {
     if (includes(url, "browse")) {
+        if (logger) {
+            logger.debug("Navigating to page: " + url);
+        }
         await navigateToPage(url, page);
         
         try {
@@ -53,4 +57,12 @@ export const resolveValidYoutubePlaylistUrl = async (url: string, page: Page) =>
     } else {
         return url;
     }
+};
+export const breakOnPage = async (page: Page, callback?: () => void) => {
+    return await page.evaluate(() => {
+        if (callback) {
+            callback();
+        }
+        debugger;
+    });
 };

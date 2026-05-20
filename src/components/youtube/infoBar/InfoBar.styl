@@ -3,10 +3,22 @@
 .info-bar {
     position: relative;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
     height: 100%;
+
+    .row {
+        align-items: start;
+
+        &.centered {
+            align-items: center;
+        }
+
+        &.right {
+            align-items: end;
+        }
+    }
 
     .label {
         display: inline-flex;

@@ -223,7 +223,7 @@ export const SettingsView: React.FC = () => {
 
     return (
         <Box className={Styles.settings} data-testid="settings">
-            <Grid className={Styles.container} container padding={2} spacing={3}>
+            <Grid className={Styles.container} container spacing={3} sx={{padding: 2}}>
                 <Grid className={Styles.content} container>
                     <Grid className={Styles.group} container size={6} component={Paper} variant="outlined">
                         <Grid size={6} spacing={2} data-help="concurrency">

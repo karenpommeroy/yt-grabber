@@ -60,7 +60,7 @@ export const DetailsModal: React.FC<DetailsModalProps> = (props: DetailsModalPro
             onKeyUp={handleKeyUp}
             {...other}
         >
-            <DialogTitle textAlign="center">{t("detailsModalTitle")}</DialogTitle>
+            <DialogTitle sx={{textAlign: "center"}}>{t("detailsModalTitle")}</DialogTitle>
             <DialogContent dividers className={Styles.content}>
                 <Stack direction="column" spacing={2}>
                     {map(value, (v, k) =>

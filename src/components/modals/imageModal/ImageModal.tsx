@@ -27,13 +27,13 @@ export const ImageModal = (props: ImageModalProps) => {
             maxWidth="md"
             fullWidth
             open={open}
-            disableEscapeKeyDown={false}
+            // disableEscapeKeyDown={false}
             onClose={handleClose}
             className={Styles.imageModal}
             data-testid="image-modal"
             {...rest}
         >
-            <DialogTitle textAlign="center">{title}</DialogTitle>
+            <DialogTitle sx={{textAlign: "center"}}>{title}</DialogTitle>
             <DialogContent className={Styles.dialogContent}>
                 {imageUrl && (
                     <Box

@@ -6,6 +6,7 @@ import {
 export interface ILoggerOptions extends LoggerOptions {
     logFile?: boolean;
     logFilePath?: string;
+    meta?: any;
 };
 
 export interface ILogger extends Logger {
@@ -55,7 +56,7 @@ export const consoleFormat = format.printf(({level, message, timestamp, ...meta}
 });
 
 export const createLogger = (options: ILoggerOptions): ILogger => {
-    const {level = "error", logFile, logFilePath = "log.log"} = options;
+    const {level = "error", logFile, logFilePath = "log.log", meta} = options;
     const transportsArray: transport[] = [
         new transports.Console({format: format.combine(format.splat(), timeFormat, consoleFormat), level})
     ];
@@ -68,6 +69,7 @@ export const createLogger = (options: ILoggerOptions): ILogger => {
         level,
         levels,
         format: format.combine(timeFormat, format.json()),
+        defaultMeta: meta,
         transports: transportsArray,
     }) as ILogger;
 };

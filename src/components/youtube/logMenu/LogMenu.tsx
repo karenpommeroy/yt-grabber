@@ -87,10 +87,10 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
                             secondary={error.message}
                             slotProps={{
                                 primary: {
-                                    paddingBottom: .5
+                                    sx: {paddingBottom: 0.5},
                                 },
                                 secondary: {
-                                    whiteSpace: "normal",
+                                    sx: { whiteSpace: "normal"},
                                 }
                             }}
                         />
@@ -121,10 +121,10 @@ export const LogMenu: React.FC<LogMenuProps> = (props) => {
                             secondary={warning.message}
                             slotProps={{
                                 primary: {
-                                    paddingBottom: .5
+                                    sx: {paddingBottom: 0.5},
                                 },
                                 secondary: {
-                                    whiteSpace: "normal",
+                                    sx: { whiteSpace: "normal"},
                                 }
                             }}
                         />

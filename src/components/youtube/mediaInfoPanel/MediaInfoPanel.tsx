@@ -169,7 +169,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                             </div>
                         </CardContent>
                         {!loading &&
-                            <Box className={Styles.actions} padding={2} gap={2}>
+                            <Box className={Styles.actions} sx={{padding: 2, gap: 2}}>
                                 <Tooltip title={t("edit")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="top">
                                     <Button data-help="editInfo" data-testid="edit-button" className={Styles.edit} size="large" fullWidth variant="contained" color="primary" disableElevation onClick={editInfo}>
                                         <EditIcon />
@@ -207,7 +207,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                                     <Button data-testid="cancel-download-playlist-button" data-help="cancelDownloadPlaylist" variant="contained" size="large" color="secondary" disableElevation startIcon={<CloseIcon />} onClick={cancel}>{t("cancel")}</Button>
                                 </Grid>
                                 <Grid>
-                                    <Box className={Styles.progressIndicator} padding={2} gap={1}>
+                                    <Box className={Styles.progressIndicator} sx={{padding: 2, gap: 1}}>
                                         <Progress data-testid="progress-circle" size={60} thickness={6.5} color="primary" value={progress} />
                                     </Box>
                                 </Grid>

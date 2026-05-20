@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import {filter, find, isEmpty, reject, size, some} from "lodash-es";
 import React from "react";
 import {useTranslation} from "react-i18next";
@@ -46,15 +47,13 @@ export const InfoBar: React.FC<InfoBarProps> = (props) => {
         <Stack
             className={Styles.infoBar}
             direction="row"
-            justifyContent="space-between"
-            spacing={1}
-            padding={1.5}
+            sx={{padding: 1.5}}
             {...rest}
         >
-            <Stack direction="row" alignItems="start">
+            <Stack direction="row" className={Styles.row}>
                 <LogMenu hidden={isEmpty(errors) && isEmpty(warnings)} />
             </Stack>
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} className={classNames(Styles.row, Styles.centered)}>
                 <Typography className={Styles.label} variant="body2" color="primary.light">
                     {t("playlists")}:
                 </Typography>
@@ -122,7 +121,7 @@ export const InfoBar: React.FC<InfoBarProps> = (props) => {
                     </Typography>
                 </Tooltip>
             </Stack>
-            <Stack direction="row" spacing={1} alignItems="end">
+            <Stack direction="row" spacing={1} className={classNames(Styles.row, Styles.right)}>
             </Stack>
             {state.loading &&
                 <Box className={Styles.progress}>

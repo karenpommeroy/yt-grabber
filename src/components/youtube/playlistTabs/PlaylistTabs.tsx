@@ -198,7 +198,7 @@ export const PlaylistTabs: React.FC<PlaylistTabsProps> = (props: PlaylistTabsPro
     return (
         <Grid className={Styles.playlistTabs} size={12}>
             <TabContext value={resolveActiveTab()}>
-                <Box borderBottom={1} borderColor="divider">
+                <Box sx={{borderBottom: 1, borderColor: "divider"}}>
                     <TabList variant="scrollable" scrollButtons="auto" onChange={handleTabChange} textColor="primary" indicatorColor="secondary" className={Styles.tablist}>
                         {map(filter(playlists, (p) => !isEmpty(p.album)), (item) => {
                             const progress = getTotalProgress(item.album.id);

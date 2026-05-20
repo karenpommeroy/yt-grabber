@@ -51,15 +51,15 @@ export const SelectArtistModal = (props: SelectArtistModalProps) => {
             maxWidth="sm"
             fullWidth
             open={open}
-            disableEscapeKeyDown={false}
+            // disableEscapeKeyDown={false}
             onClose={handleClose}
             className={Styles.selectArtistModal}
             data-testid="select-artist-modal"
             {...rest}
         >
-            <DialogTitle textAlign="center">{t("selectArtist")}</DialogTitle>
+            <DialogTitle sx={{textAlign: "center"}}>{t("selectArtist")}</DialogTitle>
             <DialogContent className={Styles.content}>
-                <Typography textAlign="center" variant="body1">{t("multipleMatchingArtistsFound")}:</Typography>
+                <Typography sx={{textAlign: "center"}} variant="body1">{t("multipleMatchingArtistsFound")}:</Typography>
                 <List className={Styles.artistList}>
                     {map(artists, (item, index) => 
                         <ListItem
@@ -75,7 +75,7 @@ export const SelectArtistModal = (props: SelectArtistModalProps) => {
                                 </Button>
                             }
                         >
-                            <Grid container flexGrow={1}>
+                            <Grid container sx={{flexGrow: 1}}>
                                 <Grid size={1} className={Styles.imageColumn}>
                                     <Avatar className={Styles.image} src={item.thumbnail} />
                                 </Grid>

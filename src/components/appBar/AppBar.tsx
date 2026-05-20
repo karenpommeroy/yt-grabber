@@ -3,7 +3,7 @@ import {useTranslation} from "react-i18next";
 
 import CloseIcon from "@mui/icons-material/Close";
 import HelpIcon from "@mui/icons-material/Help";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {Stack} from "@mui/material";
 import ApplicationBar from "@mui/material/AppBar";
@@ -82,7 +82,7 @@ const AppBar = (props: AppBarProps) => {
                         YT GRABBER
                     </Typography>
                     <Box sx={{flexGrow: 1}}></Box>
-                    <Stack direction="row" gap={1}>
+                    <Stack direction="row" sx={{gap: 1}}>
                         <LanguagePicker data-testid="language-picker" data-help="languagePicker" className={Styles.languagePicker} showArrow={false} mode={ComponentDisplayMode.Minimal} sx={{ marginRight: 1}} />
                         <IconButton data-testid="help-button" color="inherit" data-help="help-toggle" className={classnames(Styles.icon, Styles.help, {[Styles.active]: state.help})} onClick={onHelpClick}>{state.help ? <HelpIcon/> : <HelpOutlineIcon/>}</IconButton>
                         <Tooltip title={state.location === "/settings" ? t("closeSettings") : t("openSettings")}>

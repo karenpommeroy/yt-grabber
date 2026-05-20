@@ -53,7 +53,7 @@ describe("YoutubeResolvePlaylists automation", () => {
         });
 
         expect(page.setUserAgent).toHaveBeenCalledWith(UserAgent);
-        expect(resolveValidYoutubePlaylistUrlMock).toHaveBeenCalledWith("https://music.youtube.com/watch?v=abc123", page);
+        expect(resolveValidYoutubePlaylistUrlMock).toHaveBeenCalledWith("https://music.youtube.com/watch?v=abc123", page, expect.anything());
         expect(reporterFinishMock).toHaveBeenCalledWith("done", expect.objectContaining({
             values: ["https://music.youtube.com/playlist?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf"],
             errors: [],

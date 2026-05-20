@@ -32,7 +32,7 @@ describe("automation helpers", () => {
 
         await clearInput(input, page);
 
-        expect((input as any).click).toHaveBeenCalledWith({clickCount: 3});
+        expect((input as any).click).toHaveBeenCalledWith({count: 3});
         expect(page.keyboard.press).toHaveBeenCalledWith("Backspace");
     });
 

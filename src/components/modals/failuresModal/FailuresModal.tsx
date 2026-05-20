@@ -42,13 +42,13 @@ export const FailuresModal = (props: FailuresModalProps) => {
             maxWidth="xs"
             fullWidth
             open={open}
-            disableEscapeKeyDown={false}
+            // disableEscapeKeyDown={false}
             onClose={onCancel}
             className={Styles.failuresModal}
             data-testid="failures-modal"
             {...rest}
         >
-            <DialogTitle textAlign="center">{t("failuresEncountered")}</DialogTitle>
+            <DialogTitle sx={{textAlign: "center"}}>{t("failuresEncountered")}</DialogTitle>
             <DialogContent className={Styles.content}>
                 <Typography>
                     <Trans

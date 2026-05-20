@@ -24,7 +24,7 @@ const config: Config = {
         }],
     },
     transformIgnorePatterns: [
-        "node_modules/(?!(lodash-es)/)",
+        "node_modules/(?!(lodash-es|puppeteer-core|@puppeteer/browsers|puppeteer|puppeteer-extra|puppeteer-extra-plugin-stealth|puppeteer-extra-plugin-devtools)/)",
     ],
     moduleNameMapper: {
         "\\.(css|less|scss|sass|styl)$": "identity-obj-proxy",

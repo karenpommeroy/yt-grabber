@@ -414,7 +414,7 @@ export const HomeView: React.FC = () => {
             return resolveMockData(300);
         } else {
             return map(urls, (url) => {
-                const ytdplArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass"];
+                const ytdplArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass", "--impersonate", "chrome"];
                 const controller = new AbortController();
                 abortControllers[url] = controller;
 
@@ -1012,7 +1012,7 @@ export const HomeView: React.FC = () => {
                     />
                     {!isEmpty(playlists) && <FormatSelector disabled={isEmpty(playlists) || isEmpty(tracks)} />}
                 </div>
-                <Grid className={Styles.content} container spacing={2} padding={2}>
+                <Grid className={Styles.content} container spacing={2} sx={{padding: 2}}>
                     {error && <Alert className={Styles.error} severity="error">{t("missingMediaInfoError")}</Alert>}
                     <PlaylistTabs
                         queue={queue}

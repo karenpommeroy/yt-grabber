@@ -158,7 +158,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     };
 
     return (
-        <Grid className={Styles.formatSelector} container spacing={2} padding={2}>
+        <Grid className={Styles.formatSelector} container spacing={2} sx={{padding: 2}}>
             <Grid size="grow">
                 <FormControl fullWidth disabled={disabled} data-help="mediaType">
                     <InputLabel id="media-type-label">{t("mediaType")}</InputLabel>
@@ -246,7 +246,7 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
                             <Typography variant="body1">{t("gifTextOptions")}</Typography>
                         </AccordionSummary>
                         <AccordionDetails className={Styles.accordionDetails}>
-                            <Stack direction="column" spacing={1} paddingX={0} paddingY={2} paddingBottom={0}>  
+                            <Stack direction="column" spacing={1} sx={{paddingX: 0, paddingY: 2, paddingBottom: 0}}>  
                                 <FormControl className={Styles.textInputGroup} data-help="gifTopText">
                                     <TextField data-testid="gif-top-text-field" label={t("gifTopText")} variant="outlined" value={gifTopText} onChange={onGifTopTextChanged} />
                                 </FormControl>

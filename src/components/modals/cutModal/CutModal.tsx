@@ -132,13 +132,13 @@ export const CutModal: React.FC<CutModalProps> = (props: CutModalProps) => {
             maxWidth="md"
             className={Styles.cutModal}
             onKeyUp={handleKeyUp}
-            disableEscapeKeyDown
+            // disableEscapeKeyDown
             data-testid="cut-modal"
             {...other}
         >
-            <DialogTitle textAlign="center">{t("cutModalTitle")}</DialogTitle>
+            <DialogTitle sx={{textAlign: "center"}}>{t("cutModalTitle")}</DialogTitle>
             <DialogContent dividers className={Styles.content}>
-                <Grid container display="flex" justifyItems="flex-end">
+                <Grid container sx={{display: "flex", justifyItems: "flex-end"}}>
                     <Grid size={12}>
                         <List>
                             {map(entries, (entry, index) => <ListItem sx={{paddingX: 0}} divider key={entry.id}>
@@ -188,7 +188,7 @@ export const CutModal: React.FC<CutModalProps> = (props: CutModalProps) => {
                             </ListItem>)}
                         </List>
                     </Grid>
-                    <Grid size={12} display="flex" justifyContent="center" alignItems="stretch">
+                    <Grid size={12} sx={{display: "flex", justifyContent: "center", alignItems: "stretch"}}>
                         <Button startIcon={<AddIcon />} className={Styles.addButton} variant="contained" disableElevation color="secondary" onClick={onAddClick}>{t("add")}</Button>
                     </Grid>
                 </Grid>

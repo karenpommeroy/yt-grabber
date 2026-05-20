@@ -1,6 +1,7 @@
 import {TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 
+import {ILogger} from "../common/Logger";
 import {MultiMatchAction} from "../common/Media";
 import {UserAgent} from "../common/PuppeteerOptions";
 import {Reporter} from "../common/Reporter";
@@ -15,6 +16,23 @@ import {
 } from "./Selectors";
 import execute from "./YoutubeArtists";
 
+jest.mock("../common/Logger", () => {
+    const loggerMock = {
+        debug: jest.fn(),
+        error: jest.fn(),
+        success: jest.fn(),
+        warn: jest.fn(),
+        info: jest.fn(),
+        verbose: jest.fn(),
+    };
+
+    return {
+        __esModule: true,
+        createLogger: jest.fn().mockReturnValue(loggerMock),
+        __loggerMock: loggerMock,
+    };
+});
+const {__loggerMock: loggerMock} = jest.requireMock("../common/Logger") as { __loggerMock: ILogger };
 jest.mock("./Helpers", () => ({
     ...require("@tests/mocks/automations/Helpers"),
     resolveValidYoutubePlaylistUrl: jest.fn(),
@@ -42,6 +60,12 @@ describe("YoutubeArtists automation", () => {
     beforeEach(() => {
         jest.clearAllMocks();
         clearInputMock.mockReset();
+        (loggerMock.debug as any).mockClear();
+        (loggerMock.warn as any).mockClear();
+        (loggerMock.error as any).mockClear();
+        (loggerMock.success as any).mockClear();
+        (loggerMock.info as any).mockClear();
+        (loggerMock.verbose as any).mockClear();
     });
 
     test("collects albums and singles when selectors succeed", async () => {
@@ -369,7 +393,6 @@ describe("YoutubeArtists automation", () => {
 
     test("warns when album filter is already applied", async () => {
         const page = createPageMock();
-        const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
 
         page.waitForSelector.mockImplementation((selector: string) => {
             if (selector.includes(YtMusicSearchInputSelector)) return Promise.resolve({});
@@ -408,17 +431,14 @@ describe("YoutubeArtists automation", () => {
             signal: new AbortController().signal,
         });
 
-        expect(consoleWarnSpy).toHaveBeenCalledWith("Albums already filtered");
+        expect(loggerMock.debug).toHaveBeenCalledWith("Albums already filtered");
         expect(reporterFinishMock).toHaveBeenCalledWith("done", expect.objectContaining({
             values: ["https://music.youtube.com/album/one"],
         }));
-        consoleWarnSpy.mockRestore();
     });
 
     test("warns when single filter is already applied", async () => {
         const page = createPageMock();
-        const consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
-
         page.waitForSelector.mockImplementation((selector: string) => {
             if (selector.includes(YtMusicSearchInputSelector)) return Promise.resolve({});
             if (selector.includes(SinglesHrefSelector)) {
@@ -456,11 +476,10 @@ describe("YoutubeArtists automation", () => {
             signal: new AbortController().signal,
         });
 
-        expect(consoleWarnSpy).toHaveBeenCalledWith("Singles already filtered");
+        expect(loggerMock.debug).toHaveBeenCalledWith("Singles already filtered");
         expect(reporterFinishMock).toHaveBeenCalledWith("done", expect.objectContaining({
             values: ["https://music.youtube.com/single/one"],
         }));
-        consoleWarnSpy.mockRestore();
     });
 
     test("falls back to best result when search fails", async () => {

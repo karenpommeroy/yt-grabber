@@ -3,8 +3,8 @@
     "target": "es2022",
     "lib": ["es2022", "dom"],
     "module": "commonjs",
-    "moduleResolution": "node",
-    "baseUrl": ".",
+    "rootDir": ".",
+    "moduleResolution": "bundler",
     "strict": false,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
@@ -18,8 +18,8 @@
     "inlineSourceMap": false,
     "typeRoots": ["./src/@types"],
     "paths": {
-      "@tests/*": ["tests/*"],
-      "@app/*": ["src/*"]
+      "@tests/*": ["./tests/*"],
+      "@app/*": ["./src/*"]
     }
   },
   "include": ["./src/**/*.ts", "./src/**/*.tsx", "./src/**/*.json", "webpack.config.ts", "jest.setup.ts"],

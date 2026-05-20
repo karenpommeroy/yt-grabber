@@ -314,9 +314,9 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                     horizontal: "right",
                                                 }}
                                             >
-                                                <Grid container padding={0} spacing={0} className={Styles.trackCutPopup}>
+                                                <Grid container spacing={0} className={Styles.trackCutPopup} sx={{padding: 0}}>
                                                     {map(cuts, (cut, index) =>
-                                                        <Grid data-testid="track-cut" container padding={2} paddingBottom={0} spacing={1} key={index}>
+                                                        <Grid data-testid="track-cut" container spacing={1} key={index} sx={{padding: 2, paddingBottom: 0}}>
                                                             <Grid size={5}>
                                                                 <NumberFormatBase
                                                                     size="small"
@@ -351,12 +351,12 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                                     label={t("to")}
                                                                 />
                                                             </Grid>
-                                                            <Grid size={2} display="flex">
+                                                            <Grid size={2} sx={{display: "flex"}}>
                                                                 <Button data-testid="delete-track-cut-button" className={Styles.deleteCutButton} data-id={item.id} data-index={index} disableElevation variant="contained" fullWidth color="secondary" onClick={onDeleteTrackCut}>
                                                                     <DeleteForeverIcon />
                                                                 </Button>
                                                             </Grid>
-                                                            <Grid size={12} display="flex" paddingX={2}>
+                                                            <Grid size={12} sx={{display: "flex"}}>
                                                                 <Slider
                                                                     name={toString(index)}
                                                                     data-index={index}
@@ -370,7 +370,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                                             </Grid>
                                                         </Grid>
                                                     )}   
-                                                    <Grid size={12} className={Styles.addTrackCutRow} padding={1}>
+                                                    <Grid size={12} className={Styles.addTrackCutRow} sx={{padding: 1}}>
                                                         <Button data-testid="add-track-cut-button" data-id={item.id} disableElevation variant="contained" color="primary" onClick={onAddTrackCut}>
                                                             <AddIcon />
                                                         </Button>
@@ -403,7 +403,7 @@ export const TrackList: React.FC<TrackListProps> = (props: TrackListProps) => {
                                 </Stack>
                             }
                         >
-                            <Grid container direction="row" flexGrow={1}>
+                            <Grid container direction="row" sx={{flexGrow: 1}}>
                                 {item.playlist_autonumber &&
                                     <Grid size={1} className={Styles.numberColumn}>
                                         <Typography data-testid="track-number" className={Styles.number} variant="body1" color="primary.main">{item.playlist_autonumber}</Typography>

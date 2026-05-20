@@ -4,6 +4,7 @@ import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
+import {createLogger} from "../common/Logger";
 import {GetYoutubeParams, GetYoutubeResult} from "../common/Messaging";
 import puppeteerOptions, {UserAgent} from "../common/PuppeteerOptions";
 import {IReporter, ProgressInfo, Reporter} from "../common/Reporter";
@@ -13,6 +14,13 @@ import {navigateToPage, resolveValidYoutubePlaylistUrl, setCookies} from "./Help
 let page: Page;
 let browser: Browser;
 let reporter: IReporter<GetYoutubeResult>;
+
+const logger = createLogger({
+    level: "debug",
+    logFile: true,
+    logFilePath: "browser.log",
+    meta: {component: "YoutubeResolvePlaylists"},
+});
 
 puppeteer.use(StealthPlugin());
 
@@ -73,7 +81,7 @@ const run = async (
     const process = async (urlToProcess: string) => {
         const results: string[] = [];
 
-        results.push(await resolveValidYoutubePlaylistUrl(urlToProcess, page));
+        results.push(await resolveValidYoutubePlaylistUrl(urlToProcess, page, logger));
         return results;
     };
 

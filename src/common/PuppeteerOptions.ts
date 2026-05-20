@@ -19,6 +19,7 @@ export const PuppeteerOptions: LaunchOptions = {
     args: [
         "--disable-infobars",
         `--window-size=${width},${height}`,
+        "--lang=en-US,en",
         "--disable-extensions",
         "--mute-audio",
         "--disable-background-timer-throttling",

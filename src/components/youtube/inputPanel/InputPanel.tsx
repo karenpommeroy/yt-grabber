@@ -209,7 +209,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     }, [debouncedApplicationOptions]);
 
     return (
-        <Grid data-testid="input-panel" className={Styles.inputPanel} container spacing={2} paddingX={2} paddingY={1}>
+        <Grid data-testid="input-panel" className={Styles.inputPanel} container spacing={2} sx={{paddingX: 2, paddingY: 1}}>
             <Grid size="grow">
                 <Autocomplete
                     data-testid="input-field"
@@ -223,7 +223,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                     value={urls}
                     onChange={onMultiValueChange}
                     defaultValue={[]}
-                    renderTags={(value) => map(value, renderUrlTag)}
+                    renderValue={(value) => map(value, renderUrlTag)}
                     renderInput={(params: AutocompleteRenderInputParams) => (
                         <TextField
                             {...params}
@@ -234,20 +234,23 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                             error={containsInvalidValues}
                             onKeyUp={onTextFieldKeyUp}
                             slotProps={{
+                                htmlInput: {
+                                    ...params.slotProps.htmlInput,
+                                },
                                 input: {
-                                    ...params.InputProps,
-                                    startAdornment: <>
-                                        {params.InputProps.startAdornment}
-                                        <input ref={fileInputRef} type="file" hidden onChange={onSelectFile} accept=".txt,.json" />
-                                    </>
+                                    ...params.slotProps.input,
+                                    startAdornment: (<>
+                                        {params.slotProps.input.startAdornment}
+                                        <input ref={fileInputRef} type="file" accept=".txt,.json" hidden onChange={onSelectFile} />
+                                    </>)
                                 }
                             }}
                         />
                     )}
                 />
             </Grid>
-            <Grid>
-                <Stack direction="row" spacing={1} height={54}>
+            <Grid sx={{alignItems: "stretch", alignContent: "stretch", gap: 1, display: "flex"}}>
+                <Stack direction="row" sx={{gap: 1, height: 54}}>
                     <InputModePicker data-testid="input-mode-button" disabled={loading} />
                     <Tooltip title={t("loadFromFile")} arrow enterDelay={2000} leaveDelay={100} enterNextDelay={500} placement="bottom">
                         <div>
@@ -307,7 +310,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
                             <Typography variant="body1">{t("showAdvancedSearchOptions")}</Typography>
                         </AccordionSummary>
                         <AccordionDetails className={Styles.accordionDetails}>
-                            <Stack direction="column" spacing={1} paddingX={0} paddingY={2} paddingBottom={0}>  
+                            <Stack direction="column" sx={{paddingX: 0, paddingY: 2, paddingBottom: 0}}>  
                                 <FormControl className={Styles.textInputGroup} data-help="downloadReleaseDate">
                                     <FormLabel component="legend">{t("releaseDate")}</FormLabel>
                                     <FormGroup row className={Styles.controlGroup}>

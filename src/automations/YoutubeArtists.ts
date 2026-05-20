@@ -5,6 +5,7 @@ import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
+import {createLogger} from "../common/Logger";
 import {MultiMatchAction} from "../common/Media";
 import {GetYoutubeParams, GetYoutubeResult} from "../common/Messaging";
 import puppeteerOptions, {UserAgent} from "../common/PuppeteerOptions";
@@ -13,19 +14,26 @@ import {YoutubeArtist} from "../common/Youtube";
 import {MessageHandlerParams} from "../messaging/MessageChannel";
 import {clearInput, navigateToPage, resolveValidYoutubePlaylistUrl, setCookies} from "./Helpers";
 import {
-    AlbumFilterSelector, AlbumLinkSelector, AlbumsDirectLinkSelector, AlbumsHrefSelector,
-    getYtMusicAlbumLinkSelectorFilteredByDate, getYtMusicAlbumsDirectLinkSelectorFilteredByDate,
-    getYtMusicSearchResultsArtistsSelector, getYtMusicSingleLinkSelectorFilteredByDate,
-    getYtMusicSinglesDirectLinkSelectorFilteredByDate, SingleFilterSelector, SingleLinkSelector,
-    SinglesDirectLinkSelector, SinglesHrefSelector, YtMusicArtistBestResultLinkSelector,
-    YtMusicArtistRelativeLinkSelector, YtMusicArtistRelativeNameSelector,
-    YtMusicArtistRelativeThumbnailSelector, YtMusicArtistsChipSelector, YtMusicSearchInputSelector,
-    YtMusicSearchResultsArtistsLinkSelector
+    AlbumFilterSelector, AlbumLinkSelector, AlbumLinkSelectorFiltered, AlbumsDirectLinkSelector,
+    AlbumsHrefSelector, getYtMusicAlbumLinkSelectorFilteredByDate,
+    getYtMusicAlbumsDirectLinkSelectorFilteredByDate, getYtMusicSearchResultsArtistsSelector,
+    getYtMusicSingleLinkSelectorFilteredByDate, getYtMusicSinglesDirectLinkSelectorFilteredByDate,
+    SingleFilterSelector, SingleLinkSelector, SingleLinkSelectorFiltered, SinglesDirectLinkSelector,
+    SinglesHrefSelector, YtMusicArtistBestResultLinkSelector, YtMusicArtistRelativeLinkSelector,
+    YtMusicArtistRelativeNameSelector, YtMusicArtistRelativeThumbnailSelector,
+    YtMusicArtistsChipSelector, YtMusicSearchInputSelector, YtMusicSearchResultsArtistsLinkSelector
 } from "./Selectors";
 
 let page: Page;
 let browser: Browser;
 let reporter: IReporter<GetYoutubeResult>;
+
+const logger = createLogger({
+    level: "debug",
+    logFile: true,
+    logFilePath: "browser.log",
+    meta: {component: "YoutubeArtists"},
+});
 
 puppeteer.use(StealthPlugin());
 
@@ -44,8 +52,10 @@ export const execute = async (parameters: MessageHandlerParams) => {
         const result: GetYoutubeResult = {errors: [], warnings: [], values: [], sources: params.values};
         
         if (error.message === "aborted") {
+            logger.debug("Execution aborted");
             throw error;
         } else if (error instanceof TimeoutError) {
+            logger.debug("Timeout error occurred: " + error.message);
             result.errors.push({title: i18n.t("exceptionTimeout"), description: i18n.t("exceptionTimeoutText")});
         } else {
             if (error.message === "Navigating frame was detached") {
@@ -53,6 +63,7 @@ export const execute = async (parameters: MessageHandlerParams) => {
             } else {
                 result.errors.push({title: i18n.t("exceptionGetYoutubeUrls"), description: i18n.t("exceptionGetYoutubeUrlsText", {error: error.name})});
             }
+            logger.error("Error occurred during execution: " + error.stack);
         }
         
         reporter.finish("done", result);
@@ -78,21 +89,23 @@ const run = async (
 
     await page.setUserAgent(UserAgent);
     await setCookies(page);
+
+    logger.debug("Navigating to page: " + params.url);
     await navigateToPage(params.url, page);
-    
     const process = async (artist: string) => {
         const results: string[] = [];
         const artistChannelUrl = await getArtistUrl(params, artist, onPause);
 
+        logger.debug("Navigating to page: " + artistChannelUrl);
         await navigateToPage(artistChannelUrl, page);
         await page.waitForNetworkIdle();
-        
         if (params.options?.downloadAlbums) {
             const albums = await getAlbums(params);
             results.push(...albums);
         }
 
         if (params.options?.downloadSinglesAndEps) {
+            logger.debug("Navigating to page: " + artistChannelUrl);
             await navigateToPage(artistChannelUrl, page);
             await page.waitForNetworkIdle();
             
@@ -100,6 +113,7 @@ const run = async (
             results.push(...singles);
         }
         
+        logger.debug(`Found ${results.length} albums/singles for artist ${artist}`);
         return results;
     };
 
@@ -120,6 +134,7 @@ const getArtistUrl = async (params: GetYoutubeParams, artist: string, onPause?: 
         } else {
             await clearInput(searchInput, page);
             await searchInput.type(artist);
+
             page.keyboard.press("Enter");
             await page.waitForNetworkIdle();
         }
@@ -173,8 +188,11 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
         const element = await page.waitForSelector(`::-p-xpath(${AlbumsHrefSelector})`, {timeout: 1000});
         const albumsUrl = await element.evaluate((el) => el.getAttribute("href"));
 
-        await navigateToPage(`${params.url}/${albumsUrl}`, page);
-        
+        if (albumsUrl) {
+            logger.debug("Navigating to page: " + `${params.url}/${albumsUrl}`);
+            await navigateToPage(`${params.url}/${albumsUrl}`, page);
+        }
+
         try {
             const albumFilterButton = await page.waitForSelector(`::-p-xpath(${AlbumFilterSelector})`, {timeout: 1000});
         
@@ -182,24 +200,24 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
             await page.waitForNetworkIdle();
             
         } catch (e) {
-            console.warn("Albums already filtered");
+            logger.debug("Albums already filtered");
         } finally {
-            const selector =  fromYear || untilYear ? getYtMusicAlbumLinkSelectorFilteredByDate(fromYear, untilYear) : AlbumLinkSelector;
+            const selector =  (fromYear || untilYear) ? albumsUrl ? getYtMusicAlbumsDirectLinkSelectorFilteredByDate(fromYear, untilYear) : getYtMusicAlbumLinkSelectorFilteredByDate(fromYear, untilYear) : albumsUrl ? AlbumLinkSelectorFiltered : AlbumLinkSelector;
             const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
             for (const item of items) {
-                results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
+                results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page, logger));
             }
 
-            // eslint-disable-next-line no-unsafe-finally
+             // eslint-disable-next-line no-unsafe-finally
             return results;
         }
     } catch (error) {
-        const selector =  fromYear || untilYear ? getYtMusicAlbumsDirectLinkSelectorFilteredByDate(fromYear, untilYear) : AlbumsDirectLinkSelector;
+        const selector =  (fromYear || untilYear) ? getYtMusicAlbumsDirectLinkSelectorFilteredByDate(fromYear, untilYear) : AlbumsDirectLinkSelector;
         const albums = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
 
         for (const item of albums) {
-            results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
+            results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page, logger));
         }
 
         return results;
@@ -214,7 +232,10 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
         const element = await page.waitForSelector(`::-p-xpath(${SinglesHrefSelector})`, {timeout: 1000});
         const singlesUrl = await element.evaluate((el) => el.getAttribute("href"));
 
-        await navigateToPage(`${params.url}/${singlesUrl}`, page);
+        if (singlesUrl) {
+            logger.debug("Navigating to page: " + `${params.url}/${singlesUrl}`);
+            await navigateToPage(`${params.url}/${singlesUrl}`, page);
+        }
 
         try {
             const singleFilterButton = await page.waitForSelector(`::-p-xpath(${SingleFilterSelector})`, {timeout: 1000});
@@ -223,24 +244,24 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
             await page.waitForNetworkIdle();
             
         } catch (e) {
-            console.warn("Singles already filtered");
+            logger.debug("Singles already filtered");
         } finally {
-            const selector =  fromYear || untilYear ? getYtMusicSingleLinkSelectorFilteredByDate(fromYear, untilYear) : SingleLinkSelector;
+            const selector =  (fromYear || untilYear) ? singlesUrl ? getYtMusicSinglesDirectLinkSelectorFilteredByDate(fromYear, untilYear) : getYtMusicSingleLinkSelectorFilteredByDate(fromYear, untilYear) : singlesUrl ? SingleLinkSelectorFiltered : SingleLinkSelector;
             const items = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
             
             for (const item of items) {
-                results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
+                results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page, logger));
             }
-            
+
             // eslint-disable-next-line no-unsafe-finally
             return results;
         }
     } catch (error) {
-        const selector =  fromYear || untilYear ? getYtMusicSinglesDirectLinkSelectorFilteredByDate(fromYear, untilYear) : SinglesDirectLinkSelector;
+        const selector =  (fromYear || untilYear) ? getYtMusicSinglesDirectLinkSelectorFilteredByDate(fromYear, untilYear) : SinglesDirectLinkSelector;
         const singles = await page.$$eval(`xpath/${selector}`, (elements) => elements.map((el) => el.getAttribute("href")));
         
         for (const item of singles) {
-            results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page));
+            results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page, logger));
         }
 
         return results;
