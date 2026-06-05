@@ -111,6 +111,25 @@ describe("SettingsView", () => {
         ));
     });
 
+    test("persists split chapters setting toggles", async () => {
+        const shell = await render(<SettingsView />);
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalled());
+        storeSetMock.mockClear();
+
+        const splitChaptersSwitch = shell.getByLabelText("splitChapters") as HTMLInputElement;
+        expect(splitChaptersSwitch.checked).toBe(false);
+
+        await act(async () => {
+            fireEvent.click(splitChaptersSwitch);
+        });
+
+        await waitFor(() => expect(storeSetMock).toHaveBeenCalledWith(
+            "application",
+            expect.objectContaining({splitChapters: true})
+        ));
+    });
+
     test("shows validation error for invalid template tokens", async () => {
         const shell = await render(<SettingsView />);
         const templateInput = shell.getByLabelText("albumOutputTemplate") as HTMLInputElement;

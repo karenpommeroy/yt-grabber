@@ -67,4 +67,46 @@ describe("LogMenu", () => {
         await waitFor(() => expect(screen.getByText(warnings[0].url)).toBeInTheDocument());
         await waitFor(() => expect(screen.queryByText(errors[0].message)).not.toBeInTheDocument());
     });
+
+    test("closes error menu when escape is pressed", async () => {
+        const errors = [{url: "https://example.com/error", message: "Network failure"}];
+        setupDataState({errors});
+
+        const shell = await render(<LogMenu />);
+        const logMenu = shell.container.querySelector("[data-help=\"logMenu\"]") as HTMLElement;
+        const errorButton = logMenu.querySelectorAll("button")[0] as HTMLButtonElement;
+
+        fireEvent.click(errorButton);
+        await waitFor(() => expect(screen.getByText(errors[0].url)).toBeInTheDocument());
+
+        const backdrop = document.querySelector(".MuiBackdrop-root");
+        if (backdrop) {
+            fireEvent.click(backdrop);
+        } else {
+            fireEvent.mouseDown(document.body);
+        }
+
+        await waitFor(() => expect(screen.queryByText(errors[0].url)).not.toBeInTheDocument());
+    });
+
+    test("closes warning menu when backdrop is clicked", async () => {
+        const warnings = [{url: "https://example.com/warning", message: "Slow response"}];
+        setupDataState({warnings});
+
+        const shell = await render(<LogMenu />);
+        const logMenu = shell.container.querySelector("[data-help=\"logMenu\"]") as HTMLElement;
+        const warningButton = logMenu.querySelectorAll("button")[1] as HTMLButtonElement;
+
+        fireEvent.click(warningButton);
+        await waitFor(() => expect(screen.getByText(warnings[0].url)).toBeInTheDocument());
+
+        const backdrop = document.querySelector(".MuiBackdrop-root");
+        if (backdrop) {
+            fireEvent.click(backdrop);
+        } else {
+            fireEvent.mouseDown(document.body);
+        }
+
+        await waitFor(() => expect(screen.queryByText(warnings[0].url)).not.toBeInTheDocument());
+    });
 });

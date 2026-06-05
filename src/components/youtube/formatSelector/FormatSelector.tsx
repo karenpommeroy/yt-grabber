@@ -60,9 +60,9 @@ export const FormatSelector: React.FC<FormatSelectorProps> = (props) => {
     };
     
     const resolveResolutionText = (val: FormatInfo) => {
-        const [, height] = map(val.resolution.match(/\d+/g), Number);
+        const [width, height] = map(val.resolution.match(/\d+/g), Number);
 
-        return `${val.resolution} (${height}p)`;
+        return `${val.resolution} (${height ? height : width}p)`;
     };
 
     useEffect(() => {

@@ -161,7 +161,7 @@ export const MediaInfoPanel: React.FC<MediaInfoPanelProps> = (props: MediaInfoPa
                             </div>
                             <div className={Styles.row}>
                                 <Typography variant="subtitle2" className={Styles.label}>{t("releaseYear")}:</Typography>
-                                <Typography variant="subtitle2" sx={{color: "text.secondary"}}>{value.releaseYear}</Typography>
+                                <Typography variant="subtitle2" sx={{color: "text.secondary"}}>{value.releaseYear ?? ""}</Typography>
                             </div>
                             <div className={Styles.row}>
                                 <Typography variant="subtitle2" className={Styles.label}>{t("duration")}:</Typography>

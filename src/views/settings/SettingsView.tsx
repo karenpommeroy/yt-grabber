@@ -334,7 +334,7 @@ export const SettingsView: React.FC = () => {
                             </FormControl>
                         </Grid>
                         <Grid size={12} data-help="splitChapters">
-                            <FormControlLabel control={<Switch checked={applicationOptions.splitChapters} size="small" onChange={onSplitChaptersChange} />} label={t("splitChapters")} />
+                            <FormControlLabel control={<Switch checked={applicationOptions.splitChapters ?? false} size="small" onChange={onSplitChaptersChange} />} label={t("splitChapters")} />
                         </Grid>
                         <Grid size={12} data-help="alwaysOverwrite">
                             <FormControlLabel control={<Switch checked={applicationOptions.alwaysOverwrite} size="small" onChange={onOverwriteChange} />} label={t("alwaysOverwrite")} />

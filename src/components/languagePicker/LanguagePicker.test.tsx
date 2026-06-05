@@ -1,11 +1,17 @@
 import i18next from "i18next";
 
+import * as MaterialUI from "@mui/material";
 import {fireEvent, waitFor, within} from "@testing-library/react";
 import {render} from "@tests/TestRenderer";
 
+import ComponentDisplayMode from "../../common/ComponentDisplayMode";
 import LanguagePicker from "./LanguagePicker";
 
 jest.unmock("react-i18next");
+jest.mock("@mui/material", () => ({
+    ...(jest.requireActual("@mui/material") as any),
+    useMediaQuery: jest.fn(),
+}));
 
 describe("LanguagePicker", () => {
     test("renders picker with default options", async () => {
@@ -78,6 +84,18 @@ describe("LanguagePicker", () => {
         fireEvent.click(document.body);
 
         await waitFor(() => expect(shell.queryByRole("menu")).not.toBeInTheDocument());
+    });
+
+    test("uses minimal display mode when media query matches and no mode prop is provided", async () => {
+        const useMediaQueryMock = MaterialUI.useMediaQuery as jest.MockedFunction<typeof MaterialUI.useMediaQuery>;
+        useMediaQueryMock.mockReturnValue(true);
+
+        const shell = await render(<LanguagePicker data-testid="language-picker" />);
+        const trigger = shell.getByRole("button");
+
+        expect(within(trigger).queryByTestId("language-name")).not.toBeInTheDocument();
+
+        useMediaQueryMock.mockReset();
     });
 
     test("does not close menu when clicking the trigger (anchorEl)", async () => {

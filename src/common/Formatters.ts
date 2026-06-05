@@ -7,11 +7,11 @@ export const getAlbumInfo = (items: TrackInfo[], url?: string): AlbumInfo => {
 
     return {
         id: item.playlist_id ?? item.id,
-        artist: isPlaylistTrack(item) ? get(item, "uploader", get(item, "channel", get(item, "playlist_uploader"))) : get(item, "creators.0", get(item, "artist", item.channel)),
+        artist: (isPlaylistTrack(item) ? get(item, "uploader", get(item, "channel", get(item, "playlist_uploader"))) : get(item, "creators.0", get(item, "artist", item.channel))) ?? "",
         title: isAlbumTrack(item) ? get(item, "album", get(item, "playlist_title", get(item, "playlist"))) : item.title,
-        releaseYear: get(item, "release_year") ?? (new Date(item.timestamp * 1000)).getFullYear(),
+        releaseYear: get(item, "release_year") ?? item.timestamp ? (new Date(item.timestamp * 1000)).getFullYear() : new Date().getFullYear(),
         tracksNumber: get(item, "playlist_count", 1),
-        duration: sumBy(items, "duration"),
+        duration: sumBy(items, "duration") ?? 0,
         thumbnail: get(item, "thumbnail", get(find(item.thumbnails, ["id", "2"]) ?? last(item.thumbnails), "url")),
         url,
     };

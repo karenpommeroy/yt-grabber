@@ -86,8 +86,8 @@ export const FileField: React.FC<FileFieldProps> = (props) => {
                 }}
                 {...rest}
             />
-            {/* eslint-disable react/no-unknown-property */ }
-            {/* @ts-expect-error fix for webkitdirectory */}
+            {  }
+            {/* @ts-expect-error fix for webkitdirectory */}{/* eslint-disable-next-line react/no-unknown-property */}
             <input ref={fileInputRef} type="file" webkitdirectory="" directory="" multiple hidden onChange={onSelectFile} accept={mode === "file" ? join(fileTypes) : undefined} />
         </>
     );

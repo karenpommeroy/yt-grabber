@@ -154,6 +154,19 @@ describe("YtdplUtils", () => {
         expect(params).not.toContain("--download-sections");
     });
 
+    test("getYtdplRequestParams returns default filter when videoQuality is invalid", () => {
+        const track = createTrackInfo();
+        const album = createAlbumInfo();
+        const format = {type: MediaFormat.Video, extension: VideoType.Mkv, videoQuality: "abc"};
+
+        const params = getYtdplRequestParams(track, album, {}, format);
+
+        expect(params).toEqual(expect.arrayContaining([
+            "-f",
+            "bv*+ba/b[ext=webm]",
+        ]));
+    });
+
     test("getPostProcessorArgs returns correct metadata for album track with escaping", () => {
         isAlbumTrackMock.mockReturnValue(true);
         const track = {
@@ -222,6 +235,30 @@ describe("YtdplUtils", () => {
         const result = getOutputFile(track, album, {type: MediaFormat.Audio});
         
         expect(result).toBe(`./downloads/${album.artist} - ${track.title}`);
+    });
+
+    test("getOutputFile falls back to default track template when template compilation throws", () => {
+        setApplicationOptions({trackOutputTemplate: "{{(function(){throw new Error('boom')})()}}"});
+        isAlbumTrackMock.mockReturnValue(false);
+        isPlaylistTrackMock.mockReturnValue(false);
+
+        const track = createTrackInfo();
+        const album = createAlbumInfo({title: "Track Album"});
+        const result = getOutputFile(track, album, {type: MediaFormat.Audio});
+
+        expect(result).toBe(`./downloads/${album.artist} - ${track.title}`);
+    });
+
+    test("getOutputFile falls back to default album template when template compilation throws", () => {
+        setApplicationOptions({albumOutputTemplate: "{{(function(){throw new Error('boom')})()}}"});
+        isAlbumTrackMock.mockReturnValue(true);
+        isPlaylistTrackMock.mockReturnValue(false);
+
+        const track = createTrackInfo();
+        const album = createAlbumInfo({artist: "Test Artist", title: "Content Album"});
+        const result = getOutputFile(track, album, {type: MediaFormat.Audio});
+
+        expect(result).toBe(`./downloads/${album.artist}/[${album.releaseYear}] ${album.title}/${track.playlist_autonumber} - ${track.title}`);
     });
 
     test("mergeOutputFiles invokes ffmpeg with concat args and succeeds", () => {

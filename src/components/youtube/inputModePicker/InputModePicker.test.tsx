@@ -74,6 +74,17 @@ describe("InputModePicker", () => {
         await waitFor(() => expect(shell.queryByText("artists")).not.toBeInTheDocument());
     });
 
+    test("does not close menu when clicking the trigger button while open", async () => {
+        const shell = await render(<InputModePicker />);
+
+        fireEvent.click(shell.getByRole("button"));
+        await waitFor(() => shell.getByText("artists"));
+
+        fireEvent.click(shell.getByRole("button"));
+
+        await waitFor(() => expect(shell.queryByText("artists")).toBeInTheDocument());
+    });
+
     test("reacts to external store input mode changes", async () => {
         const shell = await render(<InputModePicker />);
 

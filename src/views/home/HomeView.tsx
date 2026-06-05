@@ -242,6 +242,10 @@ export const HomeView: React.FC = () => {
             });
         }
 
+        if (!isEmpty(item.warnings)) {
+            setWarnings((prev) => [...prev, {url: item.url, message: join(item.warnings, "\n")}]);
+        }
+
         if (item.value) {
             setTracks((prev) => [...prev, ...item.value]);
             setPlaylists((prev) => map(prev, (p) => {
@@ -422,7 +426,7 @@ export const HomeView: React.FC = () => {
                     ytDlpWrap.execPromise(ytdplArgsToUse, undefined, controller.signal)
                         .then((result) => {
                             const parsed = map<string, TrackInfo>(split(trim(result), "\n"), (item) => JSON.parse(item));
-                            const [deletedOrPrivateMedia, validMedia] = partition(parsed, (item) => !item.duration);
+                            const [deletedOrPrivateMedia, validMedia] = partition(parsed, (item) => isEmpty(item.formats)); // !item.duration);
 
                             resolve({
                                 url,

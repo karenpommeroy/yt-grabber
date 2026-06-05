@@ -209,7 +209,7 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
                 results.push(await resolveValidYoutubePlaylistUrl(`${params.url}/${item}`, page, logger));
             }
 
-             // eslint-disable-next-line no-unsafe-finally
+            // eslint-disable-next-line no-unsafe-finally
             return results;
         }
     } catch (error) {

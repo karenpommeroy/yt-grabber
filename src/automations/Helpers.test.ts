@@ -3,7 +3,9 @@ import fs from "fs-extra";
 import {getProfilePath} from "../common/FileSystem";
 import {waitFor} from "../common/Helpers";
 import {createInput, createPage} from "../common/TestHelpers";
-import {clearInput, navigateToPage, resolveValidYoutubePlaylistUrl, setCookies} from "./Helpers";
+import {
+    breakOnPage, clearInput, navigateToPage, resolveValidYoutubePlaylistUrl, setCookies
+} from "./Helpers";
 
 jest.mock("fs-extra", () => require("@tests/mocks/fs-extra"));
 jest.mock("../common/FileSystem", () => require("@tests/mocks/common/FileSystem"));
@@ -106,5 +108,44 @@ describe("automation helpers", () => {
 
         expect(result).toBe(url);
         expect(page.goto).toHaveBeenCalled();
+    });
+
+    test("resolveValidYoutubePlaylistUrl logs debug when browse url and logger is provided", async () => {
+        const url = "https://music.youtube.com/browse/VLOPL1234567890";
+        const canonicalHref = "https://music.youtube.com/playlist?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf";
+        const page = createPage();
+        const logger = {debug: jest.fn(), error: jest.fn(), info: jest.fn()} as any;
+        (page.$eval as jest.Mock).mockResolvedValue(canonicalHref);
+
+        const result = await resolveValidYoutubePlaylistUrl(url, page, logger);
+
+        expect(result).toBe(canonicalHref);
+        expect(page.goto).toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith("Navigating to page: " + url);
+    });
+
+    test("resolveValidYoutubePlaylistUrl returns original url when canonical href is empty", async () => {
+        const url = "https://music.youtube.com/browse/VLOPL1234567890";
+        const page = createPage();
+        (page.$eval as jest.Mock).mockResolvedValue("");
+
+        const result = await resolveValidYoutubePlaylistUrl(url, page);
+
+        expect(result).toBe(url);
+        expect(page.goto).toHaveBeenCalled();
+    });
+
+    test("breakOnPage runs the callback and returns evaluation result", async () => {
+        const page = createPage();
+        const callback = jest.fn();
+        (page.evaluate as jest.Mock).mockImplementation(async (fn: Function) => {
+            return fn();
+        });
+
+        const result = await breakOnPage(page, callback);
+
+        expect(callback).toHaveBeenCalled();
+        expect(result).toBeUndefined();
+        expect(page.evaluate).toHaveBeenCalledWith(expect.any(Function));
     });
 });

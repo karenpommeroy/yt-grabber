@@ -562,7 +562,8 @@ describe("HomeView", () => {
 
         configureStore({inputMode: InputMode.Auto, application: {debugMode: false}});
         (ytdlpWrapMock as any).execPromise.mockResolvedValueOnce(
-            "{\"id\":\"t1\",\"duration\":120,\"original_url\":\"url1\"}\n{\"id\":\"t2\",\"duration\":0,\"original_url\":\"url2\"}",
+            JSON.stringify({id:"t1", duration:120, original_url:"url1", formats:[{}]}) + "\n" +
+            JSON.stringify({id:"t2", duration:0, original_url:"url2"}),
         );
 
         useDataStateMock.mockReturnValue(createDataState({
@@ -1957,6 +1958,66 @@ describe("HomeView", () => {
         await waitFor(() => expect(setTrackStatus).toHaveBeenCalled());
     });
 
+    test("handles wrong file format detection in onCheckCorrectness", async () => {
+        (fs as any).writeFileSync = jest.fn();
+        (fs as any).statSync = jest.fn(() => ({size: 111}));
+        (fs as any).existsSync = jest.fn((filePath: string) => filePath.endsWith(".webp"));
+        (fs as any).removeSync = jest.fn();
+
+        const setTrackStatus = jest.fn();
+        const setQueue = jest.fn();
+
+        const playlists = [{
+            url: "p1",
+            album: {id: "album-1", url: "p1"},
+            tracks: [{id: "t1", original_url: "url1", filesize_approx: 0}],
+        }];
+
+        useDataStateMock.mockReturnValue(createDataState({
+            playlists,
+            tracks: playlists[0].tracks,
+            trackCuts: {},
+            queue: ["t1"],
+            formats: {global: {type: MediaFormat.Audio, extension: VideoType.Mp4}},
+            setTrackStatus,
+            setQueue,
+        }) as any);
+
+        let capturedHandlers: Record<string, Function> = {};
+        (ytdlpWrapMock as any).exec.mockImplementation(() => {
+            capturedHandlers = {};
+            const api = {
+                on: (event: string, cb: Function) => {
+                    capturedHandlers[event] = cb;
+                    return api;
+                },
+            };
+            return api;
+        });
+
+        await render(<HomeView />);
+
+        act(() => stubbedProps["playlist-tabs"].onDownloadTrack("t1"));
+
+        await waitFor(() => expect(capturedHandlers.close).toBeDefined());
+
+        await act(async () => {
+            capturedHandlers.close?.();
+        });
+
+        await waitFor(() => expect(setTrackStatus).toHaveBeenCalled());
+
+        const wrongFormatUpdater = setTrackStatus.mock.calls
+            .map(([fn]) => fn)
+            .filter((fn): fn is (prev: any[]) => any[] => typeof fn === "function")
+            .find((fn) => {
+                const result = fn([{trackId: "t1", status: "done", percent: 100}]);
+                return result[0].status === "wrongFileFormat" && result[0].error === true && result[0].completed === false;
+            });
+
+        expect(wrongFormatUpdater).toBeDefined();
+    });
+
     test("handles file parts conversion when mergeParts is false", async () => {
         (fs as any).writeFileSync = jest.fn();
         (fs as any).statSync = jest.fn(() => ({size: 111}));
@@ -2724,4 +2785,65 @@ describe("HomeView", () => {
 
         expect(processesAllUrls).toBe(true);
     });
+
+    test("operation effect returns early when concurrent downloads at limit", async () => {
+        const setQueue = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            operation: "download",
+            playlists: [{url: "p1", album: {id: "a1"}} as any],
+            tracks: [{id: "t1"}, {id: "t2"}] as any,
+            queue: ["t1", "t2"],
+            trackStatus: [{trackId: "t1", percent: 50}],
+            setQueue,
+        }) as any);
+
+        configureStore({application: {concurrency: 1}});
+
+        await render(<HomeView />);
+    });
+
+    test("onGetYoutubeCompleted with null result returns early", async () => {
+        const setQueue = jest.fn();
+        const setPlaylists = jest.fn();
+
+        useDataStateMock.mockReturnValue(createDataState({
+            setQueue,
+            setPlaylists,
+        }) as any);
+
+        await render(<HomeView />);
+
+        const handler = getIpcHandler(Messages.GetYoutubeUrlsCompleted);
+        handler?.({} as any, {result: null});
+
+        expect(setPlaylists).not.toHaveBeenCalled();
+    });
+
+    test("loadInfo with empty years does not set year constraints for artists", async () => {
+        const setQueue = jest.fn();
+        configureStore({inputMode: InputMode.Artists});
+
+        useDataStateMock.mockReturnValue(createDataState({setQueue}) as any);
+
+        await render(<HomeView />);
+
+        const handlers = getInputPanelHandlers();
+
+        ipcRendererSendMock.mockClear();
+        handlers.onLoadInfo(["https://music.youtube.com/channel/artist"], "", "");
+
+        expect(ipcRendererSendMock).toHaveBeenCalledWith(
+            Messages.GetYoutubeArtists,
+            expect.objectContaining({
+                options: expect.objectContaining({
+                    fromYear: undefined,
+                    untilYear: undefined,
+                }),
+            }),
+            expect.any(Object),
+        );
+    });
 });
+
+

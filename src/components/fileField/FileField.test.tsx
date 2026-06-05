@@ -90,4 +90,17 @@ describe("FileField", () => {
         expect(fileInput).not.toBeNull();
         expect(fileInput!.getAttribute("accept")).toBe(".mp3,.wav");
     });
+
+    test("resets hidden file input value on file selection", async () => {
+        const shell = await render(<FileField />);
+        const fileInput = shell.container.querySelector("input[type=\"file\"]") as HTMLInputElement | null;
+
+        expect(fileInput).not.toBeNull();
+
+        const file = new File(["content"], "test.txt", {type: "text/plain"});
+        fireEvent.change(fileInput!, {target: {files: [file]}});
+
+        expect(fileInput!.value).toBe("");
+    });
+
 });

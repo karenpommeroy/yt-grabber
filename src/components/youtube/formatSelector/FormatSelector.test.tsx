@@ -63,7 +63,7 @@ describe("FormatSelector", () => {
         fireEvent.change(input, {target: {value: "6"}});
 
         await waitFor(() => expect(state.setFormats).toHaveBeenCalled());
-    const updated = applyFormatUpdate(state.setFormats, formats);
+        const updated = applyFormatUpdate(state.setFormats, formats);
 
         expect(updated["tab-1"].audioQuality).toBe(6);
         expect(updated.global).toEqual(audioFormat);

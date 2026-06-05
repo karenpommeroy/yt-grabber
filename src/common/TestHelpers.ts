@@ -16,6 +16,7 @@ type PageStub = Pick<Page, "goto"> & InstanceType<typeof Page> & {
     keyboard: InstanceType<typeof Keyboard>;
     cookies: jest.Mock;
     setCookie: jest.Mock;
+    evaluate: jest.Mock;
 };
 
 type MockedDataState = Record<string, unknown> & {
@@ -110,6 +111,7 @@ export const createPage = (): PageStub => ({
     cookies: jest.fn(),
     setCookie: jest.fn(),
     $eval: jest.fn(),
+    evaluate: jest.fn(),
 } as unknown as PageStub);
 
 export const createInput = (): ElementHandle<Element> => ({
