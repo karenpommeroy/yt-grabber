@@ -1,5 +1,7 @@
 import {App} from "electron";
-import {forEach, groupBy, includes, indexOf, isNumber, keys, map, replace} from "lodash-es";
+import {
+    forEach, groupBy, includes, indexOf, isNumber, keys, map, replace, truncate
+} from "lodash-es";
 import moment from "moment";
 import path from "path";
 
@@ -108,9 +110,11 @@ export const sanitizeFilePath = (filePath: string, replacement = "-"): string =>
         return out;
     };
 
-    const illegalCharsRegex = /[<>:"/\\|?*#]/g;
+    // eslint-disable-next-line no-control-regex
+    const illegalCharsRegex = /[<>:"/\\|?*\x00-\x1F]/g;
 
     let sanitized = replaceAsciiControlChars(fileName)
+        .normalize("NFKD")
         .replace(illegalCharsRegex, replacement)
         .replace(new RegExp(`${escapeRegExp(replacement)}+`, "g"), replacement)
         .trim()
@@ -131,7 +135,7 @@ export const sanitizeFilePath = (filePath: string, replacement = "-"): string =>
         sanitized = "unnamed";
     }
 
-    return `${directory}/${sanitized}${fileExt.length > 1 ? fileExt : ""}`;
+    return `${directory}/${truncate(sanitized, {length: 100})}${fileExt.length > 1 && fileExt.length <= 4 ? fileExt : ""}`;
 };
 
 export const escapeRegExp = (str: string): string => {

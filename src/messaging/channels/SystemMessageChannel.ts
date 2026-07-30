@@ -24,7 +24,7 @@ export class SystemMessageChannel extends MultiMessageChannel {
                         shell.openPath(params.dirpath);
                     }
                     if (params.filepath) {
-                        Promise.resolve(shell.showItemInFolder(params.filepath));
+                        resolve(shell.showItemInFolder(params.filepath));
                     }
 
                     setTimeout(() => {
