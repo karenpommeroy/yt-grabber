@@ -181,6 +181,14 @@ export const SettingsView: React.FC = () => {
     const onMergePartsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setApplicationOptions((prev) => ({...prev, mergeParts: e.target.checked}));
     };
+    
+    const onUseProofOfOriginTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, useProofOfOriginToken: e.target.checked}));
+    };
+
+    const onUseYtDlpSleepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setApplicationOptions((prev) => ({...prev, useYtDlpSleep: e.target.checked}));
+    };
 
     const onConcurrencyChange = (value: number) => {
         setApplicationOptions((prev) => ({...prev, concurrency: value}));
@@ -502,6 +510,12 @@ export const SettingsView: React.FC = () => {
                                 <Typography component="span" variant="body1">{t("ytdlpVersion")}: {ytDlpVersion}</Typography>
                                 <Button size="small" variant="contained" loading={updatingYtDlp} onClick={onUpdateYtDlpClick}>{t("update")}</Button>
                             </Stack>
+                        </Grid>
+                        <Grid size={12} data-help="useProofOfOriginToken">
+                            <FormControlLabel control={<Switch checked={applicationOptions.useProofOfOriginToken} size="small" onChange={onUseProofOfOriginTokenChange} />} label={t("useProofOfOriginToken")} />
+                        </Grid>
+                        <Grid size={12} data-help="useYtDlpSleep">
+                            <FormControlLabel control={<Switch checked={applicationOptions.useYtDlpSleep} size="small" onChange={onUseYtDlpSleepChange} />} label={t("useYtDlpSleep")} />
                         </Grid>
                     </Grid>
                 </Grid>

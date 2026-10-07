@@ -1,6 +1,5 @@
 import {i18n as i18next} from "i18next";
-import {merge} from "lodash-es";
-import moment from "moment";
+import {merge, trim} from "lodash-es";
 import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
@@ -98,7 +97,7 @@ const run = async (
 
         logger.debug("Navigating to page: " + artistChannelUrl);
         await navigateToPage(artistChannelUrl, page);
-        await page.waitForNetworkIdle();
+        // await page.waitForNetworkIdle();
         if (params.options?.downloadAlbums) {
             const albums = await getAlbums(params);
             results.push(...albums);
@@ -107,7 +106,7 @@ const run = async (
         if (params.options?.downloadSinglesAndEps) {
             logger.debug("Navigating to page: " + artistChannelUrl);
             await navigateToPage(artistChannelUrl, page);
-            await page.waitForNetworkIdle();
+            // await page.waitForNetworkIdle();
             
             const singles = await getSingles(params);
             results.push(...singles);
@@ -118,7 +117,7 @@ const run = async (
     };
 
     for (const a of params.values) {
-        result.values.push(...await process(a));
+        result.values.push(...await process(trim(a)));
     }
     
     reporter.finish("done", result);
@@ -128,7 +127,7 @@ const getArtistUrl = async (params: GetYoutubeParams, artist: string, onPause?: 
     try {
         const searchInput = await page.waitForSelector(`::-p-xpath(${YtMusicSearchInputSelector})`, {timeout: 1000});
         const channelUrlRegex = /^https?:\/\/.*channel/i;
-        
+
         if (channelUrlRegex.test(artist)) {
             return artist;
         } else {
@@ -136,12 +135,12 @@ const getArtistUrl = async (params: GetYoutubeParams, artist: string, onPause?: 
             await searchInput.type(artist);
 
             page.keyboard.press("Enter");
-            await page.waitForNetworkIdle();
+            // await page.waitForNetworkIdle();
         }
         const artistsChip = await page.waitForSelector(`::-p-xpath(${YtMusicArtistsChipSelector})`, {visible: true, timeout: 1000});
 
         artistsChip.click();
-        await page.waitForNetworkIdle();
+        // await page.waitForNetworkIdle();
         await page.waitForSelector(`::-p-xpath(${YtMusicSearchResultsArtistsLinkSelector})`, {timeout: 1000});
         
         const artistsElements = await page.$$(`::-p-xpath(${getYtMusicSearchResultsArtistsSelector(artist)})`);
@@ -197,7 +196,7 @@ const getAlbums = async (params: GetYoutubeParams): Promise<string[]> => {
             const albumFilterButton = await page.waitForSelector(`::-p-xpath(${AlbumFilterSelector})`, {timeout: 1000});
         
             albumFilterButton.click();
-            await page.waitForNetworkIdle();
+            // await page.waitForNetworkIdle();
             
         } catch (e) {
             logger.debug("Albums already filtered");
@@ -241,7 +240,7 @@ const getSingles = async (params: GetYoutubeParams): Promise<string[]> => {
             const singleFilterButton = await page.waitForSelector(`::-p-xpath(${SingleFilterSelector})`, {timeout: 1000});
         
             singleFilterButton.click();
-            await page.waitForNetworkIdle();
+            // await page.waitForNetworkIdle();
             
         } catch (e) {
             logger.debug("Singles already filtered");

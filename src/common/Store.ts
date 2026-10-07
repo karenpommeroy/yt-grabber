@@ -29,6 +29,8 @@ export type ApplicationOptions = {
     language?: string;
     alwaysOverwrite?: boolean;
     mergeParts?: boolean;
+    useProofOfOriginToken?: boolean;
+    useYtDlpSleep?: boolean;
     downloadSinglesAndEps?: boolean;
     downloadAlbums?: boolean;
     splitChapters?: boolean;
@@ -151,6 +153,14 @@ export const StoreSchema: Schema<IStore> = {
             mergeParts: {
                 type: "boolean",
                 default: true
+            },
+            useProofOfOriginToken: {
+                type: "boolean",
+                default: false
+            },
+            useYtDlpSleep: {
+                type: "boolean",
+                default: false
             },
             downloadAlbums: {
                 type: "boolean",

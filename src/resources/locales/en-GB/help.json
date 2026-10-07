@@ -194,5 +194,9 @@
     "colorThemePickerHeader": "Color theme picker",
     "colorThemePickerContent": "Allows to select application color theme.",
     "splitChaptersHeader": "Split chapters",
-    "splitChaptersContent": "Specifies whether output should be split into multiple files if source media contains chapters."
+    "splitChaptersContent": "Specifies whether output should be split into multiple files if source media contains chapters.",
+    "useYtDlpSleepHeader": "Use yt-dlp sleep parameters",
+    "useYtDlpSleepContent": "Specifies whether yt-dlp sleep parameters should be used to avoid download errors when downloading multiple items.",
+    "useProofOfOriginTokenHeader": "Use Proof-of-Origin token",
+    "useProofOfOriginTokenContent": "Specifies whether yt-dlp should use Proof-of-Origin token when downloading from YouTube. This is required for some content to be downloaded properly."
 }

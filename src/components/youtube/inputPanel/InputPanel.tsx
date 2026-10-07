@@ -1,5 +1,5 @@
 import {
-    compact, every, filter, isEmpty, isFunction, map, replace, truncate, uniq, without
+    compact, every, filter, isEmpty, isFunction, map, replace, trim, truncate, uniq, without
 } from "lodash-es";
 import React, {
     ChangeEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState
@@ -102,7 +102,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
     const onMultiValueChange = (value: React.ChangeEvent<HTMLInputElement>, newValue: []) => {
         const newUrls = uniq(filter(newValue, isValid));
 
-        setUrls(newUrls);
+        setUrls(map(newUrls, (v) => trim(v)));
 
         if (isFunction(onChange)) {
             onChange(newUrls);
@@ -127,7 +127,7 @@ export const InputPanel: React.FC<InputPanelProps> = (props: InputPanelProps) =>
         reader.onload = (e) => {
             const nextUrls = uniq(filter(getEntriesFromFile(e.target?.result as string, file.type), isValid));
 
-            setUrls(nextUrls);
+            setUrls(map(nextUrls, (v) => trim(v)));
             if (isFunction(onChange)) {
                 onChange(nextUrls);
             }

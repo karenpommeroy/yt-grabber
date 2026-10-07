@@ -192,8 +192,21 @@ export const renderConfig: Configuration & DevServerConfiguration = {
                 {
                     from: "./src/resources/",
                     to: "resources",
-                    noErrorOnMissing: true,
+                    noErrorOnMissing: false,
                     force: false,
+                },
+                {
+                    from: "./server",
+                    to: "server",
+                    noErrorOnMissing: false,
+                    force: false,
+                    globOptions: {
+                        ignore: [
+                            "**/node_modules/**/test/**",
+                            "**/node_modules/**/tests/**",
+                            "**/node_modules/**/__tests__/**",
+                        ],
+                    },
                 },
             ],
         }),

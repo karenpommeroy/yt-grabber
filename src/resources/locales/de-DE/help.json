@@ -194,5 +194,9 @@
     "colorThemePickerHeader": "Farbthema Auswahl",
     "colorThemePickerContent": "Ermöglicht die Auswahl des Farbthemas der Anwendung.",
     "splitChaptersHeader": "Kapitel aufteilen",
-    "splitChaptersContent": "Legt fest, ob die Ausgabe in mehrere Dateien aufgeteilt werden soll, wenn die Quellmedien Kapitel enthalten."
+    "splitChaptersContent": "Legt fest, ob die Ausgabe in mehrere Dateien aufgeteilt werden soll, wenn die Quellmedien Kapitel enthalten.",
+    "useYtDlpSleepHeader": "Verwenden Sie die Schlafparameter von yt-dlp",
+    "useYtDlpSleepContent": "Legt fest, ob die Schlafparameter von yt-dlp verwendet werden sollen, um Downloadfehler beim Herunterladen mehrerer Elemente zu vermeiden.",
+    "useProofOfOriginTokenHeader": "Verwenden Sie das Proof-of-Origin-Token",
+    "useProofOfOriginTokenContent": "Legt fest, ob yt-dlp das Proof-of-Origin-Token beim Herunterladen von YouTube verwenden soll. Dies ist erforderlich, damit einige Inhalte ordnungsgemäß heruntergeladen werden können."
 }

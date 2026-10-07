@@ -1,7 +1,6 @@
 import classnames from "classnames";
 import {ipcRenderer, IpcRendererEvent} from "electron";
-import isFunction from "lodash-es/isFunction";
-import join from "lodash-es/join";
+import {isFunction, join} from "lodash-es";
 import React, {useEffect, useRef} from "react";
 
 import FolderIcon from "@mui/icons-material/Folder";

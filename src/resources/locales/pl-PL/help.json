@@ -194,5 +194,9 @@
     "colorThemePickerHeader": "Wybór motywu kolorystycznego",
     "colorThemePickerContent": "Pozwala wybrać motyw kolorystyczny aplikacji.",
     "splitChaptersHeader": "Podziel na rozdziały",
-    "splitChaptersContent": "Określa czy generować plików wynikowych, jeśli źródłowe media zawierają rozdziały."
+    "splitChaptersContent": "Określa czy generować plików wynikowych, jeśli źródłowe media zawierają rozdziały.",
+    "useYtDlpSleepHeader": "Użyj parametrów opóźniania yt-dlp",
+    "useYtDlpSleepContent": "Określa, czy parametry opóźniania yt-dlp powinny być używane, aby uniknąć błędów pobierania podczas pobierania wielu elementów.",
+    "useProofOfOriginTokenHeader": "Użyj tokenu Proof-of-Origin",
+    "useProofOfOriginTokenContent": "Określa, czy yt-dlp powinien używać tokenu Proof-of-Origin podczas pobierania z YouTube. Jest to wymagane, aby niektóre treści mogły być pobierane prawidłowo."
 }

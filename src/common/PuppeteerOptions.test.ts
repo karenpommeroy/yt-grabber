@@ -19,8 +19,8 @@ describe("PuppeteerOptions", () => {
                 expect.arrayContaining([
                     "--disable-infobars",
                     "--window-size=1280,800",
-                    "--no-sandbox",
                     "--disable-extensions",
+                    "--test-type",
                 ]),
             );
             expect(PuppeteerOptions.ignoreDefaultArgs).toEqual(["--enable-automation"]);

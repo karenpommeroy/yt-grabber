@@ -43,7 +43,7 @@ const TestConfig: EslintConfig  = {
     },
     settings: {
         react: {
-            version: "detect",
+            version: "19.3",
         },
     },
     files: ["**/*.test.{ts,tsx,js,jsx}"],
@@ -88,7 +88,7 @@ const BaseConfig: EslintConfig = {
 
     settings: {
         react: {
-            version: "detect",
+            version: "19.3",
         },
     },
 

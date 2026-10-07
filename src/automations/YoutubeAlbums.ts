@@ -1,5 +1,5 @@
 import {i18n as i18next} from "i18next";
-import {merge} from "lodash-es";
+import {merge, trim} from "lodash-es";
 import {Browser, LaunchOptions, Page, TimeoutError} from "puppeteer-core";
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
@@ -100,7 +100,7 @@ const run = async (params: GetYoutubeParams, options: LaunchOptions, i18n: i18ne
     };
 
     for (const a of params.values) {
-        const data = await process(a);
+        const data = await process(trim(a));
 
         result.values.push(...data);
     }

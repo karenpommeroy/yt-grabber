@@ -18,6 +18,7 @@ export const isDev = () => process.env.NODE_ENV === "development";
 
 export const isDevApplication = (app: App) => !app.isPackaged;
 
+
 export const isDebugMode = () => {
     const args = getProcessArgs();
     
@@ -111,7 +112,7 @@ export const sanitizeFilePath = (filePath: string, replacement = "-"): string =>
     };
 
     // eslint-disable-next-line no-control-regex
-    const illegalCharsRegex = /[<>:"/\\|?*\x00-\x1F]/g;
+    const illegalCharsRegex = /[<>#:"/\\|?*\x00-\x1F]/g;
 
     let sanitized = replaceAsciiControlChars(fileName)
         .normalize("NFKD")

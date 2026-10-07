@@ -111,6 +111,8 @@
     "untilYear": "Bis (Jahr)",
     "update": "Aktualisierung",
     "urls": "URLs",
+    "useProofOfOriginToken": "Proof-of-Origin-Token verwenden (Neustart erforderlich)",
+    "useYtDlpSleep": "Verwenden Sie die Schlafparameter von yt-dlp",
     "videoOutputTemplate": "Ausgabevorlage (videos)",
     "warnings": "Warnungen",
     "welcomeMessage": "Geben Sie Ihre Anfrage ein, um zu starten",

@@ -1,4 +1,4 @@
-import map from "lodash-es/map";
+import {map} from "lodash-es";
 import React, {KeyboardEvent, useEffect, useState} from "react";
 import {useTranslation} from "react-i18next";
 

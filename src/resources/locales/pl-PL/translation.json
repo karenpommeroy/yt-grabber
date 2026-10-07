@@ -111,6 +111,8 @@
     "untilYear": "Do (rok)",
     "update": "Aktualizuj",
     "urls": "Adresy URL",
+    "useProofOfOriginToken": "Użyj tokenu Proof-of-Origin (wymagany restart)",
+    "useYtDlpSleep": "Użyj parametrów opóźniania yt-dlp",
     "videoOutputTemplate": "Szablon wyjściowy (pliki wideo)",
     "warnings": "Ostrzeżenia",
     "welcomeMessage": "Wpisz zapytanie, aby rozpocząć",

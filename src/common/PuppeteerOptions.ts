@@ -23,9 +23,7 @@ export const PuppeteerOptions: LaunchOptions = {
         "--disable-extensions",
         "--mute-audio",
         "--disable-background-timer-throttling",
-        "--no-sandbox",
         "--incognito",
-        "--disable-setuid-sandbox",
         "--disable-autofill-keyboard-accessory-view",
         "--disable-password-generation",
         "--disable-save-password-bubble",
@@ -42,6 +40,7 @@ export const PuppeteerOptions: LaunchOptions = {
         "--use-fake-ui-for-media-stream",
         "--disable-crash-reporter",
         "--disable-site-isolation-trials",
+        "--test-type",
     ],
     ignoreDefaultArgs: ["--enable-automation"],
 };

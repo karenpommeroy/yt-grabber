@@ -111,6 +111,8 @@
     "untilYear": "Until (year)",
     "update": "Update",
     "urls": "Urls",
+    "useProofOfOriginToken": "Use Proof-of-Origin token (restart required)",
+    "useYtDlpSleep": "Use yt-dlp sleep parameters",
     "videoOutputTemplate": "Output template (videos)",
     "warnings": "Warnings",
     "welcomeMessage": "Type in your query to start",
