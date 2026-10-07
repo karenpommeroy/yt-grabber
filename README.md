@@ -28,6 +28,7 @@ Each download can be customized to your needs for easy workflow automation.
 - [Screenshots](#screenshots)
 - [Usage](#usage)
 - [Development](#development)
+- [Configuring Cookies](#configuring-cookies)
 - [Running](#running)
 - [Packaging](#packaging)
 - [Testing](#testing)
@@ -98,6 +99,38 @@ To build **yt-grabber** follow these steps:
 3. If using `yarn` with Visual Studio Code also run `yarn dlx @yarnpkg/sdks vscode`
 4. Run `npm build` or `yarn build` command to create development build
 5. Run `npm build:prod` or `yarn build:prod` command to create production build.
+
+## Configuring Cookies
+
+> [!CAUTION]
+> Cookies include your credentials to websites and services.
+> Anyone who sees them can access your account.
+> 
+> **YT Grabber** uses them only locally when downloading data from websites and services.
+> 
+> You may use the application without providing any cookies however in that case be aware that you can experience issues with downloading some media.
+
+In order to avoid `yt-dlp` errors and bypass limitations when downloading media you should extract your own cookies and provide it to **YT Grabber**.
+
+To extract cookies from your browser you can use browser extension like [Get cookies.txt LOCALLY](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc).
+
+To ensure cookies are properly exported follow these steps:
+1.  Open browser in incognito/private mode
+2.  Go to website from which you want to download media *(ie. music.youtube.com)*
+3.  Sign in with your credentials (reload page if needed)
+4.  Open **Get cookies.txt LOCALLY** extension and:
+    * export cookies in Netscape format and save them as `cookies.txt`
+    * export cookies in JSON format and save them as `cookies.json`
+    * open exported `cookies.json` file and remove all cokies that have nested properties (they can cause parsing issues)
+    <img src="public/screenshots/invalid_json_cookie.png" alt="Example of invalid json cookie" width="711">
+    *Example of invalid JSON cookie*
+
+> [!NOTE]
+> Exported cookies should be placed in `APP_INSTALL_DIRECTORY\resources\profile` directory.
+
+<img src="public/screenshots/cookies.png" alt="Exporting cookies" width="500">
+
+*Exporting cookies using `Get cookies.txt LOCALLY` extension*
 
 ## Running
 

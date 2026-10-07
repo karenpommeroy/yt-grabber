@@ -1,6 +1,5 @@
 import classnames from "classnames";
-import {replace} from "lodash-es";
-import map from "lodash-es/map";
+import {map, replace} from "lodash-es";
 import {useTranslation} from "react-i18next";
 
 import {

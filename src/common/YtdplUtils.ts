@@ -2,8 +2,9 @@ import {spawn} from "child_process";
 import fs from "fs-extra";
 import {flatten, get, isEmpty, map, padStart, replace, template, times, toString} from "lodash-es";
 import moment from "moment";
+import path from "path";
 
-import {getBinPath} from "./FileSystem";
+import {getBinPath, getProfilePath} from "./FileSystem";
 import {isAlbumTrack, isPlaylistTrack} from "./Formatters";
 import {escapePathString, getRealFileExtension, sanitizeFilePath} from "./Helpers";
 import {Format, MediaFormat, VideoType} from "./Media";
@@ -21,13 +22,22 @@ export const getYtdplRequestParams = (track: TrackInfo, album: AlbumInfo, trackC
         "--progress",
         ...getCutArgs(track, trackCuts),
         appOptions.alwaysOverwrite ? "--force-overwrite" : "",
-        "--extractor-args", "youtube:player_client=default,web_safari;player_js_version=actual",
+        "--js-runtimes", "node",
+        "--extractor-args", "youtube:player_client=default,web_safari,tv,ios,android,mweb",
+        "--cookies", getProfilePath() + "/cookies.txt",
         "--postprocessor-args", getPostProcessorArgs(track, album),
         "-P", `home:${appOptions.outputDirectory}`,
         appOptions.splitChapters ? "--split-chapters" : "",
         "--output", getOutput(track, album, format, trackCuts),
-        // "--output", `section:${appOptions.outputDirectory}/%(title)s/%(section_number)02d - %(section_title)s.%(ext)s`,
     ];
+
+    if (appOptions.useProofOfOriginToken) {
+        commonParams.push("--plugin-dirs", path.join(path.dirname(getBinPath()), "yt-dlp-plugins"));
+    }
+    
+    if (appOptions.useYtDlpSleep) {
+        commonParams.push("--sleep-requests", "0.75", "--sleep-interval", "5", "--max-sleep-interval", "20");
+    }
 
     return [...paramRetriever(format), ...commonParams, customYtdlpArgs];
 };
@@ -355,7 +365,6 @@ export const createGifUsingPalette = (directory: string, filename: string, forma
         "-y",
         "-i", `${directory}/${filename}.mkv`,
         "-i", `${directory}/${filename}-palette.png`,
-        // "-filter_complex", `fps=15,scale=${width}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=floyd_steinberg${gifTopText}${gifBottomText}`,
         "-filter_complex", `fps=15,scale=${width}:-1:flags=bilinear[x];[x][1:v]paletteuse=dither=bayer${gifTopText}${gifBottomText}`,
         `${directory}/${filename}.gif`,
     ];

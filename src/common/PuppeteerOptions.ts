@@ -5,7 +5,8 @@ import {getProfilePath} from "./FileSystem";
 const width = 1280;
 const height = 800;
 
-export const UserAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
+// export const UserAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.3";
+export const UserAgent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36";
 
 export const PuppeteerOptions: LaunchOptions = {
     headless: false,
@@ -26,6 +27,7 @@ export const PuppeteerOptions: LaunchOptions = {
         "--no-sandbox",
         "--incognito",
         "--disable-setuid-sandbox",
+        "--disable-gpu",
         "--disable-autofill-keyboard-accessory-view",
         "--disable-password-generation",
         "--disable-save-password-bubble",
@@ -42,6 +44,7 @@ export const PuppeteerOptions: LaunchOptions = {
         "--use-fake-ui-for-media-stream",
         "--disable-crash-reporter",
         "--disable-site-isolation-trials",
+        "--test-type",
     ],
     ignoreDefaultArgs: ["--enable-automation"],
 };

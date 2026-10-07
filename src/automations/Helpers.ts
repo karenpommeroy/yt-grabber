@@ -1,5 +1,5 @@
 import fs from "fs-extra";
-import {includes, isEmpty} from "lodash-es";
+import {includes, isEmpty, isString, trim} from "lodash-es";
 import {ElementHandle, Page} from "puppeteer-core";
 
 import {getProfilePath} from "../common/FileSystem";
@@ -8,6 +8,10 @@ import {ILogger} from "../common/Logger";
 import puppeteerOptions from "../common/PuppeteerOptions";
 
 export const navigateToPage = async (url: string, page: Page, timeout = puppeteerOptions.timeout) => {
+    if (!isString(url) || !trim(url)) {
+        throw new Error(`Invalid URL passed to navigateToPage: ${String(url)}`);
+    }
+
     await page.goto(url, {
         waitUntil: ["networkidle0", "domcontentloaded", "load"],
         timeout,
@@ -21,7 +25,7 @@ export const clearInput = async (input: ElementHandle<Element>, page: Page) => {
 
 export const setCookies = async (page: Page) => {
     const cachedCookies = fs.readJSONSync(getProfilePath() + "/cookies.json", {throws: false});
-    
+
     if (isEmpty(cachedCookies)) {
         await waitFor(3000);
         const pageCookies = await page.cookies();
@@ -63,6 +67,5 @@ export const breakOnPage = async (page: Page, callback?: () => void) => {
         if (callback) {
             callback();
         }
-        debugger;
     });
 };

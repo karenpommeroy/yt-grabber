@@ -19,8 +19,9 @@ describe("PuppeteerOptions", () => {
                 expect.arrayContaining([
                     "--disable-infobars",
                     "--window-size=1280,800",
-                    "--no-sandbox",
                     "--disable-extensions",
+                    "--no-sandbox",
+                    "--test-type",
                 ]),
             );
             expect(PuppeteerOptions.ignoreDefaultArgs).toEqual(["--enable-automation"]);
@@ -32,7 +33,7 @@ describe("PuppeteerOptions", () => {
             const {UserAgent} = require("./PuppeteerOptions");
 
             expect(UserAgent).toContain("Mozilla/5.0 (Linux; Android 10; K)");
-            expect(UserAgent).toContain("Chrome/130.0.0.0");
+            expect(UserAgent).toContain("Chrome/154.0.0.0");
         });
     });
 });

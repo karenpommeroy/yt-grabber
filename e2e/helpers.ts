@@ -3,6 +3,8 @@ import fs from "fs-extra";
 import path from "path";
 import {_electron as electron, ElectronApplication, Page} from "playwright";
 
+import {expect} from "@playwright/test";
+
 export const getElectronApp = async (): Promise<ElectronApplication> => {
     const useDev = process.env.E2E_DEV === "true";
     let app: ElectronApplication;
@@ -123,4 +125,22 @@ export const createTestTrackCuts = () => {
         {start: "00:15", end: "00:20"},
         {start: "00:25", end: "00:30"},
     ];
+};
+
+export const checkIfExistsAndRemove = (fileDir: string, fileName?: string) => {
+    if (!fileName) {
+        expect(fs.existsSync(fileDir), `Directory not found: ${fileDir}`).toBeTruthy();
+        fs.removeSync(fileDir);
+        expect(fs.existsSync(fileDir)).toBeFalsy();
+       
+        return;
+    }
+    
+    const expectedName = (fileName).normalize("NFC");
+    const actualName = fs.readdirSync(fileDir).find(f => f.normalize("NFC") === expectedName);
+    const outputFilePath = path.join(fileDir, actualName!);
+
+    expect(actualName, `File not found. Dir contains: ${fs.readdirSync(fileDir).join(", ")}`).toBeDefined();
+    fs.removeSync(outputFilePath);
+    expect(fs.existsSync(outputFilePath)).toBeFalsy();
 };

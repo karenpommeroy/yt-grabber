@@ -78,7 +78,7 @@ describe("renderer", () => {
         const {bootstrapInstance} = await loadRenderer();
 
         expect(mockedCreateLogger).toHaveBeenCalledWith({
-            level: "error",
+            level: "warn",
             logFile: true,
             logFilePath: "application.log",
         });

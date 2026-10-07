@@ -224,6 +224,7 @@ export const createPageMock = () => ({
 
 export const createBrowserMock = (page: ReturnType<typeof createPageMock>) => ({
     pages: jest.fn().mockResolvedValue([page]),
+    newPage: jest.fn().mockResolvedValue(page),
     close: jest.fn().mockResolvedValue(undefined),
 });
 

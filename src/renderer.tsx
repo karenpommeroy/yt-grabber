@@ -10,7 +10,7 @@ import schema from "./common/Store";
 const args = getProcessArgs();
 
 global.logger = createLogger({
-    level: args["debug"] ? "debug" : "error",
+    level: args["debug"] ? "debug" : "warn",
     logFile: true,
     logFilePath: "application.log",
 });

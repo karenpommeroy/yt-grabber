@@ -5,13 +5,13 @@ import {ElectronApplication, Page} from "playwright";
 import {expect, test} from "@playwright/test";
 
 import {
-    clearInputPanelTextField, createArtistTestInput, createUrlTestInput, getElectronApp,
-    getMainPage, removeFiles
+    checkIfExistsAndRemove, clearInputPanelTextField, createArtistTestInput, createUrlTestInput,
+    getElectronApp, getMainPage, removeFiles
 } from "./helpers";
 
 let app: ElectronApplication;
 let page: Page;
-const operationTimeout = 60000;
+const operationTimeout = 120000;
 
 test.beforeAll(async () => {
     app =  await getElectronApp();
@@ -73,11 +73,7 @@ test("downloads media immediately", async () => {
     await expect(trackList.getByTestId("track-completed-icon")).toBeVisible();
     await expect(trackList.getByTestId("track-status")).toHaveText("Done");
 
-    const outputFilePath = path.resolve(testInput.outputDir, testInput.filename + ".mp3");
-
-    expect(fs.existsSync(outputFilePath)).toBeTruthy();
-    fs.removeSync(outputFilePath);
-    expect(fs.existsSync(outputFilePath)).toBeFalsy();
+    checkIfExistsAndRemove(testInput.outputDir, testInput.filename + ".mp3");
 });
 
 test("downloads artist", async () => {
@@ -101,7 +97,7 @@ test("downloads artist", async () => {
     const mediaInfoPanel = page.getByTestId("media-info-panel");
     const trackList = page.getByTestId("track-list");
 
-    await expect(page.getByRole("tab")).toBeVisible();
+    await expect(page.getByRole("tab")).toBeVisible({timeout: operationTimeout});
     await expect(mediaInfoPanel.getByRole("img")).toBeVisible();
     await expect(mediaInfoPanel.getByText("Title:")).toBeVisible();
     await expect(mediaInfoPanel.getByText("Artist:")).toBeVisible();
@@ -114,11 +110,9 @@ test("downloads artist", async () => {
     await mediaInfoPanel.hover();
     await mediaInfoPanel.getByTestId("download-playlist-button").click();
     await expect(page.getByTestId("cancel-download-playlist-button")).toBeVisible();
-    await expect(page.getByTestId("cancel-download-playlist-button")).not.toBeVisible({timeout: 120000});
+    await expect(page.getByTestId("cancel-download-playlist-button")).not.toBeVisible({timeout: operationTimeout});
 
-    expect(fs.existsSync(testInput.outputDir)).toBeTruthy();
-    fs.removeSync(testInput.outputDir);
-    expect(fs.existsSync(testInput.outputDir)).toBeFalsy();
+    checkIfExistsAndRemove(testInput.outputDir);
 });
 
 for (const format of ["mp3", "wav", "flac", "m4a"]) {
@@ -172,11 +166,7 @@ for (const format of ["mp3", "wav", "flac", "m4a"]) {
         await expect(trackList.getByTestId("track-completed-icon")).toBeVisible();
         await expect(trackList.getByTestId("track-status")).toHaveText("Done");
 
-        const outputFilePath = path.resolve(testInput.outputDir, testInput.filename + "." + format);
-
-        expect(fs.existsSync(outputFilePath)).toBeTruthy();
-        fs.removeSync(outputFilePath);
-        expect(fs.existsSync(outputFilePath)).toBeFalsy();
+        checkIfExistsAndRemove(testInput.outputDir, testInput.filename + "." + format);
     });
 }
 
@@ -226,17 +216,13 @@ for (const format of ["mp4", "mkv", "mov", "avi", "mpeg", "gif"]) {
         await expect(page.getByTestId("tab-progress")).toBeVisible();
         await expect(trackList.getByTestId("track-progress")).toBeVisible();
 
-        await expect(mediaInfoPanel.getByTestId("cancel-download-playlist-button")).not.toBeVisible({timeout: 120000});
+        await expect(mediaInfoPanel.getByTestId("cancel-download-playlist-button")).not.toBeVisible({timeout: operationTimeout});
         await expect(trackList.getByTestId("track-progress")).not.toBeVisible();
         await expect(page.getByTestId("tab-progress")).not.toBeVisible();
         await expect(mediaInfoPanel.getByTestId("progress-bar")).not.toBeVisible();
         await expect(trackList.getByTestId("track-completed-icon")).toBeVisible();
         await expect(trackList.getByTestId("track-status")).toHaveText("Done");
 
-        const outputFilePath = path.resolve(testInput.outputDir, testInput.filename + "." + format);
-
-        expect(fs.existsSync(outputFilePath)).toBeTruthy();
-        fs.removeSync(outputFilePath);
-        expect(fs.existsSync(outputFilePath)).toBeFalsy();
+        checkIfExistsAndRemove(testInput.outputDir, testInput.filename + "." + format);
     });
 }

@@ -50,7 +50,7 @@ export const InfoBar: React.FC<InfoBarProps> = (props) => {
             sx={{padding: 1.5}}
             {...rest}
         >
-            <Stack direction="row" className={Styles.row}>
+            <Stack direction="row" className={classNames(Styles.row, Styles.logMenu)}>
                 <LogMenu hidden={isEmpty(errors) && isEmpty(warnings)} />
             </Stack>
             <Stack direction="row" spacing={1} className={classNames(Styles.row, Styles.centered)}>

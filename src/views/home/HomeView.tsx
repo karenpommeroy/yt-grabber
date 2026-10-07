@@ -12,7 +12,7 @@ import YTDlpWrap, {Progress as YtDlpProgress} from "yt-dlp-wrap";
 
 import {Alert, Box, Grid} from "@mui/material";
 
-import {getBinPath, removeIncompleteFiles} from "../../common/FileSystem";
+import {getBinPath, getProfilePath, removeIncompleteFiles} from "../../common/FileSystem";
 import {getAlbumInfo} from "../../common/Formatters";
 import {
     getRealFileExtension, getUrlType, isPlaylist, mapRange, resolveMockData
@@ -417,8 +417,16 @@ export const HomeView: React.FC = () => {
         if (appOptions.debugMode) {
             return resolveMockData(300);
         } else {
+            const useProofOfOriginToken = global.store.get("application.useProofOfOriginToken");
+            const baseArgs = ["--js-runtimes", "node", "--no-check-certificate", "--geo-bypass", "--extractor-args", "youtube:player_client=default,web_safari,tv,ios,android,mweb", "--cookies", getProfilePath() + "/cookies.txt"];
+            
             return map(urls, (url) => {
-                const ytdplArgs = [url, "--dump-json", "--no-check-certificate", "--geo-bypass", "--impersonate", "chrome"];
+                const ytdplArgs = [url, "--dump-json", ...baseArgs];
+                
+                if (useProofOfOriginToken) {
+                    ytdplArgs.push("--plugin-dirs", path.join(path.dirname(ytDlpWrap.getBinaryPath()), "yt-dlp-plugins"));
+                }
+                
                 const controller = new AbortController();
                 abortControllers[url] = controller;
 
@@ -426,20 +434,21 @@ export const HomeView: React.FC = () => {
                     ytDlpWrap.execPromise(ytdplArgsToUse, undefined, controller.signal)
                         .then((result) => {
                             const parsed = map<string, TrackInfo>(split(trim(result), "\n"), (item) => JSON.parse(item));
-                            const [deletedOrPrivateMedia, validMedia] = partition(parsed, (item) => isEmpty(item.formats)); // !item.duration);
-
+                            const [deletedOrPrivateMedia, validMedia] = partition(parsed, (item) => isEmpty(item.formats));
+                            
                             resolve({
                                 url,
                                 value: isArray(validMedia) ? validMedia : [validMedia],
                                 warnings: isEmpty(deletedOrPrivateMedia) ? [] : [t("foundDeletedOrPrivateMedia")]
                             });
+
                         })
                         .catch((e) => {
                             const warningRegex = /WARNING:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
                             const errorRegex = /ERROR:\s([\s\S]*?)(?=ERROR|WARNING|$)/gm;
                             const warningMatches = e.message.match(warningRegex) ?? [];
                             const errorMatches = e.message.match(errorRegex) ?? [];
-                            
+
                             if (controller.signal.aborted) {
                                 return resolve({url, errors: [], warnings: []});
                             }
@@ -451,19 +460,23 @@ export const HomeView: React.FC = () => {
                         });
                 };
                 const playlistValidationPromise = async (currentItem: number): Promise<boolean | null> => {
-                    const result = await ytDlpWrap.execPromise([url, "--dump-json", "--no-check-certificate", "--geo-bypass", "--flat-playlist", "--playlist-items", `${currentItem}`], undefined);
-                    const playlistCheckItemsCount = global.store.get<string, number>("application.playlistCheckItemsCount");
-                    const flatPlaylistCountThreshold = global.store.get<string, number>("application.playlistCountThreshold");
-                    const parsed = map<string, TrackInfo>(split(trim(result), "\n"), (item) => JSON.parse(item));
-                    const validMedia = filter(parsed, (item) => !!item.duration);
-                    
-                    if (!isEmpty(validMedia)) {
-                        return get(validMedia, "0.playlist_count") > flatPlaylistCountThreshold;
-                    } else if (currentItem === playlistCheckItemsCount) {
-                        return null;
-                    }
+                    try {
+                        const result = await ytDlpWrap.execPromise([url, "--dump-json", ...baseArgs, "--flat-playlist", "--playlist-items", `${currentItem}`], undefined);
+                        const playlistCheckItemsCount = global.store.get<string, number>("application.playlistCheckItemsCount");
+                        const flatPlaylistCountThreshold = global.store.get<string, number>("application.playlistCountThreshold");
+                        const parsed = map<string, TrackInfo>(split(trim(result), "\n"), (item) => JSON.parse(item));
+                        const validMedia = filter(parsed, (item) => !!item.duration);
+                        
+                        if (!isEmpty(validMedia)) {
+                            return get(validMedia, "0.playlist_count") > flatPlaylistCountThreshold;
+                        } else if (currentItem === playlistCheckItemsCount) {
+                            return null;
+                        }
 
-                    return playlistValidationPromise(currentItem + 1);
+                        return playlistValidationPromise(currentItem + 1);
+                    } catch (e) {
+                        logger.error(`${e.message}`);
+                    }
                 };
 
                 return new Promise<YoutubeInfoResult>((resolve) => {
@@ -477,6 +490,8 @@ export const HomeView: React.FC = () => {
                                 }
 
                                 return promiseCreator(ytdplArgsToUse, resolve);
+                            }).catch((e) => {
+                                logger.error(`${e.message}`);
                             });
                     } else {
                         return promiseCreator(ytdplArgs, resolve);

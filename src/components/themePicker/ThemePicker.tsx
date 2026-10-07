@@ -1,6 +1,5 @@
 import classnames from "classnames";
-import {isEmpty} from "lodash-es";
-import map from "lodash-es/map";
+import {isEmpty, map} from "lodash-es";
 import {useTranslation} from "react-i18next";
 
 import SystemModeIcon from "@mui/icons-material/ComputerRounded";

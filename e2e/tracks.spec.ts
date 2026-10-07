@@ -7,8 +7,8 @@ import {ElectronApplication, Page} from "playwright";
 import {expect, test} from "@playwright/test";
 
 import {
-    clearInputPanelTextField, createTestTrackCuts, createUrlTestInput, getElectronApp, getMainPage,
-    removeFiles
+    checkIfExistsAndRemove, clearInputPanelTextField, createTestTrackCuts, createUrlTestInput,
+    getElectronApp, getMainPage, removeFiles
 } from "./helpers";
 
 let app: ElectronApplication;
@@ -178,12 +178,11 @@ test("track cutting works correctly", async () => {
     await expect(page.getByTestId("cancel-download-playlist-button")).toBeVisible();
     await expect(page.getByTestId("cancel-download-playlist-button")).not.toBeVisible({timeout: 120000});
 
-    const outputFilePath = path.resolve(testInput.outputDir, testInput.filename + ".mp3");
-
-    expect(fs.existsSync(outputFilePath)).toBeTruthy();
+    const expectedName = (testInput.filename + ".mp3").normalize("NFC");
+    const actualName = fs.readdirSync(testInput.outputDir).find(f => f.normalize("NFC") === expectedName);
+    const outputFilePath = path.join(testInput.outputDir, actualName!);
     const metadata = await mm.parseFile(outputFilePath);
-    expect(metadata.format.duration).toBeCloseTo(outputDuration, 0);
     
-    fs.removeSync(outputFilePath);
-    expect(fs.existsSync(outputFilePath)).toBeFalsy();
+    expect(metadata.format.duration).toBeCloseTo(outputDuration, 0);
+    checkIfExistsAndRemove(testInput.outputDir, testInput.filename + ".mp3");
 });

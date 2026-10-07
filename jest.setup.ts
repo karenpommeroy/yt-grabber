@@ -1,3 +1,4 @@
+import {ReadableStream} from "stream/web";
 import {TextDecoder, TextEncoder} from "util";
 
 import electronMock from "@tests/mocks/electron";
@@ -22,6 +23,7 @@ console.warn = jest.fn((...args: any[]) => {
 
 global.TextEncoder = TextEncoder as typeof global.TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
+global.ReadableStream = ReadableStream as typeof global.ReadableStream;
 
 Object.defineProperty(process, "resourcesPath", {
     value: "./src/resources",
